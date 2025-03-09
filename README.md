@@ -1,8 +1,114 @@
-# eduaccess-system
-EduAccess – System Autoryzacji dla Szkół
+Inteligentny System Kontroli Dostępu dla Szkół
+==============================================
 
-github https://github.com/NikodemMlynski/eduaccess-system.git
+📌 Opis projektu
+----------------
 
-trello https://trello.com/invite/b/67b66d0b7418f35f8df9bf6c/ATTI9041b5c07516acec8e98028d7005190b5BC2D9BE/zarzadzanie-dostepem-w-szkole
+**Inteligentny System Kontroli Dostępu dla Szkół** ma na celu automatyzację zarządzania dostępem do sal lekcyjnych za pomocą technologii rozpoznawania twarzy. System zastępuje tradycyjne karty RFID i integruje się z planem lekcji, zapewniając dynamiczne zarządzanie dostępem uczniów i nauczycieli.
 
-miro wizja systemu https://miro.com/app/board/uXjVIcMhBR4=/?share_link_id=677465281486
+⚡ Kluczowe funkcjonalności
+--------------------------
+
+### ✅ Autoryzacja twarzą
+
+*   Raspberry Pi z kamerą rejestruje obraz i analizuje go przy użyciu **OpenCV + TensorFlow**.
+    
+*   Po rozpoznaniu twarzy sprawdzane są uprawnienia użytkownika w bazie danych PostgreSQL.
+    
+
+### ✅ Inteligentne zarządzanie dostępem
+
+*   **Nauczyciele** mają dostęp do sal, w których prowadzą lekcje.
+    
+*   **Uczniowie** mogą wejść tylko do sal, w których mają zajęcia.
+    
+*   **Administrator** może ręcznie zarządzać dostępem.
+    
+
+### ✅ Sterowanie drzwiami przez ESP32
+
+*   Po poprawnej autoryzacji Raspberry Pi wysyła **żądanie HTTP** do **ESP32**, które steruje serwomechanizmem otwierającym drzwi.
+    
+
+### ✅ Panel administratora (React + FastAPI)
+
+*   Zarządzanie użytkownikami i ich dostępem.
+    
+*   Podgląd **logów wejść i wyjść**.
+    
+*   Przypisywanie **Raspberry Pi do konkretnych sal** i monitorowanie ich statusu.
+    
+
+### ✅ Monitorowanie i raporty
+
+*   **Historia logowań do sal**.
+    
+*   **Raporty frekwencji** uczniów i nauczycieli.
+    
+*   **Powiadomienia** o nieautoryzowanym dostępie.
+    
+
+🛠 Środowisko uruchomieniowe
+----------------------------
+
+### 🖥 **Frontend (Panel Admina)**
+
+*   React + TypeScript
+    
+*   Zustand (zarządzanie stanem)
+    
+*   @tanstack/react-query (zapytania do API)
+    
+*   shadcn/ui + lucide-react (UI)
+    
+
+### 🌐 **Backend (API + AI)**
+
+*   FastAPI (Python) – obsługa zapytań
+    
+*   PostgreSQL – baza danych
+    
+*   OpenCV + TensorFlow – rozpoznawanie twarzy
+    
+
+### 🛠 **Mikrokontrolery i sprzęt**
+
+*   **Raspberry Pi 5 + Kamera Pi 3 Module** – AI i autoryzacja
+    
+*   **ESP32** – sterowanie zamkiem drzwi
+    
+
+### 📡 **Komunikacja**
+
+*   HTTP (REST API)
+    
+
+📡 API
+------
+
+System posiada **dwa API**:
+
+### 🌍 **Globalne API (FastAPI)** – obsługuje całą aplikację
+
+*   Endpointy do zarządzania użytkownikami
+    
+*   Historia logowań i raporty frekwencji
+    
+*   Przypisywanie sal do użytkowników
+    
+*   Obsługa autoryzacji i ról
+    
+
+### 📌 **Lokalne API (Raspberry Pi)** – obsługuje funkcje sprzętowe
+
+*   Przetwarzanie obrazu z kamery i wykrywanie twarzy
+    
+*   Wysyłanie żądań otwierania drzwi do ESP32
+    
+*   Lokalna walidacja tożsamości
+    
+*   Pingowanie do serwera globalnego w celu synchronizacji
+
+### Szczegóły
+- [Bardziej szczegółowa wizja systemu](https://miro.com/app/board/uXjVIcMhBR4=/?share_link_id=677465281486)
+- [Rozpiska zadań oraz milestones](https://trello.com/invite/b/67b66d0b7418f35f8df9bf6c/ATTI9041b5c07516acec8e98028d7005190b5BC2D9BE/zarzadzanie-dostepem-w-szkole)
