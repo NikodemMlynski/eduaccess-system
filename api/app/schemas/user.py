@@ -8,6 +8,7 @@ class UserIn(BaseModel):
     email: str 
     role: str 
     password: str 
+    class_id: Optional[int] = None
 
 class UserOut(BaseModel):  
     id: int

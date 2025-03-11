@@ -7,13 +7,6 @@ from sqlalchemy.sql import func
 
 # ADMINISTRATORS
 
-class Administrator(Base):
-    __tablename__ = "administrators"
-    id = Column(Integer, primary_key=True, nullable=False)
-    username = Column(String, nullable=False)
-    password = Column(String, nullable=False)
-    created_at = Column(DateTime, default=func.now(), nullable=False)
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 
 
 role_enum = Enum("admin", "teacher", "student", name="role_enum")
@@ -34,6 +27,13 @@ class User(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 
 
+class Administrator(Base):
+    __tablename__ = "administrators"
+    id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    user = relationship("User", lazy="joined")
 
 
 # STUDENTS
@@ -41,13 +41,12 @@ class User(Base):
 class Student(Base):
     __tablename__ = "students"
     user_id = Column(Integer, ForeignKey("users.id"), primary_key=True, nullable=False)
-    class_id = Column(Integer, ForeignKey("classes.id"), nullable=False)
+    class_id = Column(Integer, ForeignKey("classes.id"), nullable=True)
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     
-    user = relationship("User")
+    user = relationship("User", lazy="joined")
     class_ = relationship("Class")
-
 
 
 
@@ -60,7 +59,7 @@ class Teacher(Base):
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     
-    user = relationship("User")
+    user = relationship("User", lazy="joined")
 
 
 
