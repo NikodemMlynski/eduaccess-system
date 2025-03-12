@@ -40,7 +40,8 @@ class Administrator(Base):
 
 class Student(Base):
     __tablename__ = "students"
-    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     class_id = Column(Integer, ForeignKey("classes.id"), nullable=True)
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)

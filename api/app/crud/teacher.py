@@ -2,6 +2,9 @@ from sqlalchemy.orm import Session
 from app.models import Teacher
 from app.models import User
 from app.schemas.teacher import TeacherIn
+from .. import models 
+from ..schemas import teacher, user
+from .base_user_crud import BaseUserCRUD
 
 class TeachersCRUD:
     @staticmethod
@@ -22,5 +25,5 @@ class TeachersCRUD:
         return db.query(Teacher).filter(Teacher.id == teacher_id).first()
     
     @staticmethod
-    def get_all_teachers(db: Session):
-        return db.query(Teacher).all()
+    def get_all_users(db: Session):
+        return BaseUserCRUD.get_all_users(db, Teacher, teacher.TeacherOut)

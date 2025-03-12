@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 from app.models import Student
 from app.models import User
-from app.schemas.student import StudentIn
+from app.schemas import user, student
+from .base_user_crud import BaseUserCRUD
 
 class StudentCRUD:
     @staticmethod
@@ -21,3 +22,10 @@ class StudentCRUD:
         db.refresh(db_student)
         return db_student
     
+    @staticmethod
+    def get_student(db: Session, student_id: int):
+        return db.query(Student).filter(Student.id == student_id).first()
+    
+    @staticmethod 
+    def get_all_users(db: Session):
+        return BaseUserCRUD.get_all_users(db, Student, student.StudentOut)

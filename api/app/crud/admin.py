@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 from app.models import Administrator
 from app.models import User
-from app.schemas.admin import AdminIn
+from app.schemas import admin
+from .base_user_crud import BaseUserCRUD
 
 class AdminsCRUD:
     @staticmethod 
@@ -19,5 +20,5 @@ class AdminsCRUD:
         return db_admin
     
     @staticmethod
-    def get_all_admins(db: Session):
-        return db.query(Administrator).all()
+    def get_all_users(db: Session):
+        return BaseUserCRUD.get_all_users(db, Administrator, admin.AdminOut)
