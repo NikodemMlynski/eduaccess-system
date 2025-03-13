@@ -116,7 +116,7 @@ class Room(Base):
 class Attendances(Base):
     __tablename__ = "attendances"
     id = Column(Integer, primary_key=True, nullable=False)
-    student_id = Column(Integer, ForeignKey("students.user_id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
     schedule_id = Column(Integer, ForeignKey("schedule.id"), nullable=False)
     status = Column(status_enum, nullable=False)
     manual_adjustment = Column(Boolean, nullable=False)
