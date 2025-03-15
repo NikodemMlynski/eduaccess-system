@@ -111,4 +111,36 @@ System posiada **dwa API**:
 
 ### Szczegóły
 - [Bardziej szczegółowa wizja systemu](https://miro.com/app/board/uXjVIcMhBR4=/?share_link_id=677465281486)
-- [Rozpiska zadań oraz milestones](https://trello.com/invite/b/67b66d0b7418f35f8df9bf6c/ATTI9041b5c07516acec8e98028d7005190b5BC2D9BE/zarzadzanie-dostepem-w-szkole)
+
+## Instalacja projektu
+
+### API
+Jeśli nie masz Poetry, zainstaluj go
+```
+curl -sSL https://install.python-poetry.org | python3 -
+```
+Przejdź do katalogu `api` i uruchom
+```
+cd api
+poetry install
+```
+Uruchomienie servera fastapi 
+- Windows
+```
+poetry run python -m app.main
+```
+- Linux / MacOs
+```
+poetry run python3 app.main
+```
+api powinno nasłuchiwać na `localhost:8000/eduaccess/v1`
+### Frontend (Admin Panel)
+Przejdź do katalogu `admin_panel` i zainstaluj zależności
+```
+cd admin_panel
+npm install
+```
+Uruchom aplikacje
+```
+npm run dev
+```
