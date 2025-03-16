@@ -13,3 +13,10 @@ router = APIRouter(
 def get_students(db: Session = Depends(get_db)):    
 
     return StudentCRUD.get_all_users(db)
+
+@router.get("/{id}", response_model=student.StudentOut)
+def get_student(id: int, db: Session = Depends(get_db)):
+    return StudentCRUD.get_student(
+        db=db,
+        student_id=id
+    )

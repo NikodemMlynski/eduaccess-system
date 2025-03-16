@@ -10,6 +10,12 @@ router = APIRouter(
     tags=["teachers"],
 )
 @router.get("/", response_model=List[teacher.TeacherOut])
-def get_students(db: Session = Depends(get_db)):    
-
+def get_teachers(db: Session = Depends(get_db)):    
     return TeachersCRUD.get_all_users(db)
+
+@router.get("/{id}", response_model=teacher.TeacherOut)
+def get_teacher(id: int, db: Session = Depends(get_db)):
+    return TeachersCRUD.get_teacher(
+        teacher_id=id,
+        db=db
+    )
