@@ -7,5 +7,3 @@ class AdminIn(BaseModel):
 class AdminOut(BaseModel):
     id: int
     user: UserOut
-    created_at: datetime 
-    updated_at: datetime

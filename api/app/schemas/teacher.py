@@ -9,5 +9,3 @@ class TeacherIn(BaseModel):
 class TeacherOut(BaseModel):
     id: int
     user: UserOut
-    created_at: datetime 
-    updated_at: datetime

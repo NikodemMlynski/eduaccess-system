@@ -14,5 +14,3 @@ class StudentOut(BaseModel):
     id: int
     user: UserOut 
     class_id: Optional[int] = None
-    created_at: datetime 
-    updated_at: datetime

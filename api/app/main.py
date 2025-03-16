@@ -26,7 +26,7 @@ app.include_router(students.router)
 
 @app.get("/")
 def root():
-    return {"message": "Welcome to door lock API"}
+    return {"message": "Welcome to eduaccess API"}
 
 
 if __name__ == "__main__":

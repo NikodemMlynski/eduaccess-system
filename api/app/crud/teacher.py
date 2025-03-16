@@ -22,7 +22,7 @@ class TeachersCRUD:
     
     @staticmethod
     def get_teacher(db: Session, teacher_id: int):
-        return db.query(Teacher).filter(Teacher.id == teacher_id).first()
+        return BaseUserCRUD.get_user_by_id(db, Teacher, teacher.TeacherOut, teacher_id)
     
     @staticmethod
     def get_all_users(db: Session):

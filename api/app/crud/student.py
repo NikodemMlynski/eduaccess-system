@@ -24,8 +24,7 @@ class StudentCRUD:
     
     @staticmethod
     def get_student(db: Session, student_id: int):
-        return db.query(Student).filter(Student.id == student_id).first()
-    
+        return BaseUserCRUD.get_user_by_id(db, Student, student.StudentOut, student_id)
     @staticmethod 
     def get_all_users(db: Session):
         return BaseUserCRUD.get_all_users(db, Student, student.StudentOut)

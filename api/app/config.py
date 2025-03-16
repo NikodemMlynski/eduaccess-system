@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 class Settings(BaseSettings):
     database_hostname: str
@@ -12,7 +13,6 @@ class Settings(BaseSettings):
 
     database_url: str
     test_database_url: str
-    class Config:
-        env_file = ".env"
+    model_config = ConfigDict(env_file=".env")
 
 settings = Settings()
