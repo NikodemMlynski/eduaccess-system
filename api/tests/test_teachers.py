@@ -2,6 +2,11 @@ from app import schemas
 from app.models import Teacher
 import pytest
 from .database import client, session
+from .fixtures.users import user_factory
+
+# ------------------------------
+# TESTY TWORZENIA NAUCZYCIELA: POST /teachers/
+# ------------------------------
 
 def test_create_teacher(client, session):
     res = client.post("/users/", json={
@@ -60,3 +65,38 @@ def test_create_teacher_duplicate_email(client):
         "role": "teacher"
     })
     assert res.status_code in (400, 409)
+
+
+
+# ------------------------------
+# TESTY POBIERANIA WSZYSTKICH NAUCZYCIELI: GET /teachers/
+# ------------------------------
+
+def test_get_all_teachers_empty(client):
+    res = client.get("/teachers/")
+    assert res.status_code == 200
+    assert res.json() == []
+
+def test_get_all_teachers(client, user_factory):
+    user_factory(role="teacher", email="teacher1@example.com")
+    user_factory(role="teacher", email="teacher2@example.com")
+    res = client.get("/teachers/")
+    assert res.status_code == 200
+    assert len(res.json()) == 2
+
+
+
+# ------------------------------
+# TESTY POBIERANIA NAUCZYCIELA PO ID: GET /teachers/{id}
+# ------------------------------
+
+def test_get_teacher_by_id(client, user_factory):
+    teacher = user_factory(role="teacher", email="teacher1@example.com")
+    res = client.get(f"/teachers/{teacher.id}")
+    assert res.status_code == 200
+    assert res.json()["user"]["email"] == "teacher1@example.com"
+
+def test_get_not_existing_teacher(client):
+    res = client.get("/teachers/999")
+    assert res.status_code == 404
+

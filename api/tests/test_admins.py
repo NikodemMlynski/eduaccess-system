@@ -2,6 +2,7 @@ from app import schemas
 from app.models import Administrator
 import pytest
 from .database import client, session
+from .fixtures.users import user_factory
 
 def test_create_admin(client, session):
     res = client.post("/users/", json={
@@ -60,3 +61,37 @@ def test_create_admin_duplicate_email(client):
         "role": "admin"
     })
     assert res.status_code in (400, 409)
+
+
+# ------------------------------
+# TESTY POBIERANIA WSZYSTKICH ADMINÓW: GET /admins/
+# ------------------------------
+
+def test_get_all_admins_empty(client):
+    res = client.get("/admins/")
+    assert res.status_code == 200
+    assert res.json() == []
+
+def test_get_all_admins(client, user_factory):
+    user_factory(role="admin", email="admin1@example.com")
+    user_factory(role="admin", email="admin2@example.com")
+    res = client.get("/admins/")
+    assert res.status_code == 200
+    assert len(res.json()) == 2
+
+
+
+# ------------------------------
+# TESTY POBIERANIA ADMINA PO ID: GET /admins/{id}
+# ------------------------------
+
+def test_get_admin_by_id(client, user_factory):
+    teacher = user_factory(role="admin", email="admin1@example.com")
+    res = client.get(f"/admins/{teacher.id}")
+    assert res.status_code == 200
+    assert res.json()["user"]["email"] == "admin1@example.com"
+
+def test_get_not_existing_admin(client):
+    res = client.get("/admins/999")
+    assert res.status_code == 404
+
