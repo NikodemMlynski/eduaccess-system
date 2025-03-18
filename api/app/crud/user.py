@@ -57,11 +57,13 @@ class UsersCRUD:
     @staticmethod
     def delete_user(db: Session, user_id: int):
         db_user = db.query(User).filter(User.id == user_id).first()
-        if db_user:
-            db.delete(db_user)
-            db.commit()
-            return True
-        return False
+        if not db_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User does not exist"
+            )
+        db.delete(db_user)
+        db.commit()
 
     @staticmethod
     def verify_password(plain_password, hashed_password):
