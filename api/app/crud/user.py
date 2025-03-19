@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models import User
+from app.models import User, School
 from app.schemas.user import UserIn #, UserUpdate
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
@@ -22,6 +22,13 @@ class UsersCRUD:
     @staticmethod
     def create_user(db: Session, user: UserIn):
         existing_email_user = db.query(User).filter(User.email == user.email).first()
+        existing_school = db.query(School).filter(School.id == user.school_id).first()
+
+        if not existing_school:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Provided school does not exist"
+            )
 
         if existing_email_user:
             raise HTTPException(
@@ -35,7 +42,8 @@ class UsersCRUD:
             last_name=user.last_name,
             email=user.email,
             password=hashed_password,
-            role=user.role
+            role=user.role,
+            school_id=user.school_id
         )
         db.add(db_user)
         db.commit()

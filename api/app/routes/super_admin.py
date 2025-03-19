@@ -13,15 +13,18 @@ from app.crud.admin import AdminsCRUD
 router = APIRouter(
     prefix="/super_admin",
 )
-
-@router.post("/school/{admin_code}")
-def create_school_and_school_admin(admin_code: str, school_and_admin: CreateSchoolData, db: Session = Depends(get_db)):
+def check_if_super_admin(admin_code: str):
     super_admin_code = settings.super_admin_code
     if admin_code != super_admin_code:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid super admin code."
         )
+
+@router.post("/schools/{admin_code}")
+def create_school_and_school_admin(admin_code: str, school_and_admin: CreateSchoolData, db: Session = Depends(get_db)):
+    check_if_super_admin(admin_code)
+
     admin_factory = AdminFactory()
     created_admin = admin_factory.create_user(
         db=db,
@@ -37,14 +40,9 @@ def create_school_and_school_admin(admin_code: str, school_and_admin: CreateScho
         "school": created_school
     }
 
-@router.delete("/{admin_code}/school/{school_id}")
+@router.delete("/{admin_code}/schools/{school_id}")
 def delete_school_and_admin(admin_code: str, school_id: int, db: Session = Depends(get_db)):
-    super_admin_code = settings.super_admin_code
-    if admin_code != super_admin_code:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid super admin code."
-        )
+    check_if_super_admin(admin_code)
     
     admin_id = SchoolsCRUD.delete_school(db=db, school_id=school_id)
     print(admin_id)
@@ -53,3 +51,10 @@ def delete_school_and_admin(admin_code: str, school_id: int, db: Session = Depen
     
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.get("/{admin_code}/schools")
+def get_all_schools(admin_code: str, db: Session = Depends(get_db)):
+    check_if_super_admin(admin_code)
+
+    schools = SchoolsCRUD.get_all_schools(db=db)
+    return schools

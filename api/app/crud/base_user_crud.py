@@ -12,8 +12,10 @@ class BaseUserCRUD:
             schema_out(
                 id=m.id,
                 **({"class_id": m.class_id} if hasattr(m, "class_id") else {}),
+                **({"school_id": m.school_id} if hasattr(m, "school_id") else {}),
                 user=user.UserOut(
                     id=u.id,
+                    **({"school_id": u.school_id} if hasattr(u, "school_id") else {}),
                     first_name=u.first_name,
                     last_name=u.last_name,
                     email=u.email,
@@ -36,8 +38,10 @@ class BaseUserCRUD:
         return schema_out(
             id=m.id,
             **({"class_id": m.class_id} if hasattr(m, "class_id") else {}),
+            **({"school_id": m.school_id} if hasattr(m, "school_id") else {}),
             user=user.UserOut(
                 id=u.id,
+                **({"school_id": u.school_id} if hasattr(u, "school_id") else {}),
                 first_name=u.first_name,
                 last_name=u.last_name,
                 email=u.email,
