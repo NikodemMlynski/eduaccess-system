@@ -6,7 +6,7 @@ from .base_user_crud import BaseUserCRUD
 
 class StudentCRUD:
     @staticmethod
-    def create_student(db: Session, user_id: int, class_id: int):
+    def create_student(db: Session, user_id: int, class_id: int, school_id):
         user = db.query(User).filter(User.id == user_id).first()
 
         if not user:
@@ -14,7 +14,8 @@ class StudentCRUD:
         
         db_student = Student(
             user_id=user_id,
-            class_id=class_id
+            class_id=class_id,
+            school_id=school_id
         )
 
         db.add(db_student)

@@ -14,6 +14,7 @@ class StudentFactory(UserFactory):
         student = StudentCRUD.create_student(
             db=db,
             class_id=user_data.class_id,
-            user_id=user.id
+            user_id=user.id,
+            school_id=user_data.school_id
         )
         return user
