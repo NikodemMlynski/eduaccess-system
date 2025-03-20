@@ -11,13 +11,13 @@ router = APIRouter(
     tags=["admins"],
 )
 @router.get("/", response_model=List[admin.AdminOut])
-def get_students(db: Session = Depends(get_db)):    
+def get_students(school_id: int, db: Session = Depends(get_db)):    
 
-    return AdminsCRUD.get_all_users(db)
+    return AdminsCRUD.get_all_users(db, school_id)
 
-@router.get("/{id}", response_model=admin.AdminOut)
-def get_admin(id: int, db: Session = Depends(get_db)):
-    return AdminsCRUD.get_admin(
+@router.get("/admin", response_model=admin.AdminOut)
+def get_admin(school_id: int, db: Session = Depends(get_db)):
+    return AdminsCRUD.get_admin_by_school_id(
         db=db,
-        admin_id=id
+        school_id=school_id
     )

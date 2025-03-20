@@ -22,8 +22,8 @@ class AdminsCRUD:
         return db_admin
     
     @staticmethod
-    def get_all_users(db: Session):
-        return BaseUserCRUD.get_all_users(db, Administrator, admin.AdminOut)
+    def get_all_users(db: Session, school_id: int):
+        return BaseUserCRUD.get_all_users(db, Administrator, admin.AdminOut, school_id)
     
     @staticmethod
     def get_admin(db: Session, admin_id: int):
@@ -57,5 +57,5 @@ class AdminsCRUD:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Admin associated with the school is missing. Database integrity error."
             )
-        user = BaseUserCRUD.get_user_by_id(db, Administrator, admin.AdminOut, user.id); 
+        user = BaseUserCRUD.get_user_by_id(db, Administrator, admin.AdminOut, user.id, school_id); 
         return user
