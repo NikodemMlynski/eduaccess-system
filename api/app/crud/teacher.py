@@ -21,9 +21,20 @@ class TeachersCRUD:
         return db_teacher
     
     @staticmethod
-    def get_teacher(db: Session, teacher_id: int):
-        return BaseUserCRUD.get_user_by_id(db, Teacher, teacher.TeacherOut, teacher_id)
+    def get_teacher(db: Session, teacher_id: int, school_id: int):
+        return BaseUserCRUD.get_user_by_id(
+            db=db,
+            model=Teacher,
+            schema_out=teacher.TeacherOut,
+            user_id=teacher_id,
+            school_id=school_id
+            )
     
     @staticmethod
-    def get_all_users(db: Session):
-        return BaseUserCRUD.get_all_users(db, Teacher, teacher.TeacherOut)
+    def get_all_users(db: Session, school_id: int):
+        return BaseUserCRUD.get_all_users(
+            db=db,
+            model=Teacher,
+            schema_out=teacher.TeacherOut,
+            school_id=school_id
+            )
