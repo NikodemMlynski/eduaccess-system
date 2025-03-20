@@ -16,9 +16,9 @@ class School(Base):
     __tablename__ = "school"
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String, nullable=False)
+    address = Column(String, nullable=False)
     teacher_addition_code = Column(String, nullable=False)
     student_addition_code = Column(String, nullable=False)
-    admin_id = Column(Integer, ForeignKey("administrators.id"), nullable=True)
     
     # Relationships
     classes = relationship("Class", back_populates="school")

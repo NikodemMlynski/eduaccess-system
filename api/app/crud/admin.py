@@ -5,6 +5,7 @@ from app.schemas import admin
 from .base_user_crud import BaseUserCRUD
 from fastapi import HTTPException, status
 from .user import UsersCRUD
+from sqlalchemy import and_
 class AdminsCRUD:
     @staticmethod 
     def create_admin(db: Session, user_id: int):
@@ -28,6 +29,7 @@ class AdminsCRUD:
     def get_admin(db: Session, admin_id: int):
         return BaseUserCRUD.get_user_by_id(db, Administrator, admin.AdminOut, admin_id)
     
+    @staticmethod
     def delete_admin(db: Session, admin_id: int):
         existing_admin = db.query(Administrator).filter(Administrator.id == admin_id).first()
         user_id = existing_admin.user_id
@@ -42,3 +44,18 @@ class AdminsCRUD:
         db.commit()
         UsersCRUD.delete_user(db=db, user_id=user_id)
         
+    @staticmethod
+    def get_admin_by_school_id(db: Session, school_id: int):
+        user = db.query(User).filter(
+            and_(
+                User.role == "admin",
+                User.school_id == school_id,
+            )
+        ).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Admin associated with the school is missing. Database integrity error."
+            )
+        user = BaseUserCRUD.get_user_by_id(db, Administrator, admin.AdminOut, user.id); 
+        return user

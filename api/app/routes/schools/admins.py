@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from app.database import get_db
-from ..crud.admin import AdminsCRUD
+from ...crud.admin import AdminsCRUD
 from typing import List
-from ..schemas import admin
+from ...schemas import admin
 from sqlalchemy.orm import Session 
 from app.role_checker import RoleChecker
 
