@@ -6,14 +6,11 @@ from datetime import datetime
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# FIXTURE DLA NAUCZYCIELA
-
 def hash_password(password: str):
     return pwd_context.hash(password)
 
 ROLE_MODELS = {
     "teacher": Teacher,
-    "admin": Administrator,
     "student": Student
 }
 
@@ -21,6 +18,7 @@ ROLE_MODELS = {
 def user_factory(session: Session):
     def _create_user(
         role: str,
+        school_id: int,
         email: str = "user@example.com",
         first_name: str = "Test",
         last_name: str = "User",
@@ -34,6 +32,7 @@ def user_factory(session: Session):
             email=email,
             password=hashed_password,
             role=role,
+            school_id=school_id,
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow()
         )
@@ -45,11 +44,12 @@ def user_factory(session: Session):
         session.commit()
         session.refresh(user)
 
-        extra_fiels = {}
+        extra_fields = {}
         if role == "student":
-            extra_fiels["class_id"] = kwargs.get("class_id", None)
+            extra_fields["school_id"] = school_id
+            extra_fields["class_id"] = kwargs.get("class_id", None)
         
-        role_instance = model_class(user_id=user.id, **extra_fiels)
+        role_instance = model_class(user_id=user.id, **extra_fields)
         session.add(role_instance)
         session.commit()
         session.refresh(role_instance)
