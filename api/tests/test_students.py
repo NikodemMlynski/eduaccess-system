@@ -51,6 +51,23 @@ def test_create_student_missing_email(client, session, school_admin_factory):
 
     assert res.status_code == 422
 
+def test_create_student_with_existing_email(client, session, school_admin_factory, user_factory):
+    school, _, _ = school_admin_factory()
+    school_id = school.id
+    addition_code = school.student_addition_code
+
+    existing_student = user_factory(role="student", school_id=school_id, email="student1@example.com")
+    res = client.post("/users/", json={
+        "first_name": "Teacher2",
+        "last_name": "Surname2",
+        "email": "student1@example.com",
+        "role": "student",
+        "password": "asdf1234",
+        "addition_code": addition_code
+    })
+
+    assert res.status_code in (400, 409)
+
 def test_get_students_empty_list(client, session, school_admin_factory):
     school, _, _ = school_admin_factory()
     school_id = school.id
@@ -66,7 +83,7 @@ def test_get_students_list(client, session, school_admin_factory, user_factory):
     school_id = school.id
 
     student1 = user_factory(role="student", school_id=school_id, email="student1@example.com")
-    student1 = user_factory(role="student", school_id=school_id, email="student2@example.com")
+    student2 = user_factory(role="student", school_id=school_id, email="student2@example.com")
 
     res = client.get(f"/school/{school_id}/students")
 
