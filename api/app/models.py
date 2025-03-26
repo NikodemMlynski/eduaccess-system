@@ -4,14 +4,29 @@ from app.database import Base
 from sqlalchemy.sql import func
 
 
-
-# ADMINISTRATORS
-
-
-
+# ENUMS
 role_enum = Enum("admin", "teacher", "student", name="role_enum")
 status_enum = Enum("present", "absent", "late", name="status_enum")
 access_status_enum = Enum("granted", "denied", name="access_status_enum")
+
+
+# SCHOOL
+
+class School(Base):
+    __tablename__ = "school"
+    id = Column(Integer, primary_key=True, nullable=False)
+    name = Column(String, nullable=False)
+    address = Column(String, nullable=False)
+    teacher_addition_code = Column(String, nullable=False)
+    student_addition_code = Column(String, nullable=False)
+    
+    # Relationships
+    classes = relationship("Class", back_populates="school")
+    rooms = relationship("Room", back_populates="school")
+    students = relationship("Student", back_populates="school")
+    users = relationship("User", back_populates="school")
+
+
 # USERS
 
 class User(Base):
@@ -25,12 +40,21 @@ class User(Base):
     face_encoding = Column(LargeBinary, nullable=True)
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    school_id = Column(Integer, ForeignKey("school.id"), nullable=True)
+    
+    # Relationships
+    school = relationship("School", back_populates="users")
 
+
+# ADMINISTRATORS
 
 class Administrator(Base):
     __tablename__ = "administrators"
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    
     user = relationship("User", lazy="joined")
 
 
@@ -41,10 +65,13 @@ class Student(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     class_id = Column(Integer, ForeignKey("classes.id"), nullable=True)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    school_id = Column(Integer, ForeignKey("school.id"), nullable=True)
     
     user = relationship("User", lazy="joined")
     class_ = relationship("Class")
-
+    school = relationship("School", back_populates="students")
 
 
 # TEACHERS
@@ -53,10 +80,10 @@ class Teacher(Base):
     __tablename__ = "teachers"
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     
     user = relationship("User", lazy="joined")
-
-
 
 
 # CLASSES
@@ -67,8 +94,23 @@ class Class(Base):
     class_name = Column(String, nullable=False)
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    school_id = Column(Integer, ForeignKey("school.id"), nullable=True)
+    
+    school = relationship("School", back_populates="classes")
 
 
+# ROOMS
+
+class Room(Base):
+    __tablename__ = "rooms"
+    id = Column(Integer, primary_key=True, nullable=False)
+    room_name = Column(String, nullable=False)
+    capacity = Column(SmallInteger, nullable=False)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    school_id = Column(Integer, ForeignKey("school.id"), nullable=True)
+    
+    school = relationship("School", back_populates="rooms")
 
 
 # SCHEDULE
@@ -90,46 +132,30 @@ class Schedule(Base):
     teacher = relationship("Teacher")
 
 
-
-
-# ROOMS
-
-class Room(Base):
-    __tablename__ = "rooms"
-    id = Column(Integer, primary_key=True, nullable=False)
-    room_name = Column(String, nullable=False)
-    capacity = Column(SmallInteger, nullable=False)
-    created_at = Column(DateTime, default=func.now(), nullable=False)
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
-
-
-
-
 # ATTENDANCES
 
-class Attendances(Base):
+class Attendance(Base):
     __tablename__ = "attendances"
     id = Column(Integer, primary_key=True, nullable=False)
     student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
     schedule_id = Column(Integer, ForeignKey("schedule.id"), nullable=False)
     status = Column(status_enum, nullable=False)
     manual_adjustment = Column(Boolean, nullable=False)
-    created_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
     
     student = relationship("Student")
     schedule = relationship("Schedule")
 
 
+# ACCESS LOGS
 
-
-#ACCESS LOGS
-
-class AccessLogs(Base):
+class AccessLog(Base):
     __tablename__ = "access_logs"
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False)
-    access_time = Column(DateTime, nullable=False)
+    access_start_time = Column(DateTime, nullable=False)
+    access_end_time = Column(DateTime, nullable=True)
     access_status = Column(access_status_enum, nullable=False)
     reason = Column(String, nullable=True)
     created_at = Column(DateTime, default=func.now(), nullable=False)
