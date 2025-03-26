@@ -18,3 +18,6 @@ class RoleChecker:
         
         request.state.user_id = decoded.user_id
         
+admin_only = RoleChecker(["admin"])
+teacher_admin = RoleChecker(["admin", "teacher"])
+
