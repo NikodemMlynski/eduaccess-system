@@ -7,14 +7,23 @@ class SuperAdminCode(BaseModel):
 class SchoolIn(BaseModel):
     name: str
     address: str
+    
+class AdminUserIn(BaseModel):
+    first_name: str
+    last_name: str 
+    email: str 
+    role: str 
+    password: str 
 
 class CreateSchoolData(BaseModel):
     school: SchoolIn
-    admin: UserIn
+    admin: AdminUserIn
+
+
 
 class SchoolOut(BaseModel):
-    id: str 
+    id: int 
     name: str 
-    admin_id: int 
+    address: str
     student_addition_code: str 
     teacher_addition_code: str
