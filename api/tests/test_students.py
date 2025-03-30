@@ -68,7 +68,7 @@ def test_create_student_with_existing_email(client, session, school_admin_factor
 
     assert res.status_code in (400, 409)
 
-def test_get_students_empty_list(authorized_admin_client, session, school_admin_factory):
+def test_get_students_empty_list(authorized_admin_client, session):
     school, client = authorized_admin_client
     # school, _, _ = school_admin_factory()
     school_id = school.id
@@ -78,9 +78,17 @@ def test_get_students_empty_list(authorized_admin_client, session, school_admin_
     assert res.status_code == 200
     assert res.json() == []
 
+def test_get_students_without_admin_token(client, session, school_admin_factory):
+    school, _, _ = school_admin_factory() 
 
-def test_get_students_list(client, session, school_admin_factory, user_factory):
-    school, _, _ = school_admin_factory()
+    school_id = school.id 
+    res = client.get(f"/school/{school_id}/students")
+
+    assert res.status_code == 403
+
+
+def test_get_students_list(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
     school_id = school.id
 
     student1 = user_factory(role="student", school_id=school_id, email="student1@example.com")
@@ -96,8 +104,8 @@ def test_get_students_list(client, session, school_admin_factory, user_factory):
     assert "student2@example.com" in emails
 
 
-def test_get_single_student(client, session, school_admin_factory, user_factory):
-    school, _, _ = school_admin_factory()
+def test_get_single_student(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
     school_id = school.id
 
     student = user_factory(role="student", school_id=school_id, email="student1@example.com")
@@ -109,8 +117,8 @@ def test_get_single_student(client, session, school_admin_factory, user_factory)
     assert data["user"]["email"] == "student1@example.com"
     assert data["id"] == student.id
 
-def test_get_not_existing_student(client, session, school_admin_factory):
-    school, _, _ = school_admin_factory()
+def test_get_not_existing_student(authorized_admin_client, session, school_admin_factory):
+    school, client = authorized_admin_client
     school_id = school.id 
 
     res = client.get(f"/school/{school_id}/students/1")
