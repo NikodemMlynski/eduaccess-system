@@ -69,8 +69,16 @@ def test_create_teacher_with_existing_email(client, session, school_admin_factor
     assert res.status_code in (400, 409)
     assert res.json()["detail"] == "User with this email already exists"
 
-def test_get_teachers_empty_list(client, session, school_admin_factory):
+def test_get_teachers_withour_admin_token(client, session, school_admin_factory):
     school, _, _ = school_admin_factory()
+    school_id = school.id
+
+    res = client.get(f"/school/{school_id}/teachers")
+
+    assert res.status_code == 403
+
+def test_get_teachers_empty_list(authorized_admin_client, session, school_admin_factory):
+    school, client = authorized_admin_client
     school_id = school.id
 
     res = client.get(f"/school/{school_id}/teachers")
@@ -78,9 +86,8 @@ def test_get_teachers_empty_list(client, session, school_admin_factory):
     assert res.status_code == 200
     assert res.json() == []
 
-
-def test_get_teachers_list(client, session, school_admin_factory, user_factory):
-    school, _, _ = school_admin_factory()
+def test_get_teachers_list(authorized_admin_client, session, school_admin_factory, user_factory):
+    school, client = authorized_admin_client
     school_id = school.id
 
     teacher1 = user_factory(role="teacher", school_id=school_id, email="teacher1@example.com")
@@ -96,8 +103,8 @@ def test_get_teachers_list(client, session, school_admin_factory, user_factory):
     assert "teacher2@example.com" in emails
 
 
-def test_get_single_teacher(client, session, school_admin_factory, user_factory):
-    school, _, _ = school_admin_factory()
+def test_get_single_teacher(authorized_admin_client, session, school_admin_factory, user_factory):
+    school, client = authorized_admin_client
     school_id = school.id
 
     teacher = user_factory(role="teacher", school_id=school_id, email="teacher1@example.com")
@@ -109,8 +116,8 @@ def test_get_single_teacher(client, session, school_admin_factory, user_factory)
     assert data["user"]["email"] == "teacher1@example.com"
     assert data["id"] == teacher.id
 
-def test_get_not_existing_teacher(client, session, school_admin_factory):
-    school, _, _ = school_admin_factory()
+def test_get_not_existing_teacher(authorized_admin_client, session, school_admin_factory):
+    school, client = authorized_admin_client
     school_id = school.id 
 
     res = client.get(f"/school/{school_id}/teachers/1")
