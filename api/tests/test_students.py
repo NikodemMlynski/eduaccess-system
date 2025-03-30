@@ -68,8 +68,9 @@ def test_create_student_with_existing_email(client, session, school_admin_factor
 
     assert res.status_code in (400, 409)
 
-def test_get_students_empty_list(client, session, school_admin_factory):
-    school, _, _ = school_admin_factory()
+def test_get_students_empty_list(authorized_admin_client, session, school_admin_factory):
+    school, client = authorized_admin_client
+    # school, _, _ = school_admin_factory()
     school_id = school.id
 
     res = client.get(f"/school/{school_id}/students")
