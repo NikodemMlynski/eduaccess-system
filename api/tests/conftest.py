@@ -58,3 +58,44 @@ def authorized_admin_client(client, admin_token):
     }
     return school, client 
 
+@pytest.fixture 
+def test_student(client, school_admin_factory, user_factory):
+    school, _, _ = school_admin_factory()
+    school_id = school.id
+    student = user_factory(role="student", school_id=school_id, email="student@example.com")
+    return student
+
+@pytest.fixture 
+def student_token(test_student):
+    student = test_student 
+    return student, create_access_token({"user_id": student.user.id, "role": student.user.role})
+
+@pytest.fixture 
+def authorized_student_client(client, student_token):
+    student, token = student_token
+    client.headers.clear()
+    client.headers.update({
+        "Authorization": f"Bearer {token}"
+    })
+    return student, client 
+
+@pytest.fixture 
+def test_teacher(client, school_admin_factory, user_factory):
+    school, _, _ = school_admin_factory()
+    school_id = school.id 
+    teacher = user_factory(role="teacher", school_id=school_id, email="teacher@example.com")
+    return teacher
+
+@pytest.fixture 
+def teacher_token(test_teacher):
+    teacher = test_teacher 
+    return teacher, create_access_token({"user_id": teacher.user.id, "role": teacher.user.role})
+
+@pytest.fixture 
+def authorized_teacher_client(client, teacher_token):
+    teacher, token = teacher_token 
+    client.headers.clear()
+    client.headers.update({
+        "Authorization": f"Bearer {token}"
+    })
+    return teacher, client

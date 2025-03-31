@@ -69,7 +69,7 @@ def test_create_teacher_with_existing_email(client, session, school_admin_factor
     assert res.status_code in (400, 409)
     assert res.json()["detail"] == "User with this email already exists"
 
-def test_get_teachers_withour_admin_token(client, session, school_admin_factory):
+def test_get_teachers_without_admin_token(client, session, school_admin_factory):
     school, _, _ = school_admin_factory()
     school_id = school.id
 
