@@ -10,55 +10,72 @@ import RoomsPage from './pages/Rooms/RoomsPage'
 import SchedulesPage from './pages/Schedules/SchedulesPage'
 import TeachersPage from './pages/Teachers/TeachersPage'
 import StudentsPage from './pages/Students/StudentsPage'
+import AuthLayout from './layouts/AuthLayout'
+import ProtectedRoute from './components/Authorization/ProtectedRoute'
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <RootLayout/>,
-    children: [
-      {
-        index: true,
-        element: <Dashboard/>
-      },
-      {
-        path: 'signin',
-        element: <LoginPage/>
-      },
-      {
-        path: 'access-logs',
-        element: <AccessLogsPage/>
-      },
-      {
-        path: 'attendances',
-        element: <AttendancesPage/>
-      },
-      {
-        path: 'classes',
-        element: <ClassesPage/>
-      },
-      {
-        path: 'rooms',
-        element: <RoomsPage/>
-      },
-      {
-        path: 'schedules',
-        element: <SchedulesPage/>
-      },
-      {
-        path: 'teachers',
-        element: <TeachersPage/>
-      },
-      {
-        path: 'students',
-        element: <StudentsPage/>
-      },
-      {
-        path: 'administrators',
-        element: <AdministratorsPage/>
-      },
-    ]
-  }
-])
+const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      element: <AuthLayout/>,
+      children: [
+        {path: 'signin', element: <LoginPage/> }
+      ]
+    },
+    {
+      path: '/',
+      element: <ProtectedRoute />,
+      children: [
+        {
+          path: '/',
+          element: <RootLayout/>,
+          children: [
+            {
+              index: true,
+              element: <Dashboard/>
+            },
+            {
+              path: 'signin',
+              element: <LoginPage/>
+            },
+            {
+              path: 'access-logs',
+              element: <AccessLogsPage/>
+            },
+            {
+              path: 'attendances',
+              element: <AttendancesPage/>
+            },
+            {
+              path: 'classes',
+              element: <ClassesPage/>
+            },
+            {
+              path: 'rooms',
+              element: <RoomsPage/>
+            },
+            {
+              path: 'schedules',
+              element: <SchedulesPage/>
+            },
+            {
+              path: 'teachers',
+              element: <TeachersPage/>
+            },
+            {
+              path: 'students',
+              element: <StudentsPage/>
+            },
+            {
+              path: 'administrators',
+              element: <AdministratorsPage/>
+            },
+          ]
+        },        
+      ] 
+    }
+  ]
+)
 
 function App() {
 
