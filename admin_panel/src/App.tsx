@@ -12,19 +12,23 @@ import TeachersPage from './pages/Teachers/TeachersPage'
 import StudentsPage from './pages/Students/StudentsPage'
 import AuthLayout from './layouts/AuthLayout'
 import ProtectedRoute from './components/Authorization/ProtectedRoute'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AuthProvider } from './context/AutoProvider'
+
+const queryClient = new QueryClient();
 
 const router = createBrowserRouter(
   [
     {
       path: '/',
-      element: <AuthLayout/>,
+      element: <AuthProvider><AuthLayout/></AuthProvider>,
       children: [
         {path: 'signin', element: <LoginPage/> }
       ]
     },
     {
       path: '/',
-      element: <ProtectedRoute />,
+      element: <AuthProvider><ProtectedRoute /></AuthProvider>,
       children: [
         {
           path: '/',
@@ -80,7 +84,9 @@ const router = createBrowserRouter(
 function App() {
 
   return (
-    <RouterProvider router={router}/>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router}/>
+      </QueryClientProvider>
   )
 }
 

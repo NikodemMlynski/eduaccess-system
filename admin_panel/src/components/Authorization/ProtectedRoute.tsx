@@ -1,7 +1,11 @@
 import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../../context/AutoProvider";
 
-const isAuthenticated = false; 
 
 export default function ProtectedRoute() {
-    return isAuthenticated ? <Outlet/> : <Navigate to="/signin" replace />;
+    const {user, isLoading} = useAuth();
+
+    if (isLoading) return <p>Ładowanie...</p>
+
+    return user ? <Outlet/> : <Navigate to="/signin" replace />;
 }
