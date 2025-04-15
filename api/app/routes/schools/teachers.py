@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from app.database import get_db
 from ...crud.teacher import TeachersCRUD
 from typing import List
-from ...schemas import teacher
+from ...schemas import teacher, user
 from sqlalchemy.orm import Session 
 from app.role_checker import admin_only
 from ...oauth2 import school_checker
@@ -21,5 +21,22 @@ def get_teacher(school_id: int, id: int, db: Session = Depends(get_db), school_c
     return TeachersCRUD.get_teacher(
         teacher_id=id,
         db=db,
+        school_id=school_id
+    )
+
+@router.delete("/{id}", dependencies=[Depends(admin_only)])
+def delete_teacher(school_id: int, id: int, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
+    return TeachersCRUD.delete_teacher(
+        teacher_id=id,
+        db=db,
+        school_id=school_id
+    )
+
+@router.put("/{id}", response_model=teacher.TeacherOut , dependencies=[Depends(admin_only)])
+def update_teacher(school_id: int, id: int, data: user.UpdateUserIn, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
+    return TeachersCRUD.update_teacher(
+        data=data,
+        db=db,
+        teacher_id=id,
         school_id=school_id
     )

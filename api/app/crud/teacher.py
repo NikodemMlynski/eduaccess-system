@@ -5,6 +5,8 @@ from app.schemas.teacher import TeacherIn
 from .. import models 
 from ..schemas import teacher, user
 from .base_user_crud import BaseUserCRUD
+from fastapi import HTTPException, status
+from .user import UsersCRUD
 
 class TeachersCRUD:
     @staticmethod
@@ -38,3 +40,24 @@ class TeachersCRUD:
             schema_out=teacher.TeacherOut,
             school_id=school_id
             )
+    @staticmethod 
+    def delete_teacher(db: Session, teacher_id: int, school_id: int):
+        return BaseUserCRUD.delete_user(
+            db=db,
+            model=Teacher,
+            school_id=school_id,
+            user_id=teacher_id
+        )
+    
+    @staticmethod
+    def update_teacher(teacher_id: int, db: Session, school_id: int, data: user.UpdateUserIn):
+        return BaseUserCRUD.update_user(
+            db=db,
+            model=Teacher,
+            data=data,
+            school_id=school_id,
+            user_id=teacher_id
+            
+        )
+        # def update_user(db: Session, model, user_id: int, school_id: int, data: user.UpdateUserIn):
+        

@@ -32,3 +32,7 @@ class UserOut(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class UpdateUserIn(BaseModel):
+    first_name: str 
+    last_name: str 
+    email: str 

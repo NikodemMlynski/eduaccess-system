@@ -40,3 +40,22 @@ class StudentCRUD:
             schema_out=student.StudentOut,
             school_id=school_id
         )
+    
+    @staticmethod
+    def delete_student(db: Session, student_id: int, school_id: int):
+        return BaseUserCRUD.delete_user(
+            db=db,
+            model=Student,
+            school_id=school_id,
+            user_id=student_id
+        )
+    
+    @staticmethod 
+    def update_student(student_id: int, db: Session, school_id: int, data: user.UpdateUserIn):
+        return BaseUserCRUD.update_user(
+            db=db,
+            model=Student,
+            data=data,
+            school_id=school_id,
+            user_id=student_id
+        )

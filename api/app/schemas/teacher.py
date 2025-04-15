@@ -9,3 +9,4 @@ class TeacherIn(BaseModel):
 class TeacherOut(BaseModel):
     id: int
     user: UserOut
+
