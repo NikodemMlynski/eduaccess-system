@@ -13,7 +13,9 @@ import StudentsPage from './pages/Students/StudentsPage'
 import AuthLayout from './layouts/AuthLayout'
 import ProtectedRoute from './components/Authorization/ProtectedRoute'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { AuthProvider } from './context/AutoProvider'
+import { AuthProvider } from './context/AuthProvider'
+
+import {ToastContainer} from "react-toastify";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +88,7 @@ function App() {
   return (
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router}/>
+        <ToastContainer/>
       </QueryClientProvider>
   )
 }
