@@ -19,6 +19,14 @@ def get_students(school_id: int, db: Session = Depends(get_db), school_checker: 
         school_id=school_id
     )
 
+@router.get("/{id}", response_model=student.StudentOut, dependencies=[Depends(admin_only)])
+def get_student(school_id: int, id: int, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
+    return StudentCRUD.get_student(
+        db=db,
+        school_id=school_id,
+        student_id=id,
+    )
+
 @router.delete("/{id}", dependencies=[Depends(admin_only)])
 def delete_teacher(school_id: int, id: int, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
     return StudentCRUD.delete_student(
