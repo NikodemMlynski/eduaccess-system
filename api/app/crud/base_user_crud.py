@@ -3,12 +3,35 @@ from app.models import User
 from app.schemas import user
 from fastapi import HTTPException, status
 from sqlalchemy import and_ 
+from typing import Optional
 from datetime import datetime
+from sqlalchemy import or_
+
 class BaseUserCRUD:
     @staticmethod
-    def get_all_users(db: Session, model, schema_out, school_id: int):
-        users = db.query(model, User).join(User, model.user_id == User.id) \
-        .filter(User.school_id == school_id).all()
+    def get_all_users(
+        db: Session, 
+        model, 
+        schema_out, 
+        school_id: int,
+        query: Optional[str] = None,
+        page: int = 1,
+        limit: int = 10
+        ):
+        base_query = db.query(model, User).join(User, model.user_id == User.id) \
+        .filter(User.school_id == school_id)
+
+        if query:
+            search = f"%{query.lower()}%"
+            base_query = base_query.filter(
+                or_(
+                    User.first_name.ilike(search),
+                    User.last_name.ilike(search),
+                    User.email.ilike(search)
+                )
+            )
+        
+        users = base_query.offset((page - 1) * limit).limit(limit).all()
 
         return [
             schema_out(
@@ -23,10 +46,11 @@ class BaseUserCRUD:
                     email=u.email,
                     role=u.role,
                     created_at=u.created_at,
-                    updated_at=u.updated_at,
+                    updated_at=u.updated_at
                 )
             ) for m, u in users
         ]
+        
 
     @staticmethod 
     def get_user_by_id(db: Session, model, schema_out, user_id: int, school_id: int):

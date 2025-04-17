@@ -6,6 +6,7 @@ from .. import models
 from ..schemas import teacher, user
 from .base_user_crud import BaseUserCRUD
 from fastapi import HTTPException, status
+from typing import Optional
 from .user import UsersCRUD
 
 class TeachersCRUD:
@@ -33,13 +34,16 @@ class TeachersCRUD:
             )
     
     @staticmethod
-    def get_all_users(db: Session, school_id: int):
+    def get_all_teachers(db: Session, school_id: int, query: Optional[str] = None, page: int = 1, limit: int = 10):
         return BaseUserCRUD.get_all_users(
             db=db,
             model=Teacher,
             schema_out=teacher.TeacherOut,
-            school_id=school_id
-            )
+            school_id=school_id,
+            query=query,
+            page=page,
+            limit=limit
+        )
     @staticmethod 
     def delete_teacher(db: Session, teacher_id: int, school_id: int):
         return BaseUserCRUD.delete_user(

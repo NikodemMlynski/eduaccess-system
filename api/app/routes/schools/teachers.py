@@ -7,15 +7,29 @@ from sqlalchemy.orm import Session
 from app.role_checker import admin_only
 from ...oauth2 import school_checker
 from ...models import User
+from typing import Optional
+from fastapi import Query
 
 router = APIRouter(
     prefix="/teachers",
     tags=["teachers"],
 )
 @router.get("/", response_model=List[teacher.TeacherOut], dependencies=[Depends(admin_only)])
-def get_teachers(school_id: int, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):    
-    return TeachersCRUD.get_all_users(db, school_id=school_id)
-
+def get_teachers(
+    school_id: int,
+    db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker),
+    query: Optional[str] = Query(None, description="Search by name, surname, or email"),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Result limit per page"),
+):
+    return TeachersCRUD.get_all_teachers(
+        db=db,
+        school_id=school_id,
+        query=query,
+        page=page,
+        limit=limit
+    )
 @router.get("/{id}", response_model=teacher.TeacherOut, dependencies=[Depends(admin_only)])
 def get_teacher(school_id: int, id: int, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
     return TeachersCRUD.get_teacher(
