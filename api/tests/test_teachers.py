@@ -102,6 +102,62 @@ def test_get_teachers_list(authorized_admin_client, session, school_admin_factor
     assert "teacher1@example.com" in emails
     assert "teacher2@example.com" in emails
 
+def test_get_teachers_with_pagination(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    # Tworzymy 15 nauczycieli
+    for i in range(15):
+        user_factory(role="teacher", school_id=school_id, email=f"teacher{i}@example.com")
+
+    res = client.get(f"/school/{school_id}/teachers?page=1&limit=10")
+    assert res.status_code == 200
+    assert len(res.json()) == 10
+
+    res_page2 = client.get(f"/school/{school_id}/teachers?page=2&limit=10")
+    assert res_page2.status_code == 200
+    assert len(res_page2.json()) == 5
+
+
+def test_get_teachers_with_query_match(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    user_factory(role="teacher", school_id=school_id, email="john.doe@example.com", first_name="John", last_name="Doe")
+    user_factory(role="teacher", school_id=school_id, email="jane.smith@example.com", first_name="Jane", last_name="Smith")
+
+    res = client.get(f"/school/{school_id}/teachers?query=john")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data) == 1
+    assert data[0]["user"]["email"] == "john.doe@example.com"
+
+
+def test_get_teachers_with_query_no_match(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    user_factory(role="teacher", school_id=school_id, email="john.doe@example.com", first_name="John", last_name="Doe")
+
+    res = client.get(f"/school/{school_id}/teachers?query=nonexistent")
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+def test_get_teachers_limit_edge_case(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    for i in range(3):
+        user_factory(role="teacher", school_id=school_id, email=f"t{i}@example.com")
+
+    res = client.get(f"/school/{school_id}/teachers?page=1&limit=2")
+    assert res.status_code == 200
+    assert len(res.json()) == 2
+
+    res2 = client.get(f"/school/{school_id}/teachers?page=2&limit=2")
+    assert res2.status_code == 200
+    assert len(res2.json()) == 1
 
 def test_get_single_teacher(authorized_admin_client, session, school_admin_factory, user_factory):
     school, client = authorized_admin_client
