@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 
 export default function TeachersPage() {
   const { user, token } = useAuth();
-  const { data: teachers, isLoading } = useUsers<ITeacher>(`school/${user?.school_id}/teachers`, token || "");
+  const { data: teachers, isLoading } = useUsers<ITeacher>(`school/${user?.school_id}/teachers`, token || "", "teacher");
 
   if (isLoading) {
     return (

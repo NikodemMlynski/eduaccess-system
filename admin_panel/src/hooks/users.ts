@@ -1,5 +1,11 @@
 import { API_URL } from "@/config/constants";
+import { Role } from "@/types/User";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+export const USERS_KEYS = {
+    users: (role?: Role) => ["users", role ? role : null] as const,
+    user: (id: number, role?: Role) => ["users", role ? role : null, id] as const,
+}
 
 type UpdateUserInput = {
     first_name: string;
@@ -27,16 +33,16 @@ async function fetcher<T>(
     return res.json();
 }
 
-export function useUsers<T>(endpoint: string, token?: string) {
+export function useUsers<T>(endpoint: string, token?: string, role?: Role) {
     return useQuery<T[]>({
-        queryKey: [endpoint], // to będzie trzeba zmienić na user i role
+        queryKey: USERS_KEYS.users(role), // to będzie trzeba zmienić na user i role
         queryFn: () => fetcher<T[]>(`${API_URL}${endpoint}`, token),
     });
 }
 
-export function useUser<T>(endpoint: string, id: number, token?: string) {
+export function useUser<T>(endpoint: string, id: number, token?: string, role?: Role) {
     return useQuery<T>({
-        queryKey: [endpoint, id], // tak samo,
+        queryKey: USERS_KEYS.user(id, role), // tak samo,
         queryFn: () => fetcher<T>(`${API_URL}${endpoint}${id}`, token),
         enabled: !!id,
     })
