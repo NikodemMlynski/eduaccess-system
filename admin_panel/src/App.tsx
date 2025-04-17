@@ -14,7 +14,7 @@ import AuthLayout from './layouts/AuthLayout'
 import ProtectedRoute from './components/Authorization/ProtectedRoute'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './context/AuthProvider'
-
+import {ReactQueryDevtools} from "@tanstack/react-query-devtools"
 import {ToastContainer} from "react-toastify";
 
 const queryClient = new QueryClient();
@@ -91,6 +91,7 @@ function App() {
         <ToastContainer
         autoClose={1500}
         />
+        <ReactQueryDevtools/>
       </QueryClientProvider>
   )
 }
