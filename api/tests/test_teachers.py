@@ -77,6 +77,7 @@ def test_get_teachers_without_admin_token(client, session, school_admin_factory)
 
     assert res.status_code == 403
 
+
 def test_get_teachers_empty_list(authorized_admin_client, session, school_admin_factory):
     school, client = authorized_admin_client
     school_id = school.id
@@ -84,7 +85,11 @@ def test_get_teachers_empty_list(authorized_admin_client, session, school_admin_
     res = client.get(f"/school/{school_id}/teachers")
 
     assert res.status_code == 200
-    assert res.json() == []
+    data = res.json()
+    assert data["users"] == []
+    assert data["total_count"] == 0
+    assert data["has_next_page"] is False
+
 
 def test_get_teachers_list(authorized_admin_client, session, school_admin_factory, user_factory):
     school, client = authorized_admin_client
@@ -94,29 +99,38 @@ def test_get_teachers_list(authorized_admin_client, session, school_admin_factor
     teacher2 = user_factory(role="teacher", school_id=school_id, email="teacher2@example.com")
 
     res = client.get(f"/school/{school_id}/teachers")
-
     assert res.status_code == 200
     data = res.json()
-    assert len(data) == 2
-    emails = [student["user"]["email"] for student in data]
+
+    assert len(data["users"]) == 2
+    emails = [teacher["user"]["email"] for teacher in data["users"]]
     assert "teacher1@example.com" in emails
     assert "teacher2@example.com" in emails
+
+    assert data["total_count"] == 2
+    assert data["has_next_page"] is False
+
 
 def test_get_teachers_with_pagination(authorized_admin_client, session, user_factory):
     school, client = authorized_admin_client
     school_id = school.id
 
-    # Tworzymy 15 nauczycieli
     for i in range(15):
         user_factory(role="teacher", school_id=school_id, email=f"teacher{i}@example.com")
 
     res = client.get(f"/school/{school_id}/teachers?page=1&limit=10")
     assert res.status_code == 200
-    assert len(res.json()) == 10
+    data = res.json()
+    assert len(data["users"]) == 10
+    assert data["total_count"] == 15
+    assert data["has_next_page"] is True
 
     res_page2 = client.get(f"/school/{school_id}/teachers?page=2&limit=10")
     assert res_page2.status_code == 200
-    assert len(res_page2.json()) == 5
+    data2 = res_page2.json()
+    assert len(data2["users"]) == 5
+    assert data2["total_count"] == 15
+    assert data2["has_next_page"] is False
 
 
 def test_get_teachers_with_query_match(authorized_admin_client, session, user_factory):
@@ -129,8 +143,11 @@ def test_get_teachers_with_query_match(authorized_admin_client, session, user_fa
     res = client.get(f"/school/{school_id}/teachers?query=john")
     assert res.status_code == 200
     data = res.json()
-    assert len(data) == 1
-    assert data[0]["user"]["email"] == "john.doe@example.com"
+
+    assert len(data["users"]) == 1
+    assert data["users"][0]["user"]["email"] == "john.doe@example.com"
+    assert data["total_count"] == 1
+    assert data["has_next_page"] is False
 
 
 def test_get_teachers_with_query_no_match(authorized_admin_client, session, user_factory):
@@ -141,7 +158,11 @@ def test_get_teachers_with_query_no_match(authorized_admin_client, session, user
 
     res = client.get(f"/school/{school_id}/teachers?query=nonexistent")
     assert res.status_code == 200
-    assert res.json() == []
+    data = res.json()
+
+    assert data["users"] == []
+    assert data["total_count"] == 0
+    assert data["has_next_page"] is False
 
 
 def test_get_teachers_limit_edge_case(authorized_admin_client, session, user_factory):
@@ -153,11 +174,18 @@ def test_get_teachers_limit_edge_case(authorized_admin_client, session, user_fac
 
     res = client.get(f"/school/{school_id}/teachers?page=1&limit=2")
     assert res.status_code == 200
-    assert len(res.json()) == 2
+    data = res.json()
+    assert len(data["users"]) == 2
+    assert data["total_count"] == 3
+    assert data["has_next_page"] is True
 
     res2 = client.get(f"/school/{school_id}/teachers?page=2&limit=2")
     assert res2.status_code == 200
-    assert len(res2.json()) == 1
+    data2 = res2.json()
+    assert len(data2["users"]) == 1
+    assert data2["total_count"] == 3
+    assert data2["has_next_page"] is False
+
 
 def test_get_single_teacher(authorized_admin_client, session, school_admin_factory, user_factory):
     school, client = authorized_admin_client
