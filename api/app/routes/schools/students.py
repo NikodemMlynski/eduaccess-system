@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from app.database import get_db
 from ...crud.student import StudentCRUD
 from typing import List
-from ...schemas import student, user
+from ...schemas import student, user, utils
 from sqlalchemy.orm import Session 
 from app.role_checker import admin_only
 from ...oauth2 import school_checker, get_current_user
@@ -15,7 +15,7 @@ router = APIRouter(
     tags=["students"],
 )
 # , response_model=List[student.StudentOut]
-@router.get("/", dependencies=[Depends(admin_only)])
+@router.get("/", response_model=utils.PaginatedResponse[student.StudentOut], dependencies=[Depends(admin_only)])
 def get_students(
     school_id: int,
     db: Session = Depends(get_db),

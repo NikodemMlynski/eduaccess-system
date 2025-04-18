@@ -33,7 +33,15 @@ class BaseUserCRUD:
         
         users = base_query.offset((page - 1) * limit).limit(limit).all()
 
-        return [
+        has_next = base_query.offset(page * limit).limit(1).all()
+        has_next_page = len(has_next) > 0
+
+        total_count = base_query.count()
+
+        return {
+            "has_next_page": has_next_page,
+            "total_count": total_count,
+            "users":[
             schema_out(
                 id=m.id,
                 **({"class_id": m.class_id} if hasattr(m, "class_id") else {}),
@@ -49,7 +57,7 @@ class BaseUserCRUD:
                     updated_at=u.updated_at
                 )
             ) for m, u in users
-        ]
+        ]}
         
 
     @staticmethod 
