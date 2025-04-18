@@ -6,8 +6,9 @@ import { useUsers } from "@/hooks/users";
 import { useAuth } from "@/context/AuthProvider";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { PaginationControls } from "@/components/utils/PaginationControls";
+import { SearchAndLimitBar } from "@/components/utils/SearchAndLimitBar";
 
 export default function TeachersPage() {
   const { user, token } = useAuth();
@@ -47,53 +48,22 @@ export default function TeachersPage() {
 
   return (
     <div className="p-6">
-      <div className="mb-4 flex flex-col md:flex-row md:items-center gap-4">
-        <Input
-          placeholder="Szukaj nauczyciela..."
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setPage(1); // resetuj do pierwszej strony
-          }}
-          className="md:w-[300px]"
-        />
-        <div className="flex items-center gap-2">
-          <span>Na stronę:</span>
-          <select
-            value={limit}
-            onChange={(e) => {
-              setLimit(Number(e.target.value));
-              setPage(1);
-            }}
-            className="border rounded px-2 py-1"
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-          </select>
-        </div>
-      </div>
-      <div key={debouncedSearchQuery}>
-        <Teachers teachers={data?.items || []} />
+      <SearchAndLimitBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              limit={limit}
+              setLimit={setLimit}
+              setPage={setPage}
+            />
+      <div key={`${debouncedSearchQuery}-${page}`}>
+        <Teachers teachers={data?.users || []} />
       </div>
 
-      <div className="flex justify-center items-center gap-4 mt-6">
-        <button
-          disabled={page === 1}
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-          className="px-4 py-2 border rounded disabled:opacity-50"
-        >
-          Poprzednia
-        </button>
-        <span>Strona {page}</span>
-        <button
-          disabled={!data?.has_next_page}
-          onClick={() => setPage((prev) => prev + 1)}
-          className="px-4 py-2 border rounded disabled:opacity-50"
-        >
-          Następna
-        </button>
-      </div>
+      <PaginationControls<ITeacher> 
+      page={page}
+      setPage={setPage}
+      data={data}
+        />
     </div>
   );
 }

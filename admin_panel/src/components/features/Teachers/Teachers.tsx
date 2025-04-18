@@ -13,10 +13,11 @@ import { useOptimisticUsers } from "@/hooks/useOptimisticUserActions";
 import { useAuth } from "@/context/AuthProvider";
 
 interface TeachersProps {
+  total_count?: number;
   teachers: ITeacher[];
 }
 
-export default function Teachers({ teachers: initialTeachers }: TeachersProps) {
+export default function Teachers({ teachers: initialTeachers, total_count }: TeachersProps) {
   const { user } = useAuth();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
@@ -57,10 +58,9 @@ export default function Teachers({ teachers: initialTeachers }: TeachersProps) {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Lista nauczycieli</h1>
-      <h2 className="text-2xl text-red-400">Tu trzeba zrobić search bar (na backendzie w BaseUserCRUD + hook na froncie)</h2>
-      <ScrollArea className="h-[650px] rounded-md border p-4">
+    <div className="p-6 py-2">
+      <h1 className="text-2xl font-bold mb-4">Lista nauczycieli {total_count ? `(${total_count})` : ""}</h1>
+      <ScrollArea className="h-[700px] rounded-md border p-4">
         <div className="grid gap-4">
           {teachers.map((teacher) => (
             <Card key={teacher.id} className="shadow-md hover:shadow-lg transition">

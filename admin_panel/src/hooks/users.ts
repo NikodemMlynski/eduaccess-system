@@ -13,8 +13,9 @@ interface PaginatedParams {
     page?: number;
     paginated?: boolean;
 }
-interface PaginatedResponse<T> {
-    items: T[];
+export interface PaginatedResponse<T> {
+    users: T[];
+    total_count: number;
     has_next_page: boolean;
 }
 type UpdateUserInput = {
@@ -61,12 +62,9 @@ export function useUsers<T>(
     const url = `${API_URL}${endpoint}${paginated ? `?${params.toString()}` : ""}`;
   
     return useQuery<PaginatedResponse<T>>({
-      queryKey: ["users", endpoint, role, {paginated, query, limit, page}],
+      queryKey: ["users", endpoint, role, paginated, limit, page, query],
       queryFn: () =>
         fetcher<PaginatedResponse<T> | T[]>(url, token).then((res) => {
-          if (Array.isArray(res)) {
-            return { items: res, has_next_page: false };
-          }
           return res as PaginatedResponse<T>;
         }),
         enabled: !!token && !!endpoint,

@@ -13,10 +13,11 @@ import { useOptimisticUsers } from "@/hooks/useOptimisticUserActions";
 import { useAuth } from "@/context/AuthProvider";
 
 interface StudentsProps {
+  total_count?: number;
   students: IStudent[];
 }
 
-export default function Students({ students: initialStudents }: StudentsProps) {
+export default function Students({ students: initialStudents, total_count }: StudentsProps) {
   const { user } = useAuth();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
@@ -57,9 +58,9 @@ export default function Students({ students: initialStudents }: StudentsProps) {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Lista uczniów</h1>
-      <ScrollArea className="h-[750px] rounded-md border p-4">
+    <div className="p-6 py-2">
+      <h1 className="text-2xl font-bold mb-4">Lista uczniów {total_count ? `(${total_count})` : ""}</h1>
+      <ScrollArea className="h-[700px] rounded-md border p-4">
         <div className="grid gap-4">
           {students.map((student) => (
             <Card key={student.id} className="shadow-md hover:shadow-lg transition">
