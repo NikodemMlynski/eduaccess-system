@@ -3,6 +3,7 @@ from app.models import Student
 from app.models import User
 from app.schemas import user, student
 from .base_user_crud import BaseUserCRUD
+from typing import Optional
 
 class StudentCRUD:
     @staticmethod
@@ -32,11 +33,35 @@ class StudentCRUD:
             user_id=student_id,
             school_id=school_id
         )
+    
     @staticmethod 
-    def get_all_users(db: Session, school_id):
+    def get_all_students(db: Session, school_id: int, query: Optional[str] = None, page: int = 1, limit: int = 10):
+        print(f"Next school_id: {school_id}")
         return BaseUserCRUD.get_all_users(
             db=db,
             model=Student,
             schema_out=student.StudentOut,
-            school_id=school_id
+            school_id=school_id,
+            query=query,
+            page=page,
+            limit=limit,
+        )
+    
+    @staticmethod
+    def delete_student(db: Session, student_id: int, school_id: int):
+        return BaseUserCRUD.delete_user(
+            db=db,
+            model=Student,
+            school_id=school_id,
+            user_id=student_id
+        )
+    
+    @staticmethod 
+    def update_student(student_id: int, db: Session, school_id: int, data: user.UpdateUserIn):
+        return BaseUserCRUD.update_user(
+            db=db,
+            model=Student,
+            data=data,
+            school_id=school_id,
+            user_id=student_id
         )

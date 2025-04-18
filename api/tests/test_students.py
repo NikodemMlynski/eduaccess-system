@@ -70,18 +70,21 @@ def test_create_student_with_existing_email(client, session, school_admin_factor
 
 def test_get_students_empty_list(authorized_admin_client, session):
     school, client = authorized_admin_client
-    # school, _, _ = school_admin_factory()
     school_id = school.id
 
     res = client.get(f"/school/{school_id}/students")
 
     assert res.status_code == 200
-    assert res.json() == []
+    data = res.json()
+    assert data["users"] == []
+    assert data["total_count"] == 0
+    assert data["has_next_page"] is False
+
 
 def test_get_students_without_admin_token(client, session, school_admin_factory):
     school, _, _ = school_admin_factory() 
-
     school_id = school.id 
+
     res = client.get(f"/school/{school_id}/students")
 
     assert res.status_code == 403
@@ -95,13 +98,93 @@ def test_get_students_list(authorized_admin_client, session, user_factory):
     student2 = user_factory(role="student", school_id=school_id, email="student2@example.com")
 
     res = client.get(f"/school/{school_id}/students")
-
     assert res.status_code == 200
     data = res.json()
-    assert len(data) == 2
-    emails = [student["user"]["email"] for student in data]
+
+    assert len(data["users"]) == 2
+    emails = [student["user"]["email"] for student in data["users"]]
     assert "student1@example.com" in emails
     assert "student2@example.com" in emails
+
+    assert data["total_count"] == 2
+    assert data["has_next_page"] is False
+
+
+def test_get_students_with_pagination(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    for i in range(15):
+        user_factory(role="student", school_id=school_id, email=f"student{i}@example.com")
+
+    res = client.get(f"/school/{school_id}/students?page=1&limit=10")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["users"]) == 10
+    assert data["total_count"] == 15
+    assert data["has_next_page"] is True
+
+    res_page2 = client.get(f"/school/{school_id}/students?page=2&limit=10")
+    assert res_page2.status_code == 200
+    data2 = res_page2.json()
+    assert len(data2["users"]) == 5
+    assert data2["total_count"] == 15
+    assert data2["has_next_page"] is False
+
+
+def test_get_students_with_query_match(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    user_factory(role="student", school_id=school_id, email="alice.koch@example.com", first_name="Alice", last_name="Koch")
+    user_factory(role="student", school_id=school_id, email="bob.nowak@example.com", first_name="Bob", last_name="Nowak")
+
+    res = client.get(f"/school/{school_id}/students?query=alice")
+    assert res.status_code == 200
+    data = res.json()
+
+    assert len(data["users"]) == 1
+    assert data["users"][0]["user"]["email"] == "alice.koch@example.com"
+    assert data["total_count"] == 1
+    assert data["has_next_page"] is False
+
+
+def test_get_students_with_query_no_match(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    user_factory(role="student", school_id=school_id, email="student1@example.com", first_name="Mark", last_name="Twain")
+
+    res = client.get(f"/school/{school_id}/students?query=nonexistent")
+    assert res.status_code == 200
+    data = res.json()
+
+    assert data["users"] == []
+    assert data["total_count"] == 0
+    assert data["has_next_page"] is False
+
+
+def test_get_students_limit_edge_case(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    for i in range(3):
+        user_factory(role="student", school_id=school_id, email=f"student{i}@example.com")
+
+    res = client.get(f"/school/{school_id}/students?page=1&limit=2")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["users"]) == 2
+    assert data["total_count"] == 3
+    assert data["has_next_page"] is True
+
+    res2 = client.get(f"/school/{school_id}/students?page=2&limit=2")
+    assert res2.status_code == 200
+    data2 = res2.json()
+    assert len(data2["users"]) == 1
+    assert data2["total_count"] == 3
+    assert data2["has_next_page"] is False
+
 
 
 def test_get_single_student(authorized_admin_client, session, user_factory):
@@ -125,3 +208,98 @@ def test_get_not_existing_student(authorized_admin_client, session, school_admin
 
     assert res.status_code == 404
     assert res.json()["detail"] == "User not found"
+
+def test_update_student(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    student = user_factory(role="student", school_id=school_id, email="student1@example.com")
+
+    update_payload = {
+        "first_name": "UpdatedName",
+        "last_name": "UpdatedSurname",
+        "email": "updatedemail@example.com"
+    }
+
+    res = client.put(
+        f"/school/{school_id}/students/{student.id}",
+        json=update_payload
+    )
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data["user"]["email"] == "updatedemail@example.com"
+    assert data["user"]["first_name"] == "UpdatedName"
+    assert data["user"]["last_name"] == "UpdatedSurname"
+    assert data["id"] == student.id
+
+def test_update_nonexistent_student(authorized_admin_client):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    update_payload = {
+        "first_name": "Updated",
+        "last_name": "Name",
+        "email": "nonexistent@example.com"
+    }
+
+    res = client.put(
+        f"/school/{school_id}/students/9999",
+        json=update_payload
+    )
+
+    assert res.status_code == 404
+    assert res.json()["detail"] == "User not found"
+
+def test_delete_student(authorized_admin_client, session, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    student = user_factory(role="student", school_id=school_id, email="student1@example.com")
+
+    res = client.delete(f"/school/{school_id}/students/{student.id}")
+
+    assert res.status_code == 200
+    assert res.json()["message"] == "User deleted successfully"
+
+    # Spróbuj pobrać studenta ponownie — powinno być 404
+    res_get = client.get(f"/school/{school_id}/students/{student.id}")
+    assert res_get.status_code == 404
+
+def test_delete_nonexistent_student(authorized_admin_client):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    res = client.delete(f"/school/{school_id}/students/9999")
+
+    assert res.status_code == 404
+    assert res.json()["detail"] == "User not found"
+
+def test_update_student_without_admin_token(client, session, school_admin_factory, user_factory):
+    school, _, _ = school_admin_factory()
+    school_id = school.id
+
+    student = user_factory(role="student", school_id=school_id, email="student1@example.com")
+
+    update_payload = {
+        "first_name": "Hacker",
+        "last_name": "User",
+        "email": "hacked@example.com"
+    }
+
+    res = client.put(
+        f"/school/{school_id}/students/{student.id}",
+        json=update_payload
+    )
+
+    assert res.status_code == 403
+
+def test_delete_student_without_admin_token(client, session, school_admin_factory, user_factory):
+    school, _, _ = school_admin_factory()
+    school_id = school.id
+
+    student = user_factory(role="student", school_id=school_id, email="student1@example.com")
+
+    res = client.delete(f"/school/{school_id}/students/{student.id}")
+
+    assert res.status_code == 403
