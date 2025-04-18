@@ -27,6 +27,8 @@ export default function TeachersPage() {
       paginated: true
     }
   );
+  console.log("QUERY:", debouncedSearchQuery);
+  console.log("DATA: ", data);
 
   if (isLoading) {
     return (
@@ -71,8 +73,9 @@ export default function TeachersPage() {
           </select>
         </div>
       </div>
-
-      <Teachers teachers={data?.items || []} />
+      <div key={debouncedSearchQuery}>
+        <Teachers teachers={data?.items || []} />
+      </div>
 
       <div className="flex justify-center items-center gap-4 mt-6">
         <button

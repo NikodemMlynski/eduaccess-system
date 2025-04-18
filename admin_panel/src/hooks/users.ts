@@ -64,13 +64,12 @@ export function useUsers<T>(
       queryKey: ["users", endpoint, role, {paginated, query, limit, page}],
       queryFn: () =>
         fetcher<PaginatedResponse<T> | T[]>(url, token).then((res) => {
-          // 🔁 Gwarantujemy jednolitą strukturę danych
           if (Array.isArray(res)) {
             return { items: res, has_next_page: false };
           }
           return res as PaginatedResponse<T>;
         }),
-    //   placeholderData: (prev) => prev,
+        enabled: !!token && !!endpoint,
     });
   }
 
