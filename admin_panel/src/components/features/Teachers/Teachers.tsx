@@ -59,7 +59,8 @@ export default function Teachers({ teachers: initialTeachers }: TeachersProps) {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Lista nauczycieli</h1>
-      <ScrollArea className="h-[750px] rounded-md border p-4">
+      <h2 className="text-2xl text-red-400">Tu trzeba zrobić search bar (na backendzie w BaseUserCRUD + hook na froncie)</h2>
+      <ScrollArea className="h-[650px] rounded-md border p-4">
         <div className="grid gap-4">
           {teachers.map((teacher) => (
             <Card key={teacher.id} className="shadow-md hover:shadow-lg transition">
