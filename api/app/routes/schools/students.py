@@ -42,7 +42,7 @@ def get_student(school_id: int, id: int, db: Session = Depends(get_db), school_c
     )
 
 @router.delete("/{id}", dependencies=[Depends(admin_only)])
-def delete_teacher(school_id: int, id: int, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
+def delete_student(school_id: int, id: int, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
     return StudentCRUD.delete_student(
         student_id=id,
         db=db,
@@ -50,10 +50,41 @@ def delete_teacher(school_id: int, id: int, db: Session = Depends(get_db), schoo
     )
 
 @router.put("/{id}", response_model=student.StudentOut , dependencies=[Depends(admin_only)])
-def update_teacher(school_id: int, id: int, data: user.UpdateUserIn, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
+def update_student(school_id: int, id: int, data: user.UpdateUserIn, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
     return StudentCRUD.update_student(
         data=data,
         db=db,
         student_id=id,
         school_id=school_id
+    )
+
+@router.put("/{id}/classes/{class_id}", response_model=student.StudentOut, dependencies=[Depends(admin_only)])
+def assign_user_to_class(
+    school_id: int,
+id: int,
+    class_id: int,
+    db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker)
+):
+    return StudentCRUD.assign_user_to_class(
+        student_id=id,
+        db=db,
+        school_id=school_id,
+        class_id=class_id
+    )
+
+
+@router.delete("/{id}/classes/{class_id}", response_model=student.StudentOut, dependencies=[Depends(admin_only)])
+def delete_user_from_class(
+    school_id: int,
+    id: int,
+    class_id: int,
+    db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker)
+):
+    return StudentCRUD.delete_user_from_class(
+        student_id=id,
+        school_id=school_id,
+        db=db,
+        class_id=class_id
     )
