@@ -1,4 +1,3 @@
-import classes from './Attendances.module.css';
 
 interface AttendancesProps {
     attendances: []
@@ -7,6 +6,6 @@ interface AttendancesProps {
 export default function Attendances ({attendances}: AttendancesProps) {
     console.log(attendances);
     return (
-        <h1 className={classes.title}>Tu będzie podstrona frekwencji</h1>
+        <h1>Tu będzie podstrona frekwencji</h1>
     )
 }

@@ -1,6 +1,7 @@
 import { API_URL } from "@/config/constants";
 import { Role } from "@/types/User";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetcher } from "./utils/fetcher";
 
 export const USERS_KEYS = {
     users: (role?: Role) => ["users", role ? role : null] as const,
@@ -24,26 +25,6 @@ type UpdateUserInput = {
     email: string;
 }
 
-async function fetcher<T>(
-    url: string,
-    token?: string,
-    options?: RequestInit,
-): Promise<T> {
-    const res = await fetch(url, {
-        headers: {
-            "Content-Type": "application/json",
-            ...(token ? {Authorization: `Bearer ${token}`} : {})
-        },
-        ...options
-    })
-
-    if(!res.ok) {
-        throw new Error(await res.text());
-    }
-
-    return res.json();
-}
-  
 export function useUsers<T>(
     endpoint: string,
     token?: string,
