@@ -1,6 +1,7 @@
 from app import schemas
 from app.models import Student
 import pytest
+from .fixtures.classes import classes_factory
 from .database import client, session
 from .fixtures.users import user_factory
 from .fixtures.school import school_admin_factory
@@ -301,5 +302,63 @@ def test_delete_student_without_admin_token(client, session, school_admin_factor
     student = user_factory(role="student", school_id=school_id, email="student1@example.com")
 
     res = client.delete(f"/school/{school_id}/students/{student.id}")
+
+    assert res.status_code == 403
+
+def test_assign_student_to_class(authorized_admin_client, user_factory, classes_factory):
+    school, client = authorized_admin_client
+    school_id = school.id 
+
+    student = user_factory(role="student", school_id=school_id)
+    class_= classes_factory(school_id=school_id, class_name="4D")
+    class_id = class_.id
+    res = client.put(f"/school/{school_id}/students/{student.id}/classes/{class_.id}")
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data["class_id"] == class_id
+
+def test_remove_student_from_class(authorized_admin_client, user_factory, classes_factory, session):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    class_ = classes_factory(school_id=school_id, class_name="4D")
+    student = user_factory(role="student", school_id=school_id, class_id=class_.id)
+
+    res = client.delete(f"/school/{school_id}/students/{student.id}/classes/{class_.id}")
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data["class_id"] is None
+
+def test_assign_student_to_nonexistent_class(authorized_admin_client, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    student = user_factory(role="student", school_id=school_id)
+    fake_class_id = 9999  # zakładamy, że nie istnieje
+
+    res = client.put(f"/school/{school_id}/students/{student.id}/classes/{fake_class_id}")
+
+    assert res.status_code == 404
+
+def test_remove_student_from_class_they_do_not_belong_to(authorized_admin_client, user_factory, classes_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    class_ = classes_factory(school_id=school_id, class_name="4D")
+    student = user_factory(role="student", school_id=school_id)  # nie ma przypisanej klasy
+
+    res = client.delete(f"/school/{school_id}/students/{student.id}/classes/{class_.id}")
+
+    assert res.status_code in [400, 404]  # w zależności od twojej implementacji
+
+def test_assign_student_to_class_as_regular_user(user_factory, classes_factory, client, school_admin_factory):
+    school, _, _ = school_admin_factory()
+    school_id = school.id
+    other_student = user_factory(role="student", school_id=school_id)
+    class_ = classes_factory(school_id=school_id, class_name="4D")
+
+    res = client.put(f"/school/{school_id}/students/{other_student.id}/classes/{class_.id}")
 
     assert res.status_code == 403

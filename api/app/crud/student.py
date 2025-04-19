@@ -1,9 +1,12 @@
 from sqlalchemy.orm import Session
 from app.models import Student
-from app.models import User
+from app.models import User, Class
 from app.schemas import user, student
 from .base_user_crud import BaseUserCRUD
 from typing import Optional
+from fastapi import HTTPException, status
+from sqlalchemy import and_
+
 
 class StudentCRUD:
     @staticmethod
@@ -65,3 +68,56 @@ class StudentCRUD:
             school_id=school_id,
             user_id=student_id
         )
+    
+    @staticmethod 
+    def assign_user_to_class(
+        student_id: int,
+        db: Session,
+        school_id: int,
+        class_id: int
+    ):
+        student = db.query(Student).filter(Student.id == student_id).first()
+        if not student:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="This student does not exist"
+            )
+        
+        class_ = db.query(Class).filter(Class.id == class_id).first()
+        if not class_:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="This class does not exist"
+            )
+
+        student.class_id = class_.id
+        db.commit()
+        db.refresh(student)
+
+        return student
+    
+    @staticmethod 
+    def delete_user_from_class(
+        student_id: int,
+        db: Session,
+        school_id: int,
+        class_id
+    ):
+        student = db.query(Student).filter(
+            and_(
+                Student.school_id == school_id,
+                Student.id == student_id,
+                Student.class_id == class_id
+            )
+        ).first()
+
+        if not student:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Student does not exist or is not assigned to this class"
+            )
+        
+        student.class_id = None 
+        db.commit()
+        db.refresh(student)
+        return student
