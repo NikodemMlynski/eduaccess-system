@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from app.models import Room 
 from app.schemas import room 
 from fastapi import HTTPException, status 
-from sqlalchemy import and_ 
-
+from sqlalchemy import and_
+from typing import Optional
 # class Room(Base):
 #     __tablename__ = "rooms"
 #     id = Column(Integer, primary_key=True, nullable=False)
@@ -41,9 +41,34 @@ class RoomsCRUD:
         return db_room
     
     @staticmethod
-    def get_all_rooms(db: Session, school_id: int):
-        rooms = db.query(Room).filter(Room.school_id == school_id).all()
-        return rooms 
+    def get_all_rooms(
+        db: Session,
+        school_id: int,
+        query: Optional[str] = None,
+        page: int = 1,
+        limit: int = 10
+        ):
+        base_query = db.query(Room).filter(Room.school_id == school_id)
+
+        if query:
+            search = f"%{query.lower()}%"
+            base_query = base_query.filter(
+                Room.room_name.ilike(search)
+            )
+        
+        rooms = base_query.offset((page - 1) * limit).limit(limit).all()
+
+        has_next = base_query.offset(page * limit).limit(1).all()
+        has_next_page = len(has_next) > 0
+
+        total_count = base_query.count()
+
+        return {
+            "has_next_page": has_next_page,
+            "total_count": total_count,
+            "rooms": rooms
+        }
+        
     
     @staticmethod 
     def get_room_by_id(db: Session, school_id: int, id: int):

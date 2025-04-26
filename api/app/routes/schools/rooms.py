@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends 
+from fastapi import APIRouter, Depends, Query
 from ...models import User
 from app.database import get_db 
 from ...crud.rooms import RoomsCRUD 
-from ...schemas import room 
+from ...schemas import room, utils
 from ...role_checker import admin_only
 from sqlalchemy.orm import Session 
-from typing import List
+from typing import List, Optional
 from ...oauth2 import school_checker, get_current_user
 
 router = APIRouter(
@@ -26,15 +26,21 @@ def create_room(
         room_data=room_data
     )
 
-@router.get("/", response_model=List[room.RoomOut], dependencies=[Depends(admin_only)])
+@router.get("/", response_model=room.PaginatedRooms, dependencies=[Depends(admin_only)])
 def get_all_rooms(
     school_id: int,
     db: Session = Depends(get_db),
-    school_checker: User = Depends(school_checker)
+    school_checker: User = Depends(school_checker),
+    query: Optional[str] = Query(None, description="Search by name"),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Result limit per page")
 ):
     return RoomsCRUD.get_all_rooms(
         db=db,
-        school_id=school_id
+        school_id=school_id,
+        query=query,
+        page=page,
+        limit=limit
     )
 
 @router.get("/{id}", response_model=room.RoomOut, dependencies=[Depends(admin_only)])
