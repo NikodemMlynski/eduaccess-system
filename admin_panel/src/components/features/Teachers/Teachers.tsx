@@ -60,7 +60,7 @@ export default function Teachers({ teachers: initialTeachers, total_count }: Tea
   return (
     <div className="p-6 py-2">
       <h1 className="text-2xl font-bold mb-4">Lista nauczycieli {total_count ? `(${total_count})` : ""}</h1>
-      <ScrollArea className="h-[700px] rounded-md border p-4">
+      <ScrollArea className="h-[630px] rounded-md border p-4">
         <div className="grid gap-4">
           {teachers.map((teacher) => (
             <Card key={teacher.id} className="shadow-md hover:shadow-lg transition">

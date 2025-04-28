@@ -1,6 +1,6 @@
 import { IStudent } from "@/types/Student";
 import Students from "@/components/features/Students/Students";
-import { useUsers } from "@/hooks/users";
+import { PaginatedResponse, useUsers } from "@/hooks/users";
 import { useAuth } from "@/context/AuthProvider";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -61,7 +61,7 @@ export default function StudentsPage() {
         <Students students={data?.users || []} total_count={data?.total_count}/>
       </div>
 
-      <PaginationControls<IStudent> 
+      <PaginationControls<IStudent, PaginatedResponse<IStudent>> 
       page={page} 
       setPage={setPage}
       data={data}

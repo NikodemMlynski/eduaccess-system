@@ -1,16 +1,14 @@
-import { PaginatedResponse } from "@/hooks/users";
-
-interface PaginationControlsProps<T> {
+interface PaginationControlsProps<T, P extends { has_next_page?: boolean }> {
   page: number;
   setPage: (page: number) => void;
-  data?: PaginatedResponse<T>;
+  data?: P;
 }
 
-export function PaginationControls<T>({
+export function PaginationControls<T, P extends { has_next_page?: boolean }>({
   page,
   setPage,
   data,
-}: PaginationControlsProps<T>) {
+}: PaginationControlsProps<T, P>) {
   return (
     <div className="flex justify-center items-center gap-4 mt-6">
       <button

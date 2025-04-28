@@ -2,7 +2,7 @@
 
 import { ITeacher } from "@/types/Teacher";
 import Teachers from "@/components/features/Teachers/Teachers";
-import { useUsers } from "@/hooks/users";
+import { PaginatedResponse, useUsers } from "@/hooks/users";
 import { useAuth } from "@/context/AuthProvider";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -59,7 +59,7 @@ export default function TeachersPage() {
         <Teachers teachers={data?.users || []} />
       </div>
 
-      <PaginationControls<ITeacher> 
+      <PaginationControls<ITeacher, PaginatedResponse<ITeacher>> 
       page={page}
       setPage={setPage}
       data={data}

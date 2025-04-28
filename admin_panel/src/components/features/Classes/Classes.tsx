@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { DeleteModal } from "@/components/utils/deleteModal";
 
 interface ClassesProps {
   schoolClasses: IClass[];
@@ -24,13 +25,13 @@ export default function Classes({ schoolClasses }: ClassesProps) {
   const { user, token } = useAuth();
   const deleteClass = useDeleteClass(user?.school_id, token || "");
 
-  const [selectedClass, setSelectedClass] = useState<IClass | null>(null);
+  const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
   const [confirmInput, setConfirmInput] = useState("");
 
   const handleDelete = () => {
-    if (selectedClass) {
-      deleteClass.mutate(selectedClass.id);
-      setSelectedClass(null);
+    if (selectedClassId) {
+      deleteClass.mutate(selectedClassId);
+      setSelectedClassId(null);
       setConfirmInput("");
     }
   };
@@ -48,53 +49,14 @@ export default function Classes({ schoolClasses }: ClassesProps) {
                   </h2>
                   <p>Liczba uczniów: To się obliczy</p>
                 </div>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => {
-                        setSelectedClass(schoolClass);
-                        setConfirmInput("");
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Usuń klasę</DialogTitle>
-                      <DialogDescription>
-                        Ta operacja jest nieodwracalna. Aby potwierdzić, wpisz nazwę klasy: <strong>{schoolClass.class_name}</strong>
-                      </DialogDescription>
-                    </DialogHeader>
-
-                    <Input
-                      placeholder={`Wpisz: ${schoolClass.class_name}`}
-                      value={confirmInput}
-                      onChange={(e) => setConfirmInput(e.target.value)}
-                    />
-
-                    <DialogFooter>
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          setSelectedClass(null);
-                          setConfirmInput("");
-                        }}
-                      >
-                        Anuluj
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        disabled={confirmInput !== schoolClass.class_name}
-                        onClick={handleDelete}
-                      >
-                        Usuń
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                <DeleteModal
+                confirmInput={confirmInput}
+                setConfirmInput={setConfirmInput}
+                selectedItemId={schoolClass.id}
+                setSelectedItemId={setSelectedClassId}
+                valueToConfirm={schoolClass.class_name}
+                handleDelete={handleDelete}
+                />
               </div>
             </CardContent>
           </Card>

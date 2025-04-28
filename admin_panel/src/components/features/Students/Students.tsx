@@ -60,7 +60,7 @@ export default function Students({ students: initialStudents, total_count }: Stu
   return (
     <div className="p-6 py-2">
       <h1 className="text-2xl font-bold mb-4">Lista uczniów {total_count ? `(${total_count})` : ""}</h1>
-      <ScrollArea className="h-[700px] rounded-md border p-4">
+      <ScrollArea className="h-[630px] rounded-md border p-4">
         <div className="grid gap-4">
           {students.map((student) => (
             <Card key={student.id} className="shadow-md hover:shadow-lg transition">
