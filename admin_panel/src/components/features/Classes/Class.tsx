@@ -45,9 +45,9 @@ export default function Class({class_}: ClassProps) {
               <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-lg font-bold">
-                    Klasa {class_.class_name}
+                    Class {class_.class_name}
                   </h2>
-                  <p>Liczba uczniów: To się obliczy</p>
+                  <p>Number of students: TO DO</p>
                 </div>
                 <div className="flex gap-5">
                     

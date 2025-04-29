@@ -16,15 +16,15 @@ export function PaginationControls<T, P extends { has_next_page?: boolean }>({
         onClick={() => setPage(Math.max(page - 1, 1))}
         className="px-4 py-2 border rounded disabled:opacity-50"
       >
-        Poprzednia
+        Previous
       </button>
-      <span>Strona {page}</span>
+      <span>Page {page}</span>
       <button
         disabled={!data?.has_next_page}
         onClick={() => setPage(page + 1)}
         className="px-4 py-2 border rounded disabled:opacity-50"
       >
-        Następna
+        Next
       </button>
     </div>
   );

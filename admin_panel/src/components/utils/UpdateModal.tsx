@@ -71,9 +71,9 @@ export function UpdateModal({
 
                     <DialogFooter className="pt-4">
                         <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-                            Anuluj
+                            Cancel
                         </Button>
-                        <Button className="cursor-pointer" type="submit">Zapisz zmiany</Button>
+                        <Button className="cursor-pointer" type="submit">Save changes</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

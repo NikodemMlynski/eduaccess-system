@@ -2,12 +2,14 @@ import { Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Input } from "../ui/input";
+import { useState } from "react";
 
 interface DeleteModalProps{
     setConfirmInput: (text: string) => void;
     confirmInput: string;
     valueToConfirm: string;
     handleDelete: () => void;
+    item_name: string;
 }
 
 export function DeleteModal({
@@ -15,10 +17,13 @@ export function DeleteModal({
     valueToConfirm,
     handleDelete,
     setConfirmInput,
+    item_name
+
     
 }: DeleteModalProps) {
+    const [open, setOpen] = useState(false);
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
             <Button
                 className="cursor-pointer"
@@ -33,14 +38,14 @@ export function DeleteModal({
             </DialogTrigger>
             <DialogContent>
             <DialogHeader>
-                <DialogTitle>Usuń pokój</DialogTitle>
+                <DialogTitle>Delete {item_name}</DialogTitle>
                 <DialogDescription>
-                Ta operacja jest nieodwracalna. Aby potwierdzić, wpisz nazwę pokoju: <strong>{valueToConfirm}</strong>
+                This operation is irreversible. Enter {item_name} name to confirm: <strong>{valueToConfirm}</strong>
                 </DialogDescription>
             </DialogHeader>
 
             <Input
-                placeholder={`Wpisz: ${valueToConfirm}`}
+                placeholder={`Enter: ${valueToConfirm}`}
                 value={confirmInput}
                 onChange={(e) => setConfirmInput(e.target.value)}
             />
@@ -50,16 +55,17 @@ export function DeleteModal({
                 variant="ghost"
                 onClick={() => {
                     setConfirmInput("");
+                    setOpen(false);
                 }}
                 >
-                Anuluj
+                Cancel
                 </Button>
                 <Button
                 variant="destructive"
                 disabled={confirmInput !== valueToConfirm}
                 onClick={handleDelete}
                 >
-                Usuń
+                Delete
                 </Button>
             </DialogFooter>
             </DialogContent>
