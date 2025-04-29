@@ -5,11 +5,9 @@ import { Input } from "../ui/input";
 
 interface DeleteModalProps{
     setConfirmInput: (text: string) => void;
-    setSelectedItemId: (id: number | null) => void;
     confirmInput: string;
     valueToConfirm: string;
     handleDelete: () => void;
-    selectedItemId: number;
 }
 
 export function DeleteModal({
@@ -17,8 +15,7 @@ export function DeleteModal({
     valueToConfirm,
     handleDelete,
     setConfirmInput,
-    setSelectedItemId,
-    selectedItemId
+    
 }: DeleteModalProps) {
     return (
         <Dialog>
@@ -28,7 +25,6 @@ export function DeleteModal({
                 variant="destructive"
                 size="icon"
                 onClick={() => {
-                    setSelectedItemId(selectedItemId);
                 setConfirmInput("");
                 }}
             >
@@ -53,7 +49,6 @@ export function DeleteModal({
                 <Button
                 variant="ghost"
                 onClick={() => {
-                    setSelectedItemId(null);
                     setConfirmInput("");
                 }}
                 >
