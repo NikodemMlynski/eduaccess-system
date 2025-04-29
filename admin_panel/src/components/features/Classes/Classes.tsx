@@ -1,19 +1,8 @@
 import { IClass } from "@/types/Class";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthProvider";
 import { useDeleteClass } from "@/hooks/classes";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+
 import { useState } from "react";
 import { DeleteModal } from "@/components/utils/deleteModal";
 
