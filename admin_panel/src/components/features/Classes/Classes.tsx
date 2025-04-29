@@ -5,6 +5,7 @@ import { useDeleteClass } from "@/hooks/classes";
 
 import { useState } from "react";
 import { DeleteModal } from "@/components/utils/deleteModal";
+import Class from "./Class";
 
 interface ClassesProps {
   schoolClasses: IClass[];
@@ -29,26 +30,7 @@ export default function Classes({ schoolClasses }: ClassesProps) {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {schoolClasses.map((schoolClass) => (
-          <Card key={schoolClass.id} className="relative">
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-lg font-bold">
-                    Klasa {schoolClass.class_name}
-                  </h2>
-                  <p>Liczba uczniów: To się obliczy</p>
-                </div>
-                <DeleteModal
-                confirmInput={confirmInput}
-                setConfirmInput={setConfirmInput}
-                selectedItemId={schoolClass.id}
-                setSelectedItemId={setSelectedClassId}
-                valueToConfirm={schoolClass.class_name}
-                handleDelete={handleDelete}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <Class key={schoolClass.id} class_={schoolClass}/>
         ))}
       </div>
     </>
