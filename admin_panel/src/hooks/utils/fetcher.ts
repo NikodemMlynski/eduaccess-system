@@ -11,7 +11,6 @@ export async function fetcher<T>(
         },
         ...options
     })
-
     if(!res.ok) {
         const resData = await res.json();
         throw new Error(await resData.detail);

@@ -62,6 +62,7 @@ export default function Class({class_}: ClassProps) {
                 setConfirmInput={setConfirmInput}
                 valueToConfirm={class_.class_name}
                 handleDelete={handleDelete}
+                item_name="Class"
                 />
                 </div>
               </div>

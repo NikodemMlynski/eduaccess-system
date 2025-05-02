@@ -4,7 +4,7 @@ import { deleteFetcher, fetcher, postFethcer, updateFetcher } from "./utils/fetc
 import { API_URL } from "@/config/constants"
 export const CLASSES_KEYS = {
     all: ["classes"] as const,
-    one: (id: number) => [...CLASSES_KEYS.all, id] as const,
+    one: (id?: number | null) => [...CLASSES_KEYS.all, id] as const,
     year: (year: number) => [...CLASSES_KEYS.all, "year", year] as const,
 }
 
@@ -16,10 +16,11 @@ export function useClasses(endpoint: string, token?: string, options = {}) {
     })
 }
 
-export function useClass(endpoint: string, id: number, token?: string) {
+export function useClass(endpoint: string, id?: number | null, token?: string) {
     return useQuery<IClass>({
         queryKey: CLASSES_KEYS.one(id),
-        queryFn: () => fetcher(`${API_URL}${endpoint}/${id}`, token),
+        queryFn: () => {console.log('woluje sie');return fetcher(`${API_URL}${endpoint}/${id}`, token)},
+        enabled: !!id
     })
 }
 

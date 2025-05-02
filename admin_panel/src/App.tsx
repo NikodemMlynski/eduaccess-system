@@ -16,6 +16,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './context/AuthProvider'
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools"
 import {ToastContainer} from "react-toastify";
+import StudentPage from './pages/Students/StudentPage'
 
 const queryClient = new QueryClient();
 
@@ -70,7 +71,16 @@ const router = createBrowserRouter(
             },
             {
               path: 'students',
-              element: <StudentsPage/>
+              children: [
+                {
+                  index: true,
+                  element: <StudentsPage/>
+                },
+                {
+                  path: ':id',
+                  element: <StudentPage/>
+                }
+              ]
             },
             {
               path: 'administrators',

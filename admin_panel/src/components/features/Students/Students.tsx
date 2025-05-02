@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useOptimisticUsers } from "@/hooks/useOptimisticUserActions";
 import { useAuth } from "@/context/AuthProvider";
+import { Link } from "react-router-dom";
 
 interface StudentsProps {
   total_count?: number;
@@ -70,10 +71,13 @@ export default function Students({ students: initialStudents, total_count }: Stu
                     {student.user.first_name} {student.user.last_name}
                   </h2>
                   <p className="text-sm text-gray-500">{student.user.email}</p>
-                  <p className="text-sm text-gray-500 mt-1">Class: <strong>4D</strong></p>
                   <Badge className="mt-2">{student.user.role}</Badge>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
+                <Link to={student.id.toString()}>
+                <Button variant="secondary" >Details</Button>
+                </Link>
+
                   <Button variant="outline" onClick={() => handleOpenEdit(student)}>
                     Edit
                   </Button>
