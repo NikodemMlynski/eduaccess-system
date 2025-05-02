@@ -75,3 +75,18 @@ def delete_class(
         school_id=school_id,
         id=id
     )
+
+@router.put("/{id}", response_model=class_.ClassOut, dependencies=[Depends(admin_only)])
+def update_class(
+    school_id: int, 
+    id: int,
+    class_update_data: class_.ClassIn,
+    db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker)
+):
+    return ClassesCRUD.update_class(
+        db=db,
+        school_id=school_id,
+        id=id,
+        class_update_data=class_update_data
+    )

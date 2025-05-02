@@ -72,6 +72,26 @@ export function useDeleteClass(school_id?: number, token?: string) {
     })
 }
 
+export function useUpdateClass(school_id?: number, token?: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: { id: number; updates: Partial<IClass> }) =>
+            updateFetcher<IClass>(
+                `${API_URL}school/${school_id}/classes/${data.id}`,
+                data.updates,
+                token
+            ),
+        onSuccess: () => {
+            queryClient.invalidateQueries(CLASSES_KEYS.all);
+        },
+        onError: (error) => {
+            console.error("Update class error:", error);
+        },
+    });
+}
+
+
 interface ClassStudentProps {
     studentId: number;
     classId: number;

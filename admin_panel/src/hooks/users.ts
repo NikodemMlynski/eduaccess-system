@@ -8,7 +8,7 @@ export const USERS_KEYS = {
     user: (id: number, role?: Role) => ["users", role ? role : null, id] as const,
 }
 
-interface PaginatedParams {
+export interface PaginatedParams {
     query?: string;
     limit?: number;
     page?: number;

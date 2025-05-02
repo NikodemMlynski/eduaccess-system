@@ -76,7 +76,12 @@ class StudentCRUD:
         school_id: int,
         class_id: int
     ):
-        student = db.query(Student).filter(Student.id == student_id).first()
+        student = db.query(Student).filter(
+            and_(
+                Student.id == student_id,
+                Student.school_id == school_id
+            )
+        ).first()
         if not student:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

@@ -59,8 +59,8 @@ export default function Students({ students: initialStudents, total_count }: Stu
 
   return (
     <div className="p-6 py-2">
-      <h1 className="text-2xl font-bold mb-4">Lista uczniów {total_count ? `(${total_count})` : ""}</h1>
-      <ScrollArea className="h-[700px] rounded-md border p-4">
+      <h1 className="text-2xl font-bold mb-4">Students List {total_count ? `(${total_count})` : ""}</h1>
+      <ScrollArea className="h-[630px] rounded-md border p-4">
         <div className="grid gap-4">
           {students.map((student) => (
             <Card key={student.id} className="shadow-md hover:shadow-lg transition">
@@ -70,19 +70,19 @@ export default function Students({ students: initialStudents, total_count }: Stu
                     {student.user.first_name} {student.user.last_name}
                   </h2>
                   <p className="text-sm text-gray-500">{student.user.email}</p>
-                  <p className="text-sm text-gray-500 mt-1">Klasa: <strong>4D</strong></p>
+                  <p className="text-sm text-gray-500 mt-1">Class: <strong>4D</strong></p>
                   <Badge className="mt-2">{student.user.role}</Badge>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => handleOpenEdit(student)}>
-                    Edytuj
+                    Edit
                   </Button>
                   <Button
                     variant="destructive"
                     disabled={isDeleting}
                     onClick={() => handleOpenDelete(student)}
                   >
-                    Usuń
+                    Delete
                   </Button>
                 </div>
               </CardContent>

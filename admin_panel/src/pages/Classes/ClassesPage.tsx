@@ -63,7 +63,7 @@ export default function ClassesPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Lista klas</h1>
+      <h1 className="text-2xl font-semibold">Classes list</h1>
 
       {/* 🔘 Filtry + Dodawanie */}
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -72,7 +72,7 @@ export default function ClassesPage() {
             variant={selectedYear === "all" ? "default" : "outline"}
             onClick={() => setSelectedYear("all")}
           >
-            Wszystkie klasy
+            All classes
           </Button>
           {CLASS_YEARS.map((year) => (
             <Button
@@ -80,7 +80,7 @@ export default function ClassesPage() {
               variant={selectedYear === year ? "default" : "outline"}
               onClick={() => setSelectedYear(year)}
             >
-              Klasy {year}
+              Classes {year}
             </Button>
           ))}
         </div>
@@ -90,16 +90,16 @@ export default function ClassesPage() {
           <DialogTrigger asChild>
             <Button className="gap-2" size="sm">
               <Plus className="w-4 h-4" />
-              Dodaj klasę
+              Add Class
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Dodaj nową klasę</DialogTitle>
+              <DialogTitle>Add new class</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="class_name">Nazwa klasy</Label>
+                <Label htmlFor="class_name">Class name</Label>
                 <Input
                   id="class_name"
                   value={className}
@@ -113,7 +113,7 @@ export default function ClassesPage() {
                   type="submit"
                   disabled={createClass.isPending || !className}
                 >
-                  {createClass.isPending ? "Dodawanie..." : "Dodaj klasę"}
+                  {createClass.isPending ? "Adding..." : "Add class"}
                 </Button>
               </DialogFooter>
             </form>
@@ -128,14 +128,12 @@ export default function ClassesPage() {
         </div>
       )}
 
-      {/* ❌ Błąd */}
       {isError && (
         <div className="text-center text-red-500 mt-10">
-          Błąd podczas wczytywania klas.
+          Error with loading class.
         </div>
       )}
 
-      {/* ✅ Lista klas */}
       {!isLoading && !isError && <Classes schoolClasses={data || []} />}
     </div>
   );

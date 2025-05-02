@@ -68,7 +68,7 @@ export async function updateFetcher<T> (
     const res = await fetch(url, {
         method: "PUT",
         headers: {
-            Aurhorization: token ? `Bearer ${token}` : "",
+            Authorization: token ? `Bearer ${token}` : "",
             "Content-Type": "application/json",
         },
         body: JSON.stringify(body),

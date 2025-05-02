@@ -103,3 +103,38 @@ class ClassesCRUD:
         db.delete(class_)
         db.commit()
         return {"detail": "Class deleted successfully"}
+
+    @staticmethod 
+    def update_class(db: Session, school_id: int, id: int, class_update_data: class_.ClassIn):
+        class_to_update = db.query(Class).filter(
+            and_(
+                Class.id == id,
+                Class.school_id == school_id
+            )
+        ).first()
+
+        if not class_to_update:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Class not found in this school"
+            )
+        
+        existing_class = db.query(Class).filter(
+            and_(
+                Class.class_name == class_update_data.class_name,
+                Class.school_id == school_id,
+                Class.id != id
+            )
+        ).first()
+
+        if existing_class:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Another class with the same name already exists"
+            )
+        
+        class_to_update.class_name = class_update_data.class_name 
+
+        db.commit()
+        db.refresh(class_to_update)
+        return class_to_update
