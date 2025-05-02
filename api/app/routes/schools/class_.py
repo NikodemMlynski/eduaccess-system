@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends 
+from fastapi import APIRouter, Depends, Query
 from app.database import get_db 
 from ...crud.classes import ClassesCRUD
 from ...schemas import class_
 from ...role_checker import admin_only
 from app.models import User 
 from sqlalchemy.orm import Session 
-from typing import List
+from typing import List, Optional
 from ...oauth2 import school_checker, get_current_user
 
 router = APIRouter(
@@ -30,11 +30,16 @@ def create_class(
 def get_all_classes(
     school_id: int,
     db: Session = Depends(get_db),
-    school_checker: User = Depends(school_checker)
+    school_checker: User = Depends(school_checker),
+    query: Optional[str] = Query(None, description="Search by class_name"),
+    limit: int = Query(5, ge=1, le=100, description="Result limit")
 ):
     return ClassesCRUD.get_all_classes(
         db=db,
-        school_id=school_id
+        school_id=school_id,
+        limit=limit,
+        query=query
+
     )
 
 @router.get("/{id}", response_model=class_.ClassOut, dependencies=[Depends(admin_only)])
