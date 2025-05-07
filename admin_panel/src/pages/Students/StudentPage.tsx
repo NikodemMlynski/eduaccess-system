@@ -1,11 +1,9 @@
 import Student from "@/components/features/Students/Student";
 import { useAuth } from "@/context/AuthProvider";
-import { useClass } from "@/hooks/classes";
+import {useClass} from "@/hooks/classes";
 import { useUser } from "@/hooks/users";
-import { IClass } from "@/types/Class";
 import { IStudent } from "@/types/Student";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom"
 
 const StudentPage = () => {

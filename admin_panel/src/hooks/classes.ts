@@ -8,10 +8,15 @@ export const CLASSES_KEYS = {
     year: (year: number) => [...CLASSES_KEYS.all, "year", year] as const,
 }
 
-export function useClasses(endpoint: string, token?: string, options = {}) {
+export function useClasses(endpoint: string, token?: string, options: {query?: string} = {}) {
+    const { query = "" } = options;
+    const params = new URLSearchParams();
+    if (query) params.append("query", query);
+    const url = `${API_URL}${endpoint}?${params.toString()}`;
+
     return useQuery<IClass[]>({
         queryKey: CLASSES_KEYS.all,
-        queryFn: () => fetcher<IClass[]>(`${API_URL}${endpoint}`, token),
+        queryFn: () => fetcher<IClass[]>(url, token),
         ...options,
     })
 }
@@ -95,10 +100,10 @@ export function useUpdateClass(school_id?: number, token?: string) {
 
 interface ClassStudentProps {
     studentId: number;
-    classId: number;
+    classId?: number;
 }
 
-export function useAssignStudentToClass(school_id: number, token?: string) {
+export function useAssignStudentToClass(school_id?: number, token?: string) {
     return useMutation({
         mutationFn: ({
             studentId,
@@ -109,7 +114,7 @@ export function useAssignStudentToClass(school_id: number, token?: string) {
 }
 
 
-export function useRemoveStudentsFromClass(school_id: number, token?: string) {
+export function useRemoveStudentsFromClass(school_id?: number, token?: string) {
     return useMutation({
         mutationFn: ({
             studentId,
