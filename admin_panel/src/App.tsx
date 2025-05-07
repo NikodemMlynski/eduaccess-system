@@ -17,6 +17,9 @@ import { AuthProvider } from './context/AuthProvider'
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools"
 import {ToastContainer} from "react-toastify";
 import StudentPage from './pages/Students/StudentPage'
+import ScheduleRoomPage from "@/pages/Schedules/ScheduleRoomPage.tsx";
+import ScheduleClassPage from "@/pages/Schedules/ScheduleClassPage.tsx";
+import ScheduleTeacherPage from "@/pages/Schedules/ScheduleTeacherPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -63,7 +66,24 @@ const router = createBrowserRouter(
             },
             {
               path: 'schedules',
-              element: <SchedulesPage/>
+              children: [
+                {
+                  index: true,
+                  element: <SchedulesPage/>
+                },
+                {
+                  path: 'rooms/:roomId',
+                  element: <ScheduleRoomPage/>
+                },
+                {
+                  path: 'classes/:classId',
+                  element: <ScheduleClassPage/>
+                },
+                {
+                  path: 'teachers/:teacherId',
+                  element: <ScheduleTeacherPage/>
+                }
+              ]
             },
             {
               path: 'teachers',
