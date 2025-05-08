@@ -122,7 +122,7 @@ class LessonTemplate(Base):
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False)
     teacher_id = Column(Integer, ForeignKey("teachers.id"), nullable=False)
     subject = Column(String, nullable=False)
-    weekday = Column(String, nullable=False)
+    weekday = Column(Integer, nullable=False)
     start_time = Column(String, nullable=False)
     end_time = Column(String, nullable=False)
     created_at = Column(DateTime, default=func.now(), nullable=False)
