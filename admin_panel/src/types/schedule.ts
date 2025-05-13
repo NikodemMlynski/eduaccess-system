@@ -24,7 +24,7 @@ export interface ILessonTemplateIn {
     end_time: string;
 }
 
-export interface ILesson {
+export interface ILessonInstance {
     id: number;
     date: Date;
     template_id: number;
@@ -38,7 +38,7 @@ export interface ILesson {
     updated_at: Date;
 }
 
-export interface ILessonIn {
+export interface ILessonInstanceIn {
     date: Date;
     template_id: number;
     class_id: number;

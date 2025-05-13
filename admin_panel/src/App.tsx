@@ -20,6 +20,9 @@ import StudentPage from './pages/Students/StudentPage'
 import ScheduleRoomPage from "@/pages/Schedules/ScheduleRoomPage.tsx";
 import ScheduleClassPage from "@/pages/Schedules/ScheduleClassPage.tsx";
 import ScheduleTeacherPage from "@/pages/Schedules/ScheduleTeacherPage.tsx";
+import LessonInstanceTeacherPage from "@/pages/Schedules/LessonInstanceTeacherPage.tsx";
+import LessonInstanceClassPage from "@/pages/Schedules/LessonInstanceClassPage.tsx";
+import LessonInstanceRoomPage from "@/pages/Schedules/LessonInstanceRoomPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -82,7 +85,19 @@ const router = createBrowserRouter(
                 {
                   path: 'teachers/:teacherId',
                   element: <ScheduleTeacherPage/>
-                }
+                },
+                {
+                  path: 'teachers/:teacherId/dateStr/:dateStr',
+                  element: <LessonInstanceTeacherPage/>
+                },
+                {
+                  path: 'classes/:classId/dateStr/:dateStr',
+                  element: <LessonInstanceClassPage/>
+                },
+                {
+                  path: 'rooms/:roomId/dateStr/:dateStr',
+                  element: <LessonInstanceRoomPage/>
+                },
               ]
             },
             {
