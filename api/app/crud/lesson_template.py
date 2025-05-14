@@ -19,6 +19,11 @@ class LessonTemplatesCRUD:
             lesson_template_data: lesson_template.LessonTemplateIn,
             id: int = None,
     ):
+        if lesson_template_data.weekday < 0 or lesson_template_data.weekday > 4:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Weekday must be between 0 and 4",
+            )
         start_time_hours = int(lesson_template_data.start_time.split(":")[0])
         start_time_minutes = int(lesson_template_data.start_time.split(":")[1])
         end_time_hours = int(lesson_template_data.end_time.split(":")[0])
