@@ -26,7 +26,6 @@ export interface ILessonTemplateIn {
 
 export interface ILessonInstance {
     id: number;
-    date: Date;
     template_id: number;
     class: IClass;
     room: IRoom;
@@ -39,7 +38,6 @@ export interface ILessonInstance {
 }
 
 export interface ILessonInstanceIn {
-    date: Date;
     template_id: number;
     class_id: number;
     room_id: number;
