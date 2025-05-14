@@ -13,15 +13,17 @@ router = APIRouter(
     tags=["lesson_instances"],
 )
 
-@router.post("/generate",  response_model=List[lesson_instance.LessonInstanceOut])
+@router.post("/generate/weeks_ahead/{weeks_ahead}",  response_model=List[lesson_instance.LessonInstanceOut])
 def generate_lessons_from_template(
         school_id: int,
         db: Session = Depends(get_db),
         school_checker: User = Depends(school_checker),
+        weeks_ahead: int = 0,
 ):
     return LessonInstancesCRUD.generate_lessons_from_lesson_template_for_week(
         school_id=school_id,
         db=db,
+        weeks_ahead=weeks_ahead,
     )
 
 @router.post("/", response_model=lesson_instance.LessonInstanceOut, dependencies=[Depends(admin_only)])

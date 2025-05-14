@@ -172,9 +172,10 @@ class LessonInstancesCRUD:
     def generate_lessons_from_lesson_template_for_week(
             school_id: int,
             db: Session,
+            weeks_ahead: int
     ):
         today = datetime.utcnow()
-        monday = today + timedelta(days=14-today.weekday())
+        monday = today + timedelta(days=(7 + (weeks_ahead * 7))-today.weekday())
         monday = monday.replace(hour=0, minute=0)
 
         # pobranie wszystkich klas
@@ -194,13 +195,15 @@ class LessonInstancesCRUD:
             end_time_hours, end_time_minutes = lesson_template.end_time.split(":")
             start_time = monday + timedelta(days=lesson_template.weekday, hours=int(start_time_hours), minutes=int(start_time_minutes))
             end_time = monday + timedelta(days=lesson_template.weekday, hours=int(end_time_hours), minutes=int(end_time_minutes))
+            start_week_border = monday
+            end_week_border = monday + timedelta(days=monday.weekday() + 5)
+
             existing_lesson_instances = db.query(LessonInstance).filter(
                 and_(
                 LessonInstance.class_id == lesson_template.class_id,
-                # LessonInstance.start_time >= start_time,
-                # LessonInstance.end_time <= end_time,
+                LessonInstance.start_time >= start_week_border,
+                LessonInstance.end_time <= end_week_border,
                 LessonInstance.teacher_id == lesson_template.teacher_id,
-                # LessonInstance.subject == lesson_template.subject,
                 LessonInstance.room_id == lesson_template.room_id,
                 )
             ).all()
