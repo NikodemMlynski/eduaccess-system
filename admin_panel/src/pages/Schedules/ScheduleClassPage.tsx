@@ -7,7 +7,6 @@ const ScheduleClassPage = () => {
     const scheduleTemplateLessons = getScheduleForClass(Number(classId));
     return (
         <div>
-            <h1>Schedule for class: {classId}</h1>
             <ScheduleTemplate schedules={scheduleTemplateLessons} />
         </div>
     )

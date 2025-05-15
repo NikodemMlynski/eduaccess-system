@@ -7,7 +7,6 @@ const ScheduleTeacherPage = () => {
     const scheduleTemplateLessons = getScheduleForTeacher(Number(teacherId));
     return (
         <div>
-            <h1>Schedule for teacher: {teacherId}</h1>
             <ScheduleTemplate schedules={scheduleTemplateLessons} />
         </div>
     )

@@ -7,7 +7,6 @@ const ScheduleRoomPage = () => {
     const templateScheduleLessons = getScheduleForRoom(Number(roomId));
     return (
         <div>
-            <h1>Schedule for room: {roomId}</h1>
             <ScheduleTemplate schedules={templateScheduleLessons} />
         </div>
     )

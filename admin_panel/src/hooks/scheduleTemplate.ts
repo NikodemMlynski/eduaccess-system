@@ -3,7 +3,7 @@ import {IClass} from "@/types/Class.ts";
 import {IRoom} from "@/types/rooms.ts";
 import {ITeacher} from "@/types/Teacher.ts";
 
-// const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+export const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const classes: IClass[] = [
     {
         id: 1,

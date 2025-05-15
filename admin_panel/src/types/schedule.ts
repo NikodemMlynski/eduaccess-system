@@ -46,12 +46,3 @@ export interface ILessonInstanceIn {
     start_time: Date;
     end_time: Date;
 }
-
-export interface ILessonTemplateDay {
-
-  day: string;
-  subject: string;
-  teacher: string | number;
-  classroom: string;
-  lessonNumber: number; 
-}
