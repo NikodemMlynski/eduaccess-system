@@ -460,3 +460,103 @@ def test_delete_lesson_instance_not_found(
 
     res = client.delete(f"/school/{school_id}/lesson_instances/999")
     assert res.status_code == 404
+
+import pytest
+from datetime import datetime, timedelta
+
+def test_generate_lessons_from_template_success(
+    authorized_admin_client,
+    session,
+    lesson_template_factory,
+    room_factory,
+    user_factory,
+    classes_factory
+):
+    school, client = authorized_admin_client
+    school_id = school.id
+    room = room_factory(school_id=school_id)
+    teacher = user_factory(school_id=school_id, role="teacher", email="teacher@example.com")
+    klass = classes_factory(school_id=school_id, class_name="4D")
+
+    lesson_template_factory(
+        school_id=school_id,
+        room_id=room.id,
+        teacher_id=teacher.id,
+        class_id=klass.id,
+        start_time="08:00",
+        end_time="08:45",
+        subject="math",
+        weekday=0
+    )
+
+    res = client.post(f"/school/{school_id}/lesson_instances/generate/weeks_ahead/0")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data) == 1
+    assert data[0]["subject"] == "math"
+    assert data[0]["class_"]["class_name"] == "4D"
+
+
+def test_generate_lessons_from_template_no_templates(
+    authorized_admin_client,
+    session,
+    classes_factory
+):
+    school, client = authorized_admin_client
+    school_id = school.id
+    classes_factory(school_id=school_id, class_name="4D")
+
+    res = client.post(f"/school/{school_id}/lesson_instances/generate/weeks_ahead/0")
+    assert res.status_code == 400
+    assert "There are no lessons instances to forward" in res.text
+
+
+def test_generate_lessons_from_template_duplicate_avoidance(
+    authorized_admin_client,
+    session,
+    lesson_template_factory,
+    lesson_instance_factory,
+    room_factory,
+    user_factory,
+    classes_factory
+):
+    school, client = authorized_admin_client
+    school_id = school.id
+    room = room_factory(school_id=school_id)
+    teacher = user_factory(school_id=school_id, role="teacher", email="teacher@example.com")
+    klass = classes_factory(school_id=school_id, class_name="4D")
+
+    template = lesson_template_factory(
+        school_id=school_id,
+        room_id=room.id,
+        teacher_id=teacher.id,
+        class_id=klass.id,
+        start_time="08:00",
+        end_time="08:45",
+        subject="math",
+        weekday=0
+    )
+
+    today = datetime.utcnow()
+    monday = today + timedelta(days=(7 - today.weekday()))
+    lesson_instance_factory(
+        template_id=template.id,
+        class_id=klass.id,
+        room_id=room.id,
+        teacher_id=teacher.id,
+        subject="math",
+        start_time=monday.replace(hour=8, minute=0),
+        end_time=monday.replace(hour=8, minute=45)
+    )
+
+    res = client.post(f"/school/{school_id}/lesson_instances/generate/weeks_ahead/0")
+    assert res.status_code == 400
+    assert "There are no lessons instances to forward" in res.text
+
+
+def test_generate_lessons_from_template_unauthorized(client, school_admin_factory):
+    school, _, _ = school_admin_factory()
+    school_id = school.id
+
+    res = client.post(f"/school/{school_id}/lesson_instances/generate/weeks_ahead/0")
+    assert res.status_code == 403
