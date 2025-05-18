@@ -4,6 +4,7 @@ import ScheduleTemplate from "@/components/features/Schedules/ScheduleTemplate.t
 import {useAuth} from "@/context/AuthProvider.tsx";
 import {Loader2} from "lucide-react";
 import {useClass} from "@/hooks/classes.ts";
+import LessonTemplateFormModal from "@/components/features/Schedules/modals/LessonTemplateFormModal.tsx";
 import {Button} from "@/components/ui/button.tsx";
 
 const ScheduleClassPage = () => {
@@ -15,6 +16,7 @@ const ScheduleClassPage = () => {
         token || "",
         Number(classId)
     )
+
     const {data: class_data, isLoading: classesIsLoading, isError: classesIsError, error: classError} = useClass(`school/${user?.school_id}/classes`, Number(classId), token || "");
 
     if (isLoading || classesIsLoading) {
@@ -32,7 +34,9 @@ const ScheduleClassPage = () => {
     return (
         <div className="overflow-auto px-4 py-2">
             <div>
-                <Button>Add new lesson</Button>
+                <LessonTemplateFormModal class_id={Number(classId)}>
+                    <Button variant="default">Add new lesson</Button>
+                </LessonTemplateFormModal>
              <h1 className="text-4xl font-semibold text-center mb-10">{class_data?.class_name}</h1>
             </div>
              <ScheduleTemplate schedules={data || []} />

@@ -4,7 +4,7 @@ import {ITeacher} from "@/types/Teacher.ts";
 
 export interface ILessonTemplate {
     id: number;
-    class: IClass;
+    class_: IClass;
     room: IRoom;
     teacher: ITeacher;
     subject: string;
@@ -27,7 +27,7 @@ export interface ILessonTemplateIn {
 export interface ILessonInstance {
     id: number;
     template_id: number;
-    class: IClass;
+    class_: IClass;
     room: IRoom;
     teacher: ITeacher;
     subject: string;
