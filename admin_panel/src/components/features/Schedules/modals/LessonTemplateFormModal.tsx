@@ -39,23 +39,32 @@ const lessonTemplateSchema = z.object({
 type LessonTemplateFormData = z.infer<typeof lessonTemplateSchema>;
 
 interface LessonTemplateFormModalProps {
-  class_id?: number;
-  room_id?: number;
-  teacher_id?: number;
+  class_?: {
+      classId?: number;
+      className?: string;
+  };
+  room?: {
+      roomId?: number;
+      roomName?: string;
+  };
+  teacher?: {
+      teacherId?: number;
+      fullName?: string;
+  }
   lessonTemplateData?: ILessonTemplate;
   children: ReactNode
 }
 
 export default function LessonTemplateFormModal({
-    class_id,
-    room_id,
-    teacher_id,
+    class_,
+    room,
+    teacher,
     lessonTemplateData,
     children
 }: LessonTemplateFormModalProps) {
   const {user, token} = useAuth();
-  const id = class_id ? class_id : room_id ? room_id : teacher_id ? teacher_id : 0;
-  const type = class_id ? "classes" : room_id ? "rooms" : teacher_id ? "teachers" : "classes";
+  const id = class_?.classId ? class_?.classId : room?.roomId ? room?.roomId : teacher?.teacherId ? teacher?.teacherId : 0;
+  const type = class_?.classId ? "classes" : room?.roomId ? "rooms" : teacher?.teacherId ? "teachers" : "classes";
   const createScheduleTemplateMutation = useCreateScheduleTemplate(
       `school/${user?.school_id}/lesson_templates`,
       type,
@@ -101,9 +110,9 @@ export default function LessonTemplateFormModal({
   } = useForm<LessonTemplateFormData>({
     resolver: zodResolver(lessonTemplateSchema),
     defaultValues: {
-      class_id,
-      room_id,
-      teacher_id,
+      class_id: class_?.classId,
+      room_id: room?.roomId,
+      teacher_id: teacher?.teacherId,
       ...formattedLessonTemplateData
     }
   });
@@ -145,21 +154,21 @@ export default function LessonTemplateFormModal({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add lesson template
+          <DialogTitle>{lessonTemplateData ? "Update" : "Add"} lesson template
             {
-              class_id && ` for class ${class_id}`
+              class_?.classId && ` for class ${class_?.className}`
             }
             {
-              room_id && ` for room ${room_id}`
+              room?.roomId && ` for room ${room?.roomName}`
             }
             {
-              teacher_id && ` for teacher ${teacher_id}`
+              teacher?.teacherId && ` for teacher ${teacher?.fullName}`
             }
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {
-            !class_id && (
+            !class_?.classId && (
                 <LessonTemplateSelect
                     isLoading={isClassesLoading}
                     isError={isClassesError}
@@ -182,7 +191,7 @@ export default function LessonTemplateFormModal({
               )
           }
           {
-            !room_id && (
+            !room?.roomId && (
                 <LessonTemplateSelect
                     isLoading={isRoomsLoading}
                     isError={isRoomsError}
@@ -205,7 +214,7 @@ export default function LessonTemplateFormModal({
               )
           }
           {
-            !teacher_id && (
+            !teacher?.teacherId && (
                 <LessonTemplateSelect
                     isLoading={isTeachersLoading}
                     isError={isTeachersError}

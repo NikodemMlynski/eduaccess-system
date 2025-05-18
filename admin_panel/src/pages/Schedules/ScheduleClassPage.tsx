@@ -17,7 +17,7 @@ const ScheduleClassPage = () => {
         Number(classId)
     )
 
-    const {data: class_data, isLoading: classesIsLoading, isError: classesIsError, error: classError} = useClass(`school/${user?.school_id}/classes`, Number(classId), token || "");
+    const {data: classData, isLoading: classesIsLoading, isError: classesIsError, error: classError} = useClass(`school/${user?.school_id}/classes`, Number(classId), token || "");
 
     if (isLoading || classesIsLoading) {
         return <Loader2 className="animate-spin w-10 h-10" />
@@ -30,14 +30,16 @@ const ScheduleClassPage = () => {
         console.log();
         return <p>{classError.message}</p>
     }
-    console.log(class_data);
     return (
         <div className="overflow-auto px-4 py-2">
             <div>
-                <LessonTemplateFormModal class_id={Number(classId)}>
+                <LessonTemplateFormModal class_={{
+                    classId: classData?.id,
+                    className: classData?.class_name
+                }}>
                     <Button variant="default">Add new lesson</Button>
                 </LessonTemplateFormModal>
-             <h1 className="text-4xl font-semibold text-center mb-10">{class_data?.class_name}</h1>
+             <h1 className="text-4xl font-semibold text-center mb-10">{classData?.class_name}</h1>
             </div>
              <ScheduleTemplate schedules={data || []} />
         </div>
