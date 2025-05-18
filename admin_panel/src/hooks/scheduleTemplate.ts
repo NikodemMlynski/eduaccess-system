@@ -42,7 +42,7 @@ export function useDeleteScheduleTemplate(
     ) {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id: number) =>
+        mutationFn: (id?: number) =>
             deleteFetcher(`${API_URL}${endpoint}/${id}`, token),
         onSuccess: () => queryClient.invalidateQueries(
             ["scheduleTemplates", endpoint, token, type, id]
