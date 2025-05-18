@@ -1,6 +1,7 @@
 import {ILessonTemplate} from "@/types/schedule";
 import {weekdays} from "@/hooks/scheduleTemplate.ts";
 import {SquarePen} from "lucide-react";
+import LessonTemplateFormModal from "@/components/features/Schedules/modals/LessonTemplateFormModal.tsx";
 
 interface SchedulesProps {
   schedules: ILessonTemplate[];
@@ -16,6 +17,7 @@ function timeToMinutes(time: string): number {
 }
 
 export default function ScheduleTemplate({ schedules }: SchedulesProps) {
+  console.log(schedules);
   const hoursRange: IHoursRange[] = []
   for (const lesson of schedules) {
     const hourFound = hoursRange.find((hour) => hour.start_time === lesson.start_time || hour.end_time === lesson.end_time)
@@ -26,19 +28,21 @@ export default function ScheduleTemplate({ schedules }: SchedulesProps) {
   const sortedHoursRange = hoursRange.sort((a, b) => timeToMinutes(a.start_time) - timeToMinutes(b.start_time));
 
   const formattedLessons = sortedHoursRange.map((hour) => {
-    const lessonForHours = schedules.filter((item) => item.start_time === hour.start_time && item.end_time === hour.end_time)
+    const lessonForHours = schedules
+        .filter((item) => item.start_time === hour.start_time && item.end_time === hour.end_time)
+        .sort((a, b) => a.weekday - b.weekday)
+    console.log(lessonForHours);
     let lessonIndex = 0;
     return weekdays.map((_, index) => {
       if (lessonIndex == lessonForHours.length) return null
+      console.log(lessonForHours[lessonIndex])
       const lesson = lessonForHours[lessonIndex].weekday === index ? lessonForHours[lessonIndex] : null
       if (lesson) lessonIndex ++;
+      console.log(lessonIndex);
       return lesson;
     });
   })
-
-  const handleEditButtonClick = () => {
-    alert("Tutaj powinien się wyświetlić modal z możliwością edycji tej lekcji, bądź jej usunięcia, trzeba zrobić to w taki sposób aby jedną funkcją updateować plan dla klas, nauczycieli oraz sal. Żeby domyślnie zapisywało dane klasy którą wybrałeś i nie pokazywało jej już w formularzu tak samo z nauczycielami i salami")
-  }
+  console.log(formattedLessons)
 
   return (
          <div className="flex flex-wrap justify-around">
@@ -81,7 +85,9 @@ export default function ScheduleTemplate({ schedules }: SchedulesProps) {
                            <div className="text-xs text-gray-500">
                              {lesson.room.room_name}
                            </div>
-                              <SquarePen onClick={handleEditButtonClick} className="p-1 h-6 w-6 absolute top-2 right-2 cursor-pointer" />
+                              <LessonTemplateFormModal key={`${lesson?.id}-${hourIdx}-${idx}`} lessonTemplateData={lesson}>
+                                <SquarePen className="p-1 h-6 w-6 absolute top-2 right-2 cursor-pointer" />
+                              </LessonTemplateFormModal>
                          </div>
                        ) : (
                          "-"
