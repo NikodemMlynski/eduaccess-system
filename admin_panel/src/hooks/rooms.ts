@@ -18,6 +18,15 @@ export const ROOM_KEYS = {
     query: (query: string) => [...ROOM_KEYS.all, "query", query] as const,
 };
 
+export function useRoom(endpoint: string, id?: number | null, token?: string) {
+    const url = `${API_URL}${endpoint}/rooms/${id}`;
+    return useQuery<IRoom>({
+        queryKey: ["rooms", endpoint, token, id],
+        queryFn: () => fetcher<IRoom>(url, token),
+
+    })
+}
+
 export function useRooms<T>(
     endpoint: string,
     token?: string,
