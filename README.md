@@ -144,3 +144,14 @@ Uruchom aplikacje
 ```
 npm run dev
 ```
+
+### Migracje bazy danych
+utworzenie migracji
+```
+poetry run alembic revision --autogenerate -m "opis migracji"
+```
+zaaktualizowanie migracji
+```
+poetry run alembic upgrade head
+poetry run alembic -x test=true -c alembic_test.ini upgrade head
+```
