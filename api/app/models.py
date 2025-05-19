@@ -135,7 +135,7 @@ class LessonTemplate(Base):
 class LessonInstance(Base):
     __tablename__ = "lesson_instances"
     id = Column(Integer, primary_key=True, nullable=False)
-    template_id = Column(Integer, ForeignKey("lesson_templates.id"), nullable=False)
+    template_id = Column(Integer, ForeignKey("lesson_templates.id", ondelete="SET NULL"), nullable=True)
     class_id = Column(Integer, ForeignKey("classes.id"), nullable=False)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False)
     teacher_id = Column(Integer, ForeignKey("teachers.id"), nullable=False)

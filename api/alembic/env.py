@@ -13,7 +13,7 @@ config = context.config
 is_test = context.get_x_argument(as_dictionary=True).get("test", "false") == "true"
 config.set_main_option(
     "sqlalchemy.url",
-    settings.test_database_url if is_test else settings.database_url
+    settings.test_database_url.replace('%', '%%') if is_test else settings.database_url.replace('%', '%%')
 )
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
