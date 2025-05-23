@@ -6,7 +6,7 @@ from .room import RoomOut
 
 class LessonInstanceOut(BaseModel):
     id: int
-    template_id: int
+    template_id: int | None
     class_: ClassOut
     room: RoomOut
     teacher: TeacherOut
