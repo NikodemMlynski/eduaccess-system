@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from app.database import get_db
 from ...crud.lesson_template import LessonTemplatesCRUD
+
 from typing import List
-from ...schemas import lesson_template, utils
+from ...schemas import lesson_template, utils, lesson_instance
 from sqlalchemy.orm import Session
 from app.role_checker import admin_only
 from ...oauth2 import school_checker

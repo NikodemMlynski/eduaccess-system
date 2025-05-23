@@ -8,10 +8,25 @@ from app.role_checker import admin_only
 from ...oauth2 import school_checker
 from ...models import User
 from app import utils
+
 router = APIRouter(
     prefix="/lesson_instances",
     tags=["lesson_instances"],
 )
+
+@router.post("/generate/weeks_ahead/{weeks_ahead}",  response_model=List[lesson_instance.LessonInstanceOut], dependencies=[Depends(admin_only)])
+def generate_lessons_from_template(
+        school_id: int,
+        db: Session = Depends(get_db),
+        weeks_ahead: int = 0,
+        school_checker: User = Depends(school_checker),
+):
+    return LessonInstancesCRUD.generate_lessons_from_lesson_template_for_week(
+        school_id=school_id,
+        db=db,
+        weeks_ahead=weeks_ahead,
+    )
+
 @router.post("/", response_model=lesson_instance.LessonInstanceOut, dependencies=[Depends(admin_only)])
 def create_lesson_instance(
     school_id: int,
