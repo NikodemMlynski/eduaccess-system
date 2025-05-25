@@ -21,6 +21,7 @@ const LessonInstanceTimeInput = ({
 }: ILessonInstanceTimeInputProps) => {
     const [localTime, setLocalTime] = useState(time || "");
     const [localDate, setLocalDate] = useState<Date | null>(date || null);
+
     useEffect(() => {
         setTimeAndDate(identifier, localTime, localDate);
     }, [time, date, identifier, localDate, localTime])

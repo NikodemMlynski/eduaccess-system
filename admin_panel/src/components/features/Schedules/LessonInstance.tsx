@@ -8,6 +8,7 @@ import {useDeleteLessonInstance} from "@/hooks/scheduleLesson.ts";
 import {useAuth} from "@/context/AuthProvider.tsx";
 import {toast} from "react-toastify";
 import LessonInstanceFormModal from "@/components/features/Schedules/modals/LessonInstanceFormModal.tsx";
+import {formatLocalDate} from "@/components/utils/functions.ts";
 
 interface ILessonInstanceProps {
     lesson: ILessonInstance;
@@ -16,6 +17,7 @@ interface ILessonInstanceProps {
 const LessonInstance = ({
     lesson
 }: ILessonInstanceProps) => {
+    const now = formatLocalDate(new Date());
     const {user, token} = useAuth();
     const [confirmInput, setConfirmInput] = useState("");
     const deleteLessonMutation= useDeleteLessonInstance(
@@ -37,7 +39,12 @@ const LessonInstance = ({
     return (
         <Card
           key={lesson.id}
-          className="w-full flex justify-between flex-col gap-1 px-6 pr-8 py-1 relative"
+          className={`w-full flex justify-between flex-col gap-1 px-6 pr-8 py-1 relative
+          ${lesson.end_time < now ? "opacity-80" : "bg-white"}
+          ${lesson.start_time <= now && lesson.end_time >= now ? "bg-green-100" : "bg-white"}
+          ${lesson.start_time <= now && lesson.end_time >= now ? "border-green-500" : "border-gray-200"}
+          ${lesson.start_time <= now && lesson.end_time >= now ? "text-green-950" : "text-gray-800"}
+          `}
         >
             <h3 className="text-lg font-semibold indent-4 cursor-pointer"
 

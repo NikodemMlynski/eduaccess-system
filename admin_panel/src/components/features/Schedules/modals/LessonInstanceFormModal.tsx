@@ -1,6 +1,6 @@
 import {z} from "zod";
 import {ILessonInstance, ILessonInstanceIn} from "@/types/schedule.ts";
-import {ReactNode, useState} from "react";
+import {ReactNode, useEffect, useState} from "react";
 import {
     Dialog,
     DialogContent,
@@ -25,20 +25,13 @@ import LessonInstanceTimeInput from "@/components/features/Schedules/modals/Inpu
 import {format} from "date-fns";
 import {Button} from "@/components/ui/button.tsx";
 import {toast} from "react-toastify";
+import {formatLocalDate} from "@/components/utils/functions.ts";
 
-function formatLocalDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // miesiące od 0
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-}
+
 
 
 const lessonInstanceSchema = z.object({
-    template_id: z.coerce.number().min(1, "Template ID is required"),
+    template_id: z.coerce.number().optional().nullable(),
     class_id: z.coerce.number().min(1, "Class ID is required"),
     room_id: z.coerce.number().min(1, "Room ID is required"),
     teacher_id: z.coerce.number().min(1, "Teacher ID is required"),
@@ -62,6 +55,7 @@ interface LessonInstanceFormModalProps {
         teacherId?: number;
         fullName?: string;
     }
+    defaultDate: Date;
     lessonInstanceData?: ILessonInstance;
     children: ReactNode
 }
@@ -71,7 +65,8 @@ export default function LessonInstanceFormModal({
     room,
     teacher,
     lessonInstanceData,
-    children
+    children,
+    defaultDate
 }: LessonInstanceFormModalProps) {
     const [open, setOpen] = useState(false);
     return (
@@ -100,6 +95,7 @@ export default function LessonInstanceFormModal({
                     teacher={teacher}
                     lessonInstanceData={lessonInstanceData}
                     onClose={() => setOpen(false)}
+                    defaultDate={defaultDate}
                 />
             </DialogHeader>
 
@@ -113,7 +109,8 @@ const LesonInstanceInnerForm = ({
     room,
     teacher,
     lessonInstanceData,
-    onClose
+    onClose,
+    defaultDate
 }: Omit<LessonInstanceFormModalProps, "children"> & { onClose: () => void })=>  {
     const {user, token} = useAuth();
     const createLessonInstanceMutation = useCreateLessonInstance(
@@ -152,6 +149,7 @@ const LesonInstanceInnerForm = ({
         end_time: lessonInstanceData?.end_time,
     } : null;
     const {
+        watch,
         register,
         handleSubmit,
         formState: { errors },
@@ -160,12 +158,16 @@ const LesonInstanceInnerForm = ({
     } = useForm<LessonInstanceFormData>({
         resolver: zodResolver(lessonInstanceSchema),
         defaultValues: {
+            template_id: null,
             class_id: class_?.classId,
             room_id: room?.roomId,
             teacher_id: teacher?.teacherId,
             ...formattedLessonInstanceData
         }
     })
+    // useEffect(() => {
+    //     console.log(watch());
+    // }, [])
 
     const handleTimeChange = (identifier: "start_time" | "end_time", time: string, date: Date | null) => {
         if (!date) return;
@@ -176,15 +178,16 @@ const LesonInstanceInnerForm = ({
         setValue(identifier, formated);
     }
     const onSubmit = (data: LessonInstanceFormData) => {
+        console.log("Submitted data:", data);
         if(lessonInstanceData) {
             const start_time = new Date(data.start_time);
             console.log(start_time.toLocaleString())
-            const formatedData = {
+            const formattedData = {
                 ...data,
                 start_time: formatLocalDate(new Date(data.start_time)),
                 end_time: formatLocalDate(new Date(data.end_time)),
             }
-            updateLessonInstanceMutation.mutate(formatedData, {
+            updateLessonInstanceMutation.mutate(formattedData, {
                 onSuccess: () => {
                     toast.success("Lesson instance updated successfully");
                     onClose();
@@ -196,7 +199,13 @@ const LesonInstanceInnerForm = ({
             })
             console.log(data);
         } else {
-            createLessonInstanceMutation.mutate(data, {
+            console.log("wowoluj se")
+            const formattedData = {
+                ...data,
+                start_time: formatLocalDate(new Date(data.start_time)),
+                end_time: formatLocalDate(new Date(data.end_time)),
+            }
+            createLessonInstanceMutation.mutate(formattedData, {
                 onSuccess: () => {
                 toast.success("Lesson template created successfully");
                 onClose();
@@ -286,13 +295,13 @@ const LesonInstanceInnerForm = ({
                 <LessonInstanceTimeInput
                     identifier={"start_time"}
                     time={format(new Date(lessonInstanceData?.start_time || 0), "HH:mm")}
-                    date={new Date(lessonInstanceData?.start_time || 0)}
+                    date={lessonInstanceData ? (new Date(lessonInstanceData?.start_time || 0)) : defaultDate}
                     setTimeAndDate={handleTimeChange}
                 />
                 <LessonInstanceTimeInput
                     identifier={"end_time"}
                     time={format(new Date(lessonInstanceData?.end_time || 0), "HH:mm")}
-                    date={new Date(lessonInstanceData?.end_time || 0)}
+                    date={lessonInstanceData ? (new Date(lessonInstanceData?.end_time || 0)) : defaultDate}
                     setTimeAndDate={handleTimeChange}
                 />
             </div>
