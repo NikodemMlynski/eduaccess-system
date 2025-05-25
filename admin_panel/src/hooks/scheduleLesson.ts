@@ -61,3 +61,18 @@ export function useUpdateLessonInstance(
         )
     })
 }
+
+export function useGenerateLessonInstancesFromTemplates(
+    endpoint: string,
+    weeksAhead: number = 0,
+    token?: string,
+) {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: () =>
+            postFethcer(`${API_URL}${endpoint}/generate/weeks_ahead/${weeksAhead}`,{}, token),
+        onSuccess: () => queryClient.invalidateQueries(
+            ["lessonInstances"]
+        )
+    })
+}
