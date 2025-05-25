@@ -119,7 +119,11 @@ const LessonTemplateInnerForm = ({
   )
   const {data: rooms, isLoading: isRoomsLoading, isError: isRoomsError} = useRooms<IRoom>(
       `school/${user?.school_id}/rooms`,
-      token || ""
+      token || "",
+       {
+            paginated: true,
+            limit: 100,
+       }
   )
   const {data: classes, isLoading: isClassesLoading, isError: isClassesError} = useClasses(
       `school/${user?.school_id}/classes`,
@@ -129,7 +133,11 @@ const LessonTemplateInnerForm = ({
   const {data: teachers, isLoading: isTeachersLoading, isError: isTeachersError} = useUsers<ITeacher>(
       `school/${user?.school_id}/teachers`,
       token || "",
-      "teacher"
+      "teacher",
+       {
+            paginated: true,
+            limit: 100,
+       }
   )
     const formattedLessonTemplateData: ILessonTemplateIn | null = lessonTemplateData ? {
         class_id: lessonTemplateData.class_.id,

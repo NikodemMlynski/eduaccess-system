@@ -32,6 +32,10 @@ export function SchedulesPage() {
     const {data: rooms, isLoading: isRoomsLoading, isError: isRoomsError} = useRooms<IRoom>(
         `school/${user?.school_id}/rooms`,
         token || "",
+        {
+            paginated: true,
+            limit: 100,
+        }
     )
     const {
         data: classes,
@@ -41,7 +45,11 @@ export function SchedulesPage() {
     const {data: teachers, isLoading: isTeachersLoading, isError: isTeachersError} = useUsers<ITeacher>(
         `school/${user?.school_id}/teachers`,
         token || "",
-        "teacher"
+        "teacher",
+        {
+            paginated: true,
+            limit: 100,
+        }
     )
 
     const [lessonTemplateSearchValues, setLessonTemplateSearchValues] = useState<ILessonTemplateSearchValues>({
