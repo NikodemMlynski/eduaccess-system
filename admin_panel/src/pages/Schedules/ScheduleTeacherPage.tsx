@@ -2,7 +2,6 @@ import {useParams} from "react-router-dom";
 import ScheduleTemplate from "@/components/features/Schedules/ScheduleTemplate.tsx";
 import {useAuth} from "@/context/AuthProvider.tsx";
 import {useScheduleTemplates} from "@/hooks/scheduleTemplate.ts";
-import {useClass} from "@/hooks/classes.ts";
 import {Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import {useUser} from "@/hooks/users.ts";

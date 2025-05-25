@@ -29,7 +29,7 @@ export function useCreateScheduleTemplate(
         mutationFn: (data: ILessonTemplateIn) =>
             postFethcer(`${API_URL}${endpoint}`, data, token),
         onSuccess: () => queryClient.invalidateQueries(
-            ["scheduleTemplates", endpoint, token, type, id]
+            ["scheduleTemplates"]
         )
     })
 }
@@ -45,7 +45,7 @@ export function useDeleteScheduleTemplate(
         mutationFn: (id?: number) =>
             deleteFetcher(`${API_URL}${endpoint}/${id}`, token),
         onSuccess: () => queryClient.invalidateQueries(
-            ["scheduleTemplates", endpoint, token, type, id]
+            ["scheduleTemplates"]
         )
     })
 }
@@ -61,7 +61,7 @@ export function useUpdateScheduleTemplate(
         mutationFn: (data: ILessonTemplateIn)=>
             updateFetcher(`${API_URL}${endpoint}/${id}`, data, token),
         onSuccess: () => queryClient.invalidateQueries(
-            ["scheduleTemplates", endpoint, token, type, id]
+            ["scheduleTemplates"]
         )
     })
 }

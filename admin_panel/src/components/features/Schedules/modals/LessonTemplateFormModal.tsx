@@ -10,9 +10,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {ReactNode, useState} from "react";
 import {ILessonTemplate, ILessonTemplateIn} from "@/types/schedule.ts";
 import {useRooms} from "@/hooks/rooms.ts";
@@ -25,6 +23,7 @@ import LessonTemplateSelect from "@/components/features/Schedules/selecters/Less
 import {SelectItem} from "@/components/ui/select.tsx";
 import {useCreateScheduleTemplate, useUpdateScheduleTemplate, weekdays} from "@/hooks/scheduleTemplate.ts";
 import {toast} from "react-toastify";
+import {InputContainer} from "@/components/features/Schedules/modals/Inputs/InputContainer.tsx";
 
 const lessonTemplateSchema = z.object({
   class_id: z.coerce.number().min(1, "Class ID is required"),
@@ -62,7 +61,48 @@ export default function LessonTemplateFormModal({
     lessonTemplateData,
     children
 }: LessonTemplateFormModalProps) {
-  const {user, token} = useAuth();
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+          {
+              children
+          }
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>{lessonTemplateData ? "Update" : "Add"} lesson template
+            {
+              class_?.classId && ` for class ${class_?.className}`
+            }
+            {
+              room?.roomId && ` for room ${room?.roomName}`
+            }
+            {
+              teacher?.teacherId && ` for teacher ${teacher?.fullName}`
+            }
+          </DialogTitle>
+        </DialogHeader>
+        <LessonTemplateInnerForm
+            class_={class_}
+            room={room}
+            teacher={teacher}
+            lessonTemplateData={lessonTemplateData}
+            onClose={() => setOpen(false)}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const LessonTemplateInnerForm = ({
+    class_,
+    room,
+    teacher,
+    lessonTemplateData,
+    onClose
+}: Omit<LessonTemplateFormModalProps, "children"> & {onClose: () => void}) => {
+    const {user, token} = useAuth();
   const id = class_?.classId ? class_?.classId : room?.roomId ? room?.roomId : teacher?.teacherId ? teacher?.teacherId : 0;
   const type = class_?.classId ? "classes" : room?.roomId ? "rooms" : teacher?.teacherId ? "teachers" : "classes";
   const createScheduleTemplateMutation = useCreateScheduleTemplate(
@@ -91,7 +131,6 @@ export default function LessonTemplateFormModal({
       token || "",
       "teacher"
   )
-  const [open, setOpen] = useState(false);
     const formattedLessonTemplateData: ILessonTemplateIn | null = lessonTemplateData ? {
         class_id: lessonTemplateData.class_.id,
         room_id: lessonTemplateData.room.id,
@@ -122,50 +161,30 @@ export default function LessonTemplateFormModal({
         updateScheduleTemplateMutation.mutate(data, {
             onSuccess: () => {
                 toast.success("Lesson template updated successfully");
-                setOpen(false);
+                onClose();
                 reset();
             },
             onError: (error) => {
-                toast.error(error.message);
+                toast.error(error.message || "Failed to update lesson template");
             }
         })
     } else {
         createScheduleTemplateMutation.mutate(data, {
             onSuccess: () => {
                 toast.success("Lesson template created successfully");
-                setOpen(false);
+                onClose();
                 reset();
             },
             onError: (error) => {
-                toast.error(error.message);
+                toast.error(error.message || "Failed to create lesson template");
             }
         })
     }
-    setOpen(false);
+    onClose();
     reset();
   };
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-          {
-              children
-          }
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{lessonTemplateData ? "Update" : "Add"} lesson template
-            {
-              class_?.classId && ` for class ${class_?.className}`
-            }
-            {
-              room?.roomId && ` for room ${room?.roomName}`
-            }
-            {
-              teacher?.teacherId && ` for teacher ${teacher?.fullName}`
-            }
-          </DialogTitle>
-        </DialogHeader>
+    return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {
             !class_?.classId && (
@@ -263,32 +282,5 @@ export default function LessonTemplateFormModal({
             <Button type="submit">Zapisz</Button>
           </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-interface InputContainerProps {
-  register: any;
-  errors: any;
-  label: string;
-  name: keyof LessonTemplateFormData;
-}
-const InputContainer = ({
-    register,
-    errors,
-    name,
-    label,
-    ...props
-}: InputContainerProps) => {
-  return (
-       <div>
-          <Label className="pb-1" htmlFor={name}>{label}</Label>
-          <Input {...props} id={name} {...register(name)} />
-          {errors[name] && (
-            <p className="text-sm text-red-500 mt-1">
-              {errors[name]?.message as string}
-            </p>
-          )}
-        </div>
-  )
+    )
 }

@@ -1,5 +1,5 @@
 import {useParams} from "react-router-dom";
-import LessonInstance from "@/components/features/Schedules/LessonInstance.tsx";
+import LessonInstance from "@/components/features/Schedules/LessonInstances.tsx";
 import {useLessonInstance} from "@/hooks/scheduleLesson.ts";
 import {useAuth} from "@/context/AuthProvider.tsx";
 
