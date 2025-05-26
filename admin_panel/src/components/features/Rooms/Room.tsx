@@ -58,6 +58,7 @@ export default function Room({room}: RoomProps) {
                 setConfirmInput={setConfirmInput}
                 handleDelete={handleDelete}
                 valueToConfirm={room.room_name}
+                item_name="Room"
                 />
                 </div>
                 

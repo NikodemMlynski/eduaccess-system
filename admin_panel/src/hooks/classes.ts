@@ -4,22 +4,28 @@ import { deleteFetcher, fetcher, postFethcer, updateFetcher } from "./utils/fetc
 import { API_URL } from "@/config/constants"
 export const CLASSES_KEYS = {
     all: ["classes"] as const,
-    one: (id: number) => [...CLASSES_KEYS.all, id] as const,
+    one: (id?: number | null) => [...CLASSES_KEYS.all, id] as const,
     year: (year: number) => [...CLASSES_KEYS.all, "year", year] as const,
 }
 
-export function useClasses(endpoint: string, token?: string, options = {}) {
+export function useClasses(endpoint: string, token?: string, options: {query?: string} = {}) {
+    const { query = "" } = options;
+    const params = new URLSearchParams();
+    if (query) params.append("query", query);
+    const url = `${API_URL}${endpoint}?${params.toString()}`;
+
     return useQuery<IClass[]>({
         queryKey: CLASSES_KEYS.all,
-        queryFn: () => fetcher<IClass[]>(`${API_URL}${endpoint}`, token),
+        queryFn: () => fetcher<IClass[]>(url, token),
         ...options,
     })
 }
 
-export function useClass(endpoint: string, id: number, token?: string) {
+export function useClass(endpoint: string, id?: number | null, token?: string) {
     return useQuery<IClass>({
         queryKey: CLASSES_KEYS.one(id),
-        queryFn: () => fetcher(`${API_URL}${endpoint}/${id}`, token),
+        queryFn: () => {console.log('woluje sie');return fetcher(`${API_URL}${endpoint}/${id}`, token)},
+        enabled: !!id
     })
 }
 
@@ -94,10 +100,10 @@ export function useUpdateClass(school_id?: number, token?: string) {
 
 interface ClassStudentProps {
     studentId: number;
-    classId: number;
+    classId?: number;
 }
 
-export function useAssignStudentToClass(school_id: number, token?: string) {
+export function useAssignStudentToClass(school_id?: number, token?: string) {
     return useMutation({
         mutationFn: ({
             studentId,
@@ -108,7 +114,7 @@ export function useAssignStudentToClass(school_id: number, token?: string) {
 }
 
 
-export function useRemoveStudentsFromClass(school_id: number, token?: string) {
+export function useRemoveStudentsFromClass(school_id?: number, token?: string) {
     return useMutation({
         mutationFn: ({
             studentId,

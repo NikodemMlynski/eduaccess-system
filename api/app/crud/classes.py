@@ -3,6 +3,7 @@ from app.models import Class
 from app.schemas import class_ 
 from fastapi import HTTPException, status
 from sqlalchemy import and_
+from typing import Optional
 
 def check_class_name_correct(s):
     return (
@@ -45,9 +46,25 @@ class ClassesCRUD:
         return db_class
     
     @staticmethod 
-    def get_all_classes(db: Session, school_id: int):
-        classes = db.query(Class).filter(Class.school_id == school_id).all()
+    def get_all_classes(
+        db: Session,
+        school_id: int,
+        query: Optional[str] = None,
+        limit: int = 5,
+    ):
+        base_query = db.query(Class).filter(Class.school_id == school_id)
+
+        if query:
+            search = f"%{query.lower()}%"
+            base_query = base_query.filter(
+                Class.class_name.ilike(search)
+            )
+            classes = base_query.limit(limit).all()
+        else:
+            classes = base_query.all()
+
         return classes
+        
     
     @staticmethod
     def get_class_by_id(db: Session, school_id: int, id: int):

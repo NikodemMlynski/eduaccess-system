@@ -115,18 +115,37 @@ class Room(Base):
 
 # SCHEDULE
 
-class Schedule(Base):
-    __tablename__ = "schedule"
+class LessonTemplate(Base):
+    __tablename__ = "lesson_templates"
     id = Column(Integer, primary_key=True, nullable=False)
     class_id = Column(Integer, ForeignKey("classes.id"), nullable=False)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False)
     teacher_id = Column(Integer, ForeignKey("teachers.id"), nullable=False)
-    start_time = Column(DateTime, nullable=False)
-    end_time = Column(DateTime, nullable=False)
     subject = Column(String, nullable=False)
+    weekday = Column(Integer, nullable=False)
+    start_time = Column(String, nullable=False)
+    end_time = Column(String, nullable=False)
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     
+    class_ = relationship("Class")
+    room = relationship("Room")
+    teacher = relationship("Teacher")
+
+class LessonInstance(Base):
+    __tablename__ = "lesson_instances"
+    id = Column(Integer, primary_key=True, nullable=False)
+    template_id = Column(Integer, ForeignKey("lesson_templates.id"), nullable=False)
+    class_id = Column(Integer, ForeignKey("classes.id"), nullable=False)
+    room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False)
+    teacher_id = Column(Integer, ForeignKey("teachers.id"), nullable=False)
+    subject = Column(String, nullable=False)
+    start_time = Column(DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+
+    template = relationship("LessonTemplate")
     class_ = relationship("Class")
     room = relationship("Room")
     teacher = relationship("Teacher")
@@ -138,13 +157,13 @@ class Attendance(Base):
     __tablename__ = "attendances"
     id = Column(Integer, primary_key=True, nullable=False)
     student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
-    schedule_id = Column(Integer, ForeignKey("schedule.id"), nullable=False)
+    lesson_id = Column(Integer, ForeignKey("lesson_instances.id"), nullable=False)
     status = Column(status_enum, nullable=False)
     manual_adjustment = Column(Boolean, nullable=False)
     created_at = Column(DateTime, default=func.now(), nullable=False)
     
     student = relationship("Student")
-    schedule = relationship("Schedule")
+    lesson = relationship("LessonInstance")
 
 
 # ACCESS LOGS

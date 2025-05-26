@@ -5,7 +5,7 @@ import { fetcher } from "./utils/fetcher";
 
 export const USERS_KEYS = {
     users: (role?: Role) => ["users", role ? role : null] as const,
-    user: (id: number, role?: Role) => ["users", role ? role : null, id] as const,
+    user: (id?: number, role?: Role) => ["users", role ? role : null, id] as const,
 }
 
 export interface PaginatedParams {
@@ -19,7 +19,7 @@ export interface PaginatedResponse<T> {
     total_count: number;
     has_next_page: boolean;
 }
-type UpdateUserInput = {
+export type UpdateUserInput = {
     first_name: string;
     last_name: string;
     email: string;
@@ -53,7 +53,7 @@ export function useUsers<T>(
   }
 
   
-export function useUser<T>(endpoint: string, id: number, token?: string, role?: Role) {
+export function useUser<T>(endpoint: string, id?: number, token?: string, role?: Role) {
     return useQuery<T>({
         queryKey: USERS_KEYS.user(id, role), // tak samo,
         queryFn: () => fetcher<T>(`${API_URL}${endpoint}${id}`, token),

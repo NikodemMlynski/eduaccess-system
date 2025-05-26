@@ -123,6 +123,7 @@ Przejdź do katalogu `api` i uruchom
 ```
 cd api
 poetry install
+poetry add bcrypt // z jakiegoś powodu paczka nie instaluje się razem z innymi
 ```
 Uruchomienie servera fastapi 
 - Windows
