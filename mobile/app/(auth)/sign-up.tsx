@@ -4,6 +4,7 @@ import InputContainer from "@/components/forms/InputContainer"
 import {IUserIn} from "@/types/User";
 import {useCreateUser} from "@/hooks/users";
 import {Toast} from "toastify-react-native";
+import {useRouter} from "expo-router";
 
 interface IErrors {
     first_name?: string;
@@ -23,6 +24,7 @@ const initialUserValues = {
   }
 
 const SignUp = () => {
+    const router = useRouter();
   const createUserMutation = useCreateUser();
   const [form, setForm] = useState<IUserIn>(initialUserValues);
 
@@ -53,6 +55,7 @@ const SignUp = () => {
           Toast.success("Success message")
           console.log("tu musi być redirect jeszcze")
           setForm(initialUserValues);
+          router.push("/(auth)/sign-in")
         },
         onError: (err) => {
           Toast.error(err.message || "Failed to sign up")
@@ -63,7 +66,7 @@ const SignUp = () => {
 
   return (
     <ScrollView className="flex-1 bg-background px-6 py-8">
-      <Text className="text-white text-3xl font-bold mb-6 mt-[100px]">Utwórz konto</Text>
+      <Text className="text-white text-3xl font-bold mb-6 mt-[100px]">Sign Up</Text>
         <InputContainer<IUserIn>
             value={form.first_name}
             handleChange={handleChange}
@@ -121,7 +124,7 @@ const SignUp = () => {
         className="bg-primary py-3 rounded-xl mt-4"
       >
         <Text className="text-white text-center text-base font-medium">
-          Zarejestruj się
+          Sign up
         </Text>
       </TouchableOpacity>
     </ScrollView>
