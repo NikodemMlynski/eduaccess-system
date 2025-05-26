@@ -103,6 +103,27 @@ def test_invalid_super_admin_code_action(client):
 # ------------------------------
 # TESTY POBIERANIA WSZYSTKICH ADMINÓW: GET /admins/
 # ------------------------------
+
+def test_get_school_by_id_unauthorized(client):
+    res = client.get(f"/school/1")
+    assert res.status_code in (401, 403)
+
+def test_get_school_by_id_admin_does_not_belong_to(authorized_admin_client):
+    school, client = authorized_admin_client
+
+    res = client.get(f"/school/999")
+    assert res.status_code == 403
+
+
+def test_get_school_by_id(client, authorized_admin_client):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    res = client.get(f"/school/{school_id}")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id"] == school_id
+
 def test_get_all_schools_empty(client):
     res = client.get(f"/super_admin/{settings.super_admin_code}/schools")
     assert res.status_code == 200
@@ -131,3 +152,5 @@ def test_get_all_schools(client, school_admin_factory):
     assert len(data) == 2
     assert data[0]["name"] in ("School 1", "School 2")
     assert data[1]["name"] in ("School 1", "School 2")
+
+
