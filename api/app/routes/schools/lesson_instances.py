@@ -8,6 +8,7 @@ from app.role_checker import admin_only
 from ...oauth2 import school_checker
 from ...models import User
 from app import utils
+
 router = APIRouter(
     prefix="/lesson_instances",
     tags=["lesson_instances"],

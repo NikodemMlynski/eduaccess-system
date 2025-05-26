@@ -26,7 +26,7 @@ export interface ILessonTemplateIn {
 
 export interface ILessonInstance {
     id: number;
-    template_id: number;
+    template_id?: number;
     class_: IClass;
     room: IRoom;
     teacher: ITeacher;
@@ -38,11 +38,11 @@ export interface ILessonInstance {
 }
 
 export interface ILessonInstanceIn {
-    template_id: number;
+    template_id?: number;
     class_id: number;
     room_id: number;
     teacher_id: number;
     subject: string;
-    start_time: Date;
-    end_time: Date;
+    start_time: string;
+    end_time: string;
 }

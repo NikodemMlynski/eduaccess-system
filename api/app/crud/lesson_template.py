@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from sqlalchemy import and_, or_
 from typing import Optional
-from app.models import LessonTemplate
+from app.models import LessonTemplate, LessonInstance
+from datetime import datetime, timedelta
+from .classes import ClassesCRUD
 
 from app.utils import get_weekday
 

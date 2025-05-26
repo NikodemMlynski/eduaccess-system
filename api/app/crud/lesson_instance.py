@@ -3,10 +3,10 @@ from app.models import LessonInstance
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
+from .classes import ClassesCRUD
+from .lesson_template import LessonTemplatesCRUD
 from typing import Optional
 from datetime import datetime, timedelta
-from app.crud.classes import ClassesCRUD
-from app.crud.lesson_template import LessonTemplatesCRUD
 
 class LessonInstancesCRUD:
     @staticmethod
@@ -168,6 +168,7 @@ class LessonInstancesCRUD:
         db.refresh(lesson_instance_to_update)
         return lesson_instance_to_update
 
+
     @staticmethod
     def generate_lessons_from_lesson_template_for_week(
             school_id: int,
@@ -175,7 +176,7 @@ class LessonInstancesCRUD:
             weeks_ahead: int
     ):
         today = datetime.utcnow()
-        monday = today + timedelta(days=(7 + (weeks_ahead * 7))-today.weekday())
+        monday = today + timedelta(days=(7 + (weeks_ahead * 7)) - today.weekday())
         monday = monday.replace(hour=0, minute=0)
 
         # pobranie wszystkich klas
@@ -193,18 +194,20 @@ class LessonInstancesCRUD:
         for lesson_template in lesson_templates_list:
             start_time_hours, start_time_minutes = lesson_template.start_time.split(":")
             end_time_hours, end_time_minutes = lesson_template.end_time.split(":")
-            start_time = monday + timedelta(days=lesson_template.weekday, hours=int(start_time_hours), minutes=int(start_time_minutes))
-            end_time = monday + timedelta(days=lesson_template.weekday, hours=int(end_time_hours), minutes=int(end_time_minutes))
+            start_time = monday + timedelta(days=lesson_template.weekday, hours=int(start_time_hours),
+                                            minutes=int(start_time_minutes))
+            end_time = monday + timedelta(days=lesson_template.weekday, hours=int(end_time_hours),
+                                          minutes=int(end_time_minutes))
             start_week_border = monday
             end_week_border = monday + timedelta(days=monday.weekday() + 5)
 
             existing_lesson_instances = db.query(LessonInstance).filter(
                 and_(
-                LessonInstance.class_id == lesson_template.class_id,
-                LessonInstance.start_time >= start_week_border,
-                LessonInstance.end_time <= end_week_border,
-                LessonInstance.teacher_id == lesson_template.teacher_id,
-                LessonInstance.room_id == lesson_template.room_id,
+                    LessonInstance.class_id == lesson_template.class_id,
+                    LessonInstance.start_time >= start_week_border,
+                    LessonInstance.end_time <= end_week_border,
+                    LessonInstance.teacher_id == lesson_template.teacher_id,
+                    LessonInstance.room_id == lesson_template.room_id,
                 )
             ).all()
             lesson_exist = False
@@ -212,9 +215,9 @@ class LessonInstancesCRUD:
                 formated_start_time = existing_lesson_instance.start_time.strftime("%H:%M")
                 formated_end_time = existing_lesson_instance.end_time.strftime("%H:%M")
                 if (
-                    formated_start_time == lesson_template.start_time and
-                    formated_end_time == lesson_template.end_time and
-                    existing_lesson_instance.start_time.weekday() == lesson_template.weekday
+                        formated_start_time == lesson_template.start_time and
+                        formated_end_time == lesson_template.end_time and
+                        existing_lesson_instance.start_time.weekday() == lesson_template.weekday
                 ):
                     lesson_exist = True
 
@@ -240,7 +243,3 @@ class LessonInstancesCRUD:
             )
         return lesson_instances
 
-        # zrobić pętle po klasach
-            # pobrać wszystkie lesson_template dla danej klasy
-            # zrobić pętle po lesson_templatach
-                # dla każdego templatu dodać lesson_instance

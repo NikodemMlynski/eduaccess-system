@@ -1,7 +1,6 @@
 import {ILessonTemplate} from "@/types/schedule";
 import {weekdays} from "@/hooks/scheduleTemplate.ts";
-import {SquarePen} from "lucide-react";
-import LessonTemplateFormModal from "@/components/features/Schedules/modals/LessonTemplateFormModal.tsx";
+import ScheduleTempleteLesson from "@/components/features/Schedules/ScheduleTemplateLesson.tsx";
 
 interface SchedulesProps {
   schedules: ILessonTemplate[];
@@ -66,33 +65,12 @@ export default function ScheduleTemplate({ schedules }: SchedulesProps) {
           <tbody>
             {formattedLessons.map((lessons_for_hour, hourIdx) => (
               <tr key={hourIdx}>
-
                 <td className="border border-gray-200 p-1 text-center text-sm text-gray-700 h-[65px]">
                   {sortedHoursRange && sortedHoursRange[hourIdx].start_time} - {sortedHoursRange &&  sortedHoursRange[hourIdx].end_time}
                 </td>
                 {lessons_for_hour.map((lesson, idx) => {
                   return (
-                     <td
-                       key={`${lesson?.id}-${hourIdx}-${idx}`}
-                       className="border border-gray-200 p-1 text-center text-sm text-gray-800 h-[65px]"
-                     >
-                       {lesson ? (
-                         <div className="relative pr-2">
-                           <div className="font-semibold">{lesson.subject}</div>
-                           <div className="text-xs text-gray-500">
-                             {lesson.teacher.user.first_name} {lesson.teacher.user.last_name}
-                           </div>
-                           <div className="text-xs text-gray-500">
-                             {lesson.room.room_name}
-                           </div>
-                              <LessonTemplateFormModal key={`${lesson?.id}-${hourIdx}-${idx}`} lessonTemplateData={lesson}>
-                                <SquarePen className="p-1 h-6 w-6 absolute top-2 right-2 cursor-pointer" />
-                              </LessonTemplateFormModal>
-                         </div>
-                       ) : (
-                         "-"
-                       )}
-                     </td>
+                     <ScheduleTempleteLesson lesson={lesson} hourIdx={hourIdx} idx={idx}/>
                   );
                 })}
               </tr>

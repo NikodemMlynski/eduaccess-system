@@ -10,6 +10,11 @@ import {useUsers} from "@/hooks/users.ts";
 import {ITeacher} from "@/types/Teacher.ts";
 import LessonTemplateSelect from "@/components/features/Schedules/selecters/LessonTemplateSelect.tsx";
 import LessonInstanceSelect from "@/components/features/Schedules/selecters/LessonInstanceSelect.tsx";
+import {Button} from "@/components/ui/button.tsx";
+import {Input} from "@/components/ui/input.tsx";
+import {Label} from "@/components/ui/label.tsx";
+import {useGenerateLessonInstancesFromTemplates} from "@/hooks/scheduleLesson.ts";
+import {toast} from "react-toastify";
 
 interface ILessonTemplateSearchValues {
     class_id: number | null;
@@ -32,6 +37,10 @@ export function SchedulesPage() {
     const {data: rooms, isLoading: isRoomsLoading, isError: isRoomsError} = useRooms<IRoom>(
         `school/${user?.school_id}/rooms`,
         token || "",
+        {
+            paginated: true,
+            limit: 100,
+        }
     )
     const {
         data: classes,
@@ -41,9 +50,12 @@ export function SchedulesPage() {
     const {data: teachers, isLoading: isTeachersLoading, isError: isTeachersError} = useUsers<ITeacher>(
         `school/${user?.school_id}/teachers`,
         token || "",
-        "teacher"
+        "teacher",
+        {
+            paginated: true,
+            limit: 100,
+        }
     )
-
     const [lessonTemplateSearchValues, setLessonTemplateSearchValues] = useState<ILessonTemplateSearchValues>({
         class_id: null,
         teacher_id: null,
@@ -77,8 +89,42 @@ export function SchedulesPage() {
         }
     }
 
+    const [weeksAhead, setWeeksAhead] = useState<number>(0);
+    const generateLessonInstancesFromTemplatesMutation = useGenerateLessonInstancesFromTemplates(
+        `school/${user?.school_id}/lesson_instances`,
+        weeksAhead,
+        token || "",
+
+    )
+    const generatorClick = () => {
+        generateLessonInstancesFromTemplatesMutation.mutate({}, {
+            onSuccess: () => {
+                toast.success("Successfully generated lesson instances")
+            },
+            onError: (error) => {
+                toast.error(error.message)
+            },
+        })
+    }
+
     return (
         <div className="p-6 space-y-6">
+            <Card>
+                <CardHeader>
+                    <h1 className="text-xl font-bold px-2">Wygeneruj godziny lekcyjne na najbliższe dwa tygodnie na bazie szablonów</h1>
+                    <h4>(w przyszłości będzie to robione automatycznie co tydzień)</h4>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex flex-row justify-around items-center">
+                        <Label>
+                            <Input className="w-[150px]" value={weeksAhead} onChange={(e) => setWeeksAhead(+e.target.value)} type="number" placeholder="Ile tygodni" />
+                            Tygodni w przód
+                        </Label>
+                       <Button className="cursor-pointer" onClick={generatorClick}>Generuj</Button>
+                    </div>
+
+                </CardContent>
+            </Card>
             <Card>
                 <CardHeader>
                     <h1 className="text-2xl font-bold px-2">Wyszukaj szablon planu lekcji</h1>

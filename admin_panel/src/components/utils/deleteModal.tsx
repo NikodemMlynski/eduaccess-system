@@ -10,6 +10,7 @@ interface DeleteModalProps{
     valueToConfirm: string;
     handleDelete: () => void;
     item_name: string;
+    className?: string;
 }
 
 export function DeleteModal({
@@ -17,8 +18,8 @@ export function DeleteModal({
     valueToConfirm,
     handleDelete,
     setConfirmInput,
-    item_name
-
+    item_name,
+    className,
     
 }: DeleteModalProps) {
     const [open, setOpen] = useState(false);
@@ -26,7 +27,7 @@ export function DeleteModal({
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
             <Button
-                className="cursor-pointer"
+                className={`cursor-pointer ${className || ""}`}
                 variant="destructive"
                 size="icon"
                 onClick={() => {
@@ -63,7 +64,10 @@ export function DeleteModal({
                 <Button
                 variant="destructive"
                 disabled={confirmInput !== valueToConfirm}
-                onClick={handleDelete}
+                onClick={() => {
+                    handleDelete()
+                    setOpen(false);
+                }}
                 >
                 Delete
                 </Button>

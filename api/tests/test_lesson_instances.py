@@ -1,5 +1,4 @@
 import pytest
-
 from .conftest import authorized_admin_client
 from .fixtures.lesson_instances import lesson_instance_factory
 from .fixtures.lesson_templates import lesson_template_factory
@@ -8,6 +7,7 @@ from .fixtures.school import school_admin_factory
 from .fixtures.users import user_factory
 from .fixtures.classes import classes_factory
 from datetime import datetime
+from datetime import datetime, timedelta
 
 def test_create_lesson_instance(
         authorized_admin_client,
@@ -460,9 +460,6 @@ def test_delete_lesson_instance_not_found(
 
     res = client.delete(f"/school/{school_id}/lesson_instances/999")
     assert res.status_code == 404
-
-import pytest
-from datetime import datetime, timedelta
 
 def test_generate_lessons_from_template_success(
     authorized_admin_client,

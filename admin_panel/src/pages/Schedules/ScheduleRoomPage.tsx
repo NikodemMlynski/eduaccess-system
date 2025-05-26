@@ -5,6 +5,7 @@ import {useAuth} from "@/context/AuthProvider.tsx";
 import {Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import {useRoom} from "@/hooks/rooms.ts";
+import LessonTemplateFormModal from "@/components/features/Schedules/modals/LessonTemplateFormModal.tsx";
 const ScheduleRoomPage = () => {
     const {user, token} = useAuth();
     const {roomId} = useParams();
@@ -14,7 +15,7 @@ const ScheduleRoomPage = () => {
         token || "",
         Number(roomId)
     )
-    const {data: room_data, isLoading: roomsIsLoading, isError: roomsIsError, error: roomError} = useRoom(
+    const {data: roomData, isLoading: roomsIsLoading, isError: roomsIsError, error: roomError} = useRoom(
         `school/${user?.school_id}`, Number(roomId), token || "");
 
     if (isLoading || roomsIsLoading) {
@@ -31,8 +32,13 @@ const ScheduleRoomPage = () => {
     return (
         <div className="overflow-auto px-4 py-2">
             <div>
-                <Button>Add new lesson</Button>
-             <h1 className="text-4xl font-semibold text-center mb-10">{room_data?.room_name}</h1>
+                <LessonTemplateFormModal room={{
+                    roomId: roomData?.id,
+                    roomName: roomData?.room_name
+                }}>
+                    <Button variant="default">Add new lesson</Button>
+                </LessonTemplateFormModal>
+             <h1 className="text-4xl font-semibold text-center mb-10">{roomData?.room_name}</h1>
             </div>
              <ScheduleTemplate schedules={data || []} />
         </div>
