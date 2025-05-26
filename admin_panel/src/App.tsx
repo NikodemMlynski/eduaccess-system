@@ -3,7 +3,7 @@ import RootLayout from './layouts/RootLayout'
 import Dashboard from './components/Dashboard/Dashboard'
 import LoginPage from './pages/Authentication/LoginPage'
 import AccessLogsPage from './pages/AccesLogs/AccessLogsPage'
-import AdministratorsPage from './pages/Administrators/AdministratorsPage'
+import SchoolPage from '@/pages/School/SchoolPage.tsx'
 import AttendancesPage from './pages/Attendances/AttendancesPage'
 import ClassesPage from './pages/Classes/ClassesPage'
 import RoomsPage from './pages/Rooms/RoomsPage'
@@ -119,7 +119,7 @@ const router = createBrowserRouter(
             },
             {
               path: 'administrators',
-              element: <AdministratorsPage/>
+              element: <SchoolPage/>
             },
           ]
         },        
