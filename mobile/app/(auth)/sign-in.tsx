@@ -5,7 +5,7 @@ import {useLogin} from "@/hooks/auth";
 import {Toast} from "toastify-react-native";
 import {ILoginData, ITokenOut} from "@/types/auth";
 import {useRouter} from "expo-router";
-
+import {useAuth} from "@/context/AuthContext";
 const initialLoginValues = {
     email: "",
     password: "",
@@ -13,6 +13,7 @@ const initialLoginValues = {
 
 const SignIn = () => {
     const router = useRouter()
+    const {login} = useAuth();
     const loginMutation = useLogin();
     const [form, setForm] = useState<ILoginData>(initialLoginValues);
 
@@ -27,7 +28,7 @@ const SignIn = () => {
         onSuccess: async (data: ITokenOut) => {
             console.log(data);
             console.log("z tego tokena potem trzeba zrobić context");
-            router.push("/(root)/(student)/profile")
+            login(data.access_token)
         },
         onError: (error) => {
             Toast.error(error.message || "Failed to login");
