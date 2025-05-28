@@ -1,11 +1,21 @@
-import {Text, View} from "react-native";
+import { Text } from "react-native";
+import {useAuth} from "@/context/AuthContext";
+import {useSchool} from "@/hooks/school";
+import Profile from "@/components/Profile"
+const Index = () => {
+    const {user, logout, token } = useAuth();
+    const {data: school, isLoading, isError, error} = useSchool(`school`, user?.school_id, token || "");
+    if (isLoading) return <Text>Loading...</Text>;
+    if (isError) return <Text>Error: {error.message}</Text>;
 
-const Profile = () => {
     return (
-        <View className="flex items-center justify-center p-5">
-            <Text>Teacher Profile</Text>
-        </View>
-    )
-}
+        <Profile
+            user={user}
+            logout={logout}
+            school={school || null}
+            class_={null}
+        />
+    );
+};
 
-export default Profile;
+export default Index;
