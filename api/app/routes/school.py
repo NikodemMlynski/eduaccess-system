@@ -25,11 +25,10 @@ router.include_router(rooms.router)
 router.include_router(lesson_templates.router)
 router.include_router(lesson_instances.router)
 
-@router.get("/", response_model=SchoolOut, dependencies=[Depends(admin_only)])
+@router.get("/", response_model=SchoolOut)
 def get_school(
     school_id: int,
     db: Session = Depends(get_db),
-    school_checker: User = Depends(school_checker)
 ):
     return SchoolsCRUD.get_school_by_id(db=db, school_id=school_id)
 

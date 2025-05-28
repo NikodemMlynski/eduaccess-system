@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!isInitialized) return;
-    if ((!user || !token) && (pathname !== "/(auth)/sign-in" && pathname !== "/(auth)/sign-up")) {
+    if ((!user || !token) && (pathname !== "/sign-in" && pathname !== "/sign-up" && pathname !== "/")) {
       setUser(null);
       setToken(null);
       router.replace("/(auth)/sign-in");

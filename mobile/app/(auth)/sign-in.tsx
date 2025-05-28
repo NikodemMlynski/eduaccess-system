@@ -52,6 +52,7 @@ const SignIn = () => {
             value={form.password}
             handleChange={handleChange}
             name={"password"}
+            secureTextEntry={true}
             label={"Password"}
         ></InputContainer>
 
