@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { IUser } from "@/types/User";
 import { apiUrl, tokenStorageKey } from "@/constants/constants";
-import { useRouter } from "expo-router";
+import {usePathname, useRouter} from "expo-router";
 
 interface AuthContextType {
   user: IUser | null;
@@ -18,7 +18,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<IUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
+  const pathname = usePathname()
 
   useEffect(() => {
     const initAuth = async () => {
@@ -34,15 +36,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const data: IUser = await res.json();
           setUser(data);
           setToken(storedToken);
+
         } catch {
           await AsyncStorage.removeItem(tokenStorageKey);
           setUser(null);
         }
       }
       setIsLoading(false);
+      setIsInitialized(true);
     };
     initAuth();
   }, []);
+
+  useEffect(() => {
+    if (!isInitialized) return;
+    if ((!user || !token) && (pathname !== "/(auth)/sign-in" && pathname !== "/(auth)/sign-up")) {
+      setUser(null);
+      setToken(null);
+      router.replace("/(auth)/sign-in");
+    } else {
+      if (user && token) {
+        if (!pathname.startsWith(`/(root)/(${user.role as "teacher" | "student"})`))
+          router.replace(`/(root)/(${user.role as "teacher" | "student"})/profile`);
+      }
+    }
+  }, [user, pathname, token, router, isInitialized]);
 
   const login = async (newToken: string) => {
     await AsyncStorage.setItem(tokenStorageKey, newToken);
@@ -54,7 +72,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!res.ok) throw new Error("Unauthorized");
 
     const userData: IUser = await res.json();
-
+    if (userData.role === "admin") {
+      throw new Error("You're admin use admin panel instead of app");
+    }
     if (!["student", "teacher"].includes(userData.role)) {
       throw new Error("Unauthorized role");
     }

@@ -26,11 +26,14 @@ const SignIn = () => {
     const handleSubmit = () => {
     loginMutation.mutate(form, {
         onSuccess: async (data: ITokenOut) => {
-            console.log(data);
-            console.log("z tego tokena potem trzeba zrobić context");
-            login(data.access_token)
+            try {
+                await login(data.access_token)
+            } catch (error) {
+                Toast.error(error.message || "Failed to login");
+            }
         },
         onError: (error) => {
+            console.log(" wywolal sie drugi");
             Toast.error(error.message || "Failed to login");
         }
     });
