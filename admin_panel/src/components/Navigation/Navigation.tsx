@@ -8,7 +8,7 @@ const navigationItems = [
   { to: "rooms", label: "Classrooms" },
   { to: "attendances", label: "Attendance report" },
   { to: "access-logs", label: "Access logs" },
-  { to: "administrators", label: "Administrators" },
+  { to: "administrators", label: "School Info" },
 ];
 
 export default function Navigation() {
