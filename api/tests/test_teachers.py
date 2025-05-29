@@ -5,7 +5,7 @@ from .fixtures.school import school_admin_factory
 def test_create_teacher(client, session, school_admin_factory):
     school, _, _ = school_admin_factory()
     school_id = school.id
-    addition_code = school.teacher_addition_code 
+    addition_code = school.teacher_addition_code
 
     res = client.post("/users/", json={
         "first_name": "Teacher1",
@@ -38,7 +38,7 @@ def test_create_teacher_invalid_addition_code(client, session, school_admin_fact
 def test_create_teacher_missing_first_name(client, session, school_admin_factory):
     school, _, _ = school_admin_factory()
     school_id = school.id
-    addition_code = school.teacher_addition_code 
+    addition_code = school.teacher_addition_code
 
     res = client.post("/users/", json={
         "last_name": "Surname1",
@@ -202,9 +202,48 @@ def test_get_single_teacher(authorized_admin_client, session, school_admin_facto
 
 def test_get_not_existing_teacher(authorized_admin_client, session, school_admin_factory):
     school, client = authorized_admin_client
-    school_id = school.id 
+    school_id = school.id
 
     res = client.get(f"/school/{school_id}/teachers/1")
 
     assert res.status_code == 404
     assert res.json()["detail"] == "User not found"
+
+
+def test_get_teacher_by_user_id_as_admin(authorized_admin_client, session, school_admin_factory, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    teacher = user_factory(role="teacher", school_id=school_id, email="teacher1@example.com")
+    res = client.get(f"/school/{school_id}/teachers/user_id/{teacher.user_id}")
+
+    assert res.status_code == 200
+
+def test_get_teacher_by_user_id_as_student(authorized_student_client, session, school_admin_factory, user_factory):
+    student, client = authorized_student_client
+    school_id = student.user.school_id
+
+    teacher = user_factory(role="teacher", school_id=school_id, email="teacher1@example.com")
+
+    res = client.get(f"/school/{school_id}/teachers/user_id/{teacher.user_id}")
+
+    assert res.status_code == 200
+
+def test_get_teacher_by_user_id_not_found(authorized_student_client, session, school_admin_factory, user_factory):
+    student, client = authorized_student_client
+    school_id = student.user.school_id
+
+    res = client.get(f"/school/{school_id}/teachers/user_id/999")
+
+    assert res.status_code == 404
+
+def test_get_teacher_by_user_id_not_authorized(client, session, school_admin_factory, user_factory):
+    school, _, _ = school_admin_factory()
+    school_id = school.id
+    teacher = user_factory(role="teacher", school_id=school_id, email="teacher1@example.com")
+
+    res = client.get(f"/school/{school_id}/teachers/user_id/{teacher.user_id}")
+
+    assert res.status_code == 401
+
+
