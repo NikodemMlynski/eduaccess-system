@@ -41,7 +41,7 @@ def get_student(school_id: int, id: int, db: Session = Depends(get_db), school_c
         student_id=id,
     )
 
-@router.get("/user_id/{id}", response_model=student.StudentOut)
+@router.get("/user_id/{id}", response_model=student.StudentOutWithClass)
 def get_student_by_user_id(
         school_id: int,
         id: int,
