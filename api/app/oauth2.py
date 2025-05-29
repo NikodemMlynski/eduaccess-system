@@ -10,7 +10,9 @@ from sqlalchemy.orm import Session
 from app.schemas.auth import TokenData 
 from app.models import User 
 from app.database import get_db 
-from app.config import settings 
+from app.config import settings
+
+from app.crud.student import StudentCRUD
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -57,7 +59,13 @@ def school_checker( school_id: int, current_user: User = Depends(get_current_use
             raise HTTPException(status_code=403, detail="You are not permitted to access data for a different school")
 
 def protect(user_id: int, permitted_roles: [str], current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    print(permitted_roles)
-    print(current_user.role)
     if not(current_user.id == user_id or current_user.role in permitted_roles):
         raise HTTPException(status_code=403, detail="You are not permitted to access fate for another user")
+
+def class_protect(class_id: int, permitted_roles: [str], current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if (current_user.role in permitted_roles):
+        return
+    print(current_user.__dict__)
+    student = StudentCRUD.get_student_by_user_id(db=db, user_id=current_user.id, school_id=current_user.school_id)
+    if (student.class_id != class_id):
+        raise HTTPException(status_code=403, detail="You are not permitted to access data for a different class")
