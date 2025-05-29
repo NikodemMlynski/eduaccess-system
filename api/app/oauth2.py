@@ -55,3 +55,9 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 def school_checker( school_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if current_user.school_id != school_id:
             raise HTTPException(status_code=403, detail="You are not permitted to access data for a different school")
+
+def protect(user_id: int, permitted_roles: [str], current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    print(permitted_roles)
+    print(current_user.role)
+    if not(current_user.id == user_id or current_user.role in permitted_roles):
+        raise HTTPException(status_code=403, detail="You are not permitted to access fate for another user")
