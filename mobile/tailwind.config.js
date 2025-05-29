@@ -12,6 +12,7 @@ module.exports = {
         accent: '#00CFFF',
         text: '#FFFFFF',
         subtext: '#7AC8F9',
+        "green-text": "#4ade80",
       },
     },
   },

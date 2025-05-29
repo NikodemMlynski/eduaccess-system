@@ -8,11 +8,6 @@ const Index = () => {
     const {data: school, isLoading, isError, error} = useSchool(`school`, user?.school_id, token || "");
     if (isLoading) return <Text>Loading...</Text>;
     if (isError) return <Text>Error: {error.message}</Text>;
-
-     // const {data: teacher, isLoading: teacherIsLoading,
-     //    isError: teacherIsError, error: teacherError
-     // } = useStudent(`school/${user?.school_id}/students`, user?.id, token || "");
-
     return (
         <Profile
             user={user}
