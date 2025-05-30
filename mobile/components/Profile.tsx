@@ -17,7 +17,7 @@ const Profile = ({
 }: ProfileProps) => {
     return (
         <View className="flex-1 bg-background px-6 pt-20">
-          <View className="items-center mb-20">
+          <View className="items-center mb-14">
             <View className="bg-surface rounded-full w-28 h-28 items-center justify-center mb-3">
               <User size={50} color="#00CFFF" />
             </View>
@@ -58,7 +58,7 @@ const Profile = ({
 
           <TouchableOpacity
             onPress={() => logout()}
-            className={`bg-red-600 mt-10 py-4 rounded-xl flex-row items-center justify-center`}
+            className={`bg-red-600 mt-2 py-4 rounded-xl flex-row items-center justify-center`}
           >
             <LogOut size={20} color="#FFFFFF" className="mr-2" />
             <Text className="text-white font-medium text-xl">Wyloguj się</Text>
