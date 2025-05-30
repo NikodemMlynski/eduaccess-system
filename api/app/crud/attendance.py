@@ -4,7 +4,8 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from typing import Optional
-
+from datetime import datetime
+from sqlalchemy import func
 class AttendancesCRUD:
 
     @staticmethod
@@ -121,3 +122,89 @@ class AttendancesCRUD:
         db.refresh(attendance)
         return attendance
 
+    @staticmethod
+    def get_class_attendance_by_day(
+        db: Session,
+        class_id: int,
+        day: datetime.date,
+    ) -> list:
+        attendances = (
+            db.query(Attendance)
+            .join(Student, Attendance.student_id == Student.id)
+            .join(LessonInstance, Attendance.lesson_id == LessonInstance.id)
+            .filter(
+                Student.class_id == class_id,
+                func.date(LessonInstance.start_time) == day
+            )
+            .all()
+        )
+        return [
+            {
+                "student_id": a.student_id,
+                "lesson_id": a.lesson_id,
+                "status": a.status,
+                "subject": a.lesson.subject,
+                "start_time": a.lesson.start_time,
+                "end_time": a.lesson.end_time
+            }
+            for a in attendances
+        ]
+
+    @staticmethod
+    def get_student_attendance_by_day(
+        db: Session,
+        student_id: int,
+        day: datetime.date
+    ) -> list:
+        attendances = (
+            db.query(Attendance)
+            .join(LessonInstance, Attendance.lesson_id == LessonInstance.id)
+            .filter(
+                Attendance.student_id == student_id,
+                func.date(LessonInstance.start_time) == day
+            )
+            .all()
+        )
+        return [
+            {
+                "lesson_id": a.lesson_id,
+                "status": a.status,
+                "subject": a.lesson.subject,
+                "start_time": a.lesson.start_time,
+                "end_time": a.lesson.end_time
+            }
+            for a in attendances
+        ]
+
+    @staticmethod
+    def get_student_attendance_stats_by_subject(
+        db: Session,
+        student_id: int,
+        date_from: Optional[datetime.date] = None,
+        date_to: Optional[datetime.date] = None
+    ) -> list:
+        query = (
+            db.query(
+                LessonInstance.subject,
+                func.count(Attendance.id).label("total"),
+                func.sum(func.case((Attendance.status == "present", 1), else_=0)).label("present_count")
+            )
+            .join(LessonInstance, Attendance.lesson_id == LessonInstance.id)
+            .filter(Attendance.student_id == student_id)
+        )
+        if date_from:
+            query = query.filter(LessonInstance.start_time >= date_from)
+        if date_to:
+            query = query.filter(LessonInstance.start_time <= date_to)
+        query = query.group_by(LessonInstance.subject)
+
+        results = query.all()
+        return [
+            {
+                "subject": r.subject,
+                "present_percent": round((r.present_count / r.total) * 100, 2) if r.total else 0.0,
+                "present_count": r.present_count,
+                "total": r.total
+            }
+            for r in results
+        ]

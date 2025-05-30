@@ -1,0 +1,87 @@
+import pytest
+from datetime import datetime, timedelta
+
+from app.models import Student, LessonInstance, Attendance
+
+@pytest.fixture
+def student_factory(session, classes_factory, school_admin_factory):
+    def _factory(class_name="1A"):
+        school, _, _ = school_admin_factory()
+        class_ = classes_factory(school_id=school.id, class_name=class_name)
+        student = Student(user_id=999, class_id=class_.id, school_id=school.id)
+        session.add(student)
+        session.commit()
+        return student, class_, school
+    return _factory
+
+@pytest.fixture
+def lesson_instance_factory(session, classes_factory, school_admin_factory):
+    def _factory(class_id, subject="Math", start_time=None):
+        if not start_time:
+            start_time = datetime.now()
+        lesson = LessonInstance(
+            template_id=1,
+            class_id=class_id,
+            room_id=1,
+            teacher_id=1,
+            subject=subject,
+            start_time=start_time,
+            end_time=start_time + timedelta(hours=1)
+        )
+        session.add(lesson)
+        session.commit()
+        return lesson
+    return _factory
+
+@pytest.fixture
+def attendance_factory(session):
+    def _factory(student_id, lesson_id, status="present"):
+        attendance = Attendance(
+            student_id=student_id,
+            lesson_id=lesson_id,
+            status=status,
+            manual_adjustment=False
+        )
+        session.add(attendance)
+        session.commit()
+        return attendance
+    return _factory
+
+def test_get_class_attendance_by_day(client, session, student_factory, lesson_instance_factory, attendance_factory):
+    student, class_, school = student_factory()
+    lesson = lesson_instance_factory(class_id=class_.id, start_time=datetime(2024, 9, 1, 8, 0))
+    attendance_factory(student_id=student.id, lesson_id=lesson.id, status="present")
+
+    res = client.get(f"/attendance/class/{class_.id}/day/2024-09-01")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data, list)
+    assert data[0]["student_id"] == student.id
+    assert data[0]["status"] == "present"
+
+def test_get_student_attendance_by_day(client, session, student_factory, lesson_instance_factory, attendance_factory):
+    student, class_, school = student_factory()
+    lesson = lesson_instance_factory(class_id=class_.id, start_time=datetime(2024, 9, 1, 9, 0))
+    attendance_factory(student_id=student.id, lesson_id=lesson.id, status="absent")
+
+    res = client.get(f"/attendance/student/{student.id}/day/2024-09-01")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data, list)
+    assert data[0]["lesson_id"] == lesson.id
+    assert data[0]["status"] == "absent"
+
+def test_get_student_attendance_stats_by_subject(client, session, student_factory, lesson_instance_factory, attendance_factory):
+    student, class_, school = student_factory()
+    lesson1 = lesson_instance_factory(class_id=class_.id, subject="Math", start_time=datetime(2024, 9, 1, 8, 0))
+    lesson2 = lesson_instance_factory(class_id=class_.id, subject="Math", start_time=datetime(2024, 9, 2, 8, 0))
+    lesson3 = lesson_instance_factory(class_id=class_.id, subject="Biology", start_time=datetime(2024, 9, 1, 10, 0))
+    attendance_factory(student_id=student.id, lesson_id=lesson1.id, status="present")
+    attendance_factory(student_id=student.id, lesson_id=lesson2.id, status="absent")
+    attendance_factory(student_id=student.id, lesson_id=lesson3.id, status="present")
+
+    res = client.get(f"/attendance/student/{student.id}/stats/subjects?date_from=2024-09-01&date_to=2024-09-02")
+    assert res.status_code == 200
+    data = res.json()
+    assert any(d["subject"] == "Math" and d["present_percent"] == 50.0 for d in data)
+    assert any(d["subject"] == "Biology" and d["present_percent"] == 100.0 for d in data)

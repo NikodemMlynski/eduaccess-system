@@ -8,12 +8,48 @@ from app.models import User
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from ...oauth2 import school_checker, get_current_user
+from datetime import date
 
 router = APIRouter(
     prefix="/attendances",
     tags=["attendances"],
 )
 
+@router.get("/class/{class_id}/day/{day}", response_model=List[attendance.AttendanceOut])
+def get_class_attendance_by_day(
+    school_id: int,
+    class_id: int,
+    day: date,
+    db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker),
+):
+    return AttendancesCRUD.get_class_attendance_by_day(db=db, class_id=class_id, day=day)
+
+@router.get("/student/{student_id}/day/{day}")
+def get_student_attendance_by_day(
+    school_id: int,
+    student_id: int,
+    day: date,
+    db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker),
+):
+    return AttendancesCRUD.get_student_attendance_by_day(db=db, student_id=student_id, day=day)
+
+@router.get("/student/{student_id}/stats", response_model=List[attendance.StudentAttendanceStatsOut])
+def get_student_attendance_stats_by_subject(
+    school_id: int,
+    student_id: int,
+    date_from: Optional[date] = Query(None),
+    date_to: Optional[date] = Query(None),
+    db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker),
+):
+    return AttendancesCRUD.get_student_attendance_stats_by_subject(
+        db=db,
+        student_id=student_id,
+        date_from=date_from,
+        date_to=date_to,
+    )
 @router.post("/", response_model=attendance.AttendanceOut, dependencies=[Depends(admin_only)])
 def create_attendance(
         school_id: int,
