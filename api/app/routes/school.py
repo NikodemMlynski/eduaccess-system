@@ -1,4 +1,6 @@
-from fastapi import APIRouter 
+from fastapi import APIRouter
+
+from .schools import attendances
 from .schools import students
 from .schools import admins
 from .schools import teachers
@@ -24,6 +26,7 @@ router.include_router(class_.router)
 router.include_router(rooms.router)
 router.include_router(lesson_templates.router)
 router.include_router(lesson_instances.router)
+router.include_router(attendances.router)
 
 @router.get("/", response_model=SchoolOut)
 def get_school(
