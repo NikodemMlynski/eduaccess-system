@@ -2,6 +2,7 @@ import { API_URL } from "@/config/constants";
 import { Role } from "@/types/User";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "./utils/fetcher";
+import {IStudent} from "@/types/Student.ts";
 
 export const USERS_KEYS = {
     users: (role?: Role) => ["users", role ? role : null] as const,
@@ -58,6 +59,17 @@ export function useUser<T>(endpoint: string, id?: number, token?: string, role?:
         queryKey: USERS_KEYS.user(id, role), // tak samo,
         queryFn: () => fetcher<T>(`${API_URL}${endpoint}${id}`, token),
         enabled: !!id,
+    })
+}
+
+export function useStudentsForClass(
+    endpoint: string,
+    token?: string,
+    classId?: number
+) {
+    return useQuery<IStudent[]>({
+        queryKey: ["students", "class", classId],
+        queryFn: () => fetcher<IStudent[]>(`${API_URL}${endpoint}/class_id/${classId}`, token)
     })
 }
 

@@ -4,13 +4,15 @@ import {ArrowLeft, ArrowRight} from "lucide-react"
 import {useEffect, useState} from "react";
 interface ILessonInstanceDatePickerProps {
     dateStr?: string;
-    type: "classes" | "teachers" | "rooms";
+    type: "classes" | "teachers" | "rooms" | "students";
     id?: number;
+    link: "schedules" | "attendances";
 }
 const LessonInstanceDatePicker = ({
     dateStr,
     type,
-    id
+    id,
+    link
 }: ILessonInstanceDatePickerProps) => {
     const [date, setDate] = useState(new Date( dateStr || ""));
     const monday = date.getDay() - 1;
@@ -32,7 +34,7 @@ const LessonInstanceDatePicker = ({
         })
     }
     useEffect(() => {
-        navigate(`/schedules/${type}/${id}/dateStr/${date.toISOString().split("T")[0]}`)
+        navigate(`/${link}/${type}/${id}/dateStr/${date.toISOString().split("T")[0]}`)
     }, [date])
     return (
         <div className="flex justify-center items-center space-x-2 py-2 mt-5 relative">
@@ -47,7 +49,7 @@ const LessonInstanceDatePicker = ({
                 `}
                 key={index}
                 onClick={() => {
-                     navigate(`/schedules/${type}/${id}/dateStr/${day.toISOString().split("T")[0]}`)
+                     navigate(`/${link}/${type}/${id}/dateStr/${day.toISOString().split("T")[0]}`)
                 }}
                 >{day.getDate()}</Button>
             ))
