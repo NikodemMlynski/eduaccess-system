@@ -2,10 +2,9 @@ from app.schemas import attendance
 from app.models import Attendance, Student, LessonInstance
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, case, func
 from typing import Optional
-from datetime import datetime
-from sqlalchemy import func
+from datetime import datetime, time
 class AttendancesCRUD:
 
     @staticmethod
@@ -128,27 +127,22 @@ class AttendancesCRUD:
         class_id: int,
         day: datetime.date,
     ) -> list:
+        start = datetime.combine(day, time.min)
+        end = datetime.combine(day, time.max)
         attendances = (
             db.query(Attendance)
             .join(Student, Attendance.student_id == Student.id)
             .join(LessonInstance, Attendance.lesson_id == LessonInstance.id)
             .filter(
-                Student.class_id == class_id,
-                func.date(LessonInstance.start_time) == day
+                and_(
+                    LessonInstance.class_id == class_id,
+                    Attendance.created_at >= start,
+                    Attendance.created_at <= end
+                )
             )
             .all()
         )
-        return [
-            {
-                "student_id": a.student_id,
-                "lesson_id": a.lesson_id,
-                "status": a.status,
-                "subject": a.lesson.subject,
-                "start_time": a.lesson.start_time,
-                "end_time": a.lesson.end_time
-            }
-            for a in attendances
-        ]
+        return attendances
 
     @staticmethod
     def get_student_attendance_by_day(
@@ -156,55 +150,59 @@ class AttendancesCRUD:
         student_id: int,
         day: datetime.date
     ) -> list:
+        start = datetime.combine(day, time.min)
+        end = datetime.combine(day, time.max)
+        print(start)
+        print(end)
+        print(student_id)
         attendances = (
             db.query(Attendance)
             .join(LessonInstance, Attendance.lesson_id == LessonInstance.id)
             .filter(
+                and_(
                 Attendance.student_id == student_id,
-                func.date(LessonInstance.start_time) == day
+                Attendance.created_at >= start,
+                Attendance.created_at <= end
+                )
             )
             .all()
         )
-        return [
-            {
-                "lesson_id": a.lesson_id,
-                "status": a.status,
-                "subject": a.lesson.subject,
-                "start_time": a.lesson.start_time,
-                "end_time": a.lesson.end_time
-            }
-            for a in attendances
-        ]
+        return attendances
 
     @staticmethod
     def get_student_attendance_stats_by_subject(
         db: Session,
         student_id: int,
-        date_from: Optional[datetime.date] = None,
-        date_to: Optional[datetime.date] = None
+        date_from: datetime.date,
+        date_to: datetime.date
     ) -> list:
-        query = (
+        present_case = case(
+            (Attendance.status == "present", 1),  # WHEN
+            else_=0  # ELSE
+        )
+
+        results = (
             db.query(
-                LessonInstance.subject,
+                LessonInstance.subject.label("subject"),
                 func.count(Attendance.id).label("total"),
-                func.sum(func.case((Attendance.status == "present", 1), else_=0)).label("present_count")
+                func.sum(present_case).label("present_count"),
             )
             .join(LessonInstance, Attendance.lesson_id == LessonInstance.id)
-            .filter(Attendance.student_id == student_id)
+            .filter(
+                Attendance.student_id == student_id,
+                LessonInstance.start_time >= date_from,
+                LessonInstance.start_time <= date_to,
+            )
+            .group_by(LessonInstance.subject)
+            .all()
         )
-        if date_from:
-            query = query.filter(LessonInstance.start_time >= date_from)
-        if date_to:
-            query = query.filter(LessonInstance.start_time <= date_to)
-        query = query.group_by(LessonInstance.subject)
 
-        results = query.all()
         return [
             {
                 "subject": r.subject,
-                "present_percent": round((r.present_count / r.total) * 100, 2) if r.total else 0.0,
+                "present_percent": round(r.present_count / r.total * 100, 2) if r.total else 0.0,
                 "present_count": r.present_count,
-                "total": r.total
+                "total": r.total,
             }
             for r in results
         ]

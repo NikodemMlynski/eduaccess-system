@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from app.database import get_db
-
+import calendar
 from ...crud.attendance import AttendancesCRUD
 from ...schemas import attendance
 from ...role_checker import admin_only
@@ -25,7 +25,9 @@ def get_class_attendance_by_day(
 ):
     return AttendancesCRUD.get_class_attendance_by_day(db=db, class_id=class_id, day=day)
 
-@router.get("/student/{student_id}/day/{day}")
+@router.get("/student/{student_id}/day/{day}"
+    , response_model=List[attendance.AttendanceOut]
+            )
 def get_student_attendance_by_day(
     school_id: int,
     student_id: int,
@@ -35,7 +37,9 @@ def get_student_attendance_by_day(
 ):
     return AttendancesCRUD.get_student_attendance_by_day(db=db, student_id=student_id, day=day)
 
-@router.get("/student/{student_id}/stats", response_model=List[attendance.StudentAttendanceStatsOut])
+@router.get("/student/{student_id}/stats",
+            response_model=List[attendance.StudentAttendanceStatsOut]
+            )
 def get_student_attendance_stats_by_subject(
     school_id: int,
     student_id: int,
@@ -44,12 +48,20 @@ def get_student_attendance_stats_by_subject(
     db: Session = Depends(get_db),
     school_checker: User = Depends(school_checker),
 ):
+    today = date.today()
+
+    if not date_to or not date_from:
+        date_from = today.replace(day=1)
+        last_day = calendar.monthrange(today.year, today.month)[1]
+        date_to = today.replace(day=last_day)
+
+
     return AttendancesCRUD.get_student_attendance_stats_by_subject(
-        db=db,
-        student_id=student_id,
-        date_from=date_from,
-        date_to=date_to,
-    )
+            db=db,
+            student_id=student_id,
+            date_from=date_from,
+            date_to=date_to,
+        )
 @router.post("/", response_model=attendance.AttendanceOut, dependencies=[Depends(admin_only)])
 def create_attendance(
         school_id: int,

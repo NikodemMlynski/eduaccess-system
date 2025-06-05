@@ -19,7 +19,7 @@ class LessonInstanceOut(BaseModel):
 
 class LessonInstanceCompactOut(BaseModel):
     id: int
-    template_id: int
+    template_id: Optional[int]
     class_id: int
     room_id: int
     teacher_id: int

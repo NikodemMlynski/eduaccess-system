@@ -18,7 +18,6 @@ class AttendanceOut(BaseModel):
     status: str
     manual_adjustment: bool
     created_at: datetime
-from pydantic import BaseModel
 
 class StudentAttendanceStatsOut(BaseModel):
     subject: str
