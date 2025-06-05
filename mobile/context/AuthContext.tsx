@@ -60,7 +60,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log(pathname);
       if (user && token) {
         const validPathnames = ["/profile", "/door_requests", "/attendances", "/schedule", "/home"]
-        if (!validPathnames.includes(pathname)) {
+        const isValid = validPathnames.some(validPath => pathname.startsWith(validPath));
+
+        if (!isValid) {
           router.replace(`/(root)/(${user.role as "teacher" | "student"})/profile`);
         }
       }

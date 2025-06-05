@@ -74,7 +74,7 @@ def get_all_lesson_instances_by_room_id(
         date=date
     )
 
-@router.get("/teachers/{teacher_id}", response_model=List[lesson_instance.LessonInstanceOut], dependencies=[Depends(admin_only)])
+@router.get("/teachers/{teacher_id}", response_model=List[lesson_instance.LessonInstanceOut])
 def get_all_lesson_instances_by_teacher_id(
     school_id: int,
     teacher_id: int,
