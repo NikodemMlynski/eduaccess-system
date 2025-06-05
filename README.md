@@ -132,7 +132,7 @@ poetry run python -m app.main
 ```
 - Linux / MacOs
 ```
-poetry run python3 app.main
+poetry run python3 -m app.main
 ```
 api powinno nasłuchiwać na `localhost:8000/eduaccess/v1`
 ### Frontend (Admin Panel)

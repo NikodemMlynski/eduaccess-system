@@ -50,7 +50,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const error = await response.json();
         throw new Error(error.message || "Błąd logowania");
       }
-      return await response.json();
+      const data = await response.json();
+      console.log(data);
+      if (data.role === "admin" || data.role == "teacher") return data
+      throw new Error("Permission denied")
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["user"], data);
