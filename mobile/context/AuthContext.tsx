@@ -3,6 +3,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { IUser } from "@/types/User";
 import { apiUrl, tokenStorageKey } from "@/constants/constants";
 import {usePathname, useRouter} from "expo-router";
+import {ITeacher} from "@/types/Teacher";
+import {IStudent} from "@/types/Student";
 
 interface AuthContextType {
   user: IUser | null;
@@ -55,9 +57,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setToken(null);
       router.replace("/(auth)/sign-in");
     } else {
+      console.log(pathname);
       if (user && token) {
-        if (!pathname.startsWith(`/(root)/(${user.role as "teacher" | "student"})`))
+        const validPathnames = ["/profile", "/door_requests", "/attendances", "/schedule", "/home"]
+        const isValid = validPathnames.some(validPath => pathname.startsWith(validPath));
+
+        if (!isValid) {
           router.replace(`/(root)/(${user.role as "teacher" | "student"})/profile`);
+        }
       }
     }
   }, [user, pathname, token, router, isInitialized]);

@@ -38,6 +38,19 @@ def get_teacher(school_id: int, id: int, db: Session = Depends(get_db), school_c
         school_id=school_id
     )
 
+@router.get("/user_id/{id}", response_model=teacher.TeacherOut)
+def get_teacher_by_user_id(
+        school_id: int,
+        id: int,
+        db: Session = Depends(get_db),
+        school_checker: User = Depends(school_checker)
+):
+    return TeachersCRUD.get_teacher_by_user_id(
+        db=db,
+        school_id=school_id,
+        user_id=id,
+    )
+
 @router.delete("/{id}", dependencies=[Depends(admin_only)])
 def delete_teacher(school_id: int, id: int, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
     return TeachersCRUD.delete_teacher(

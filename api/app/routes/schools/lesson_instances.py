@@ -5,7 +5,7 @@ from typing import List
 from ...schemas import lesson_instance
 from sqlalchemy.orm import Session
 from app.role_checker import admin_only
-from ...oauth2 import school_checker
+from ...oauth2 import school_checker, class_protect, get_current_user
 from ...models import User
 from app import utils
 
@@ -39,14 +39,21 @@ def create_lesson_instance(
         lesson_instance_data=lesson_instance_data
     )
 
-@router.get("/classes/{class_id}", response_model=List[lesson_instance.LessonInstanceOut], dependencies=[Depends(admin_only)])
+@router.get("/classes/{class_id}", response_model=List[lesson_instance.LessonInstanceOut])
 def get_all_lesson_instances_by_class_id(
     school_id: int,
     class_id: int,
     db: Session = Depends(get_db),
     school_checker: User = Depends(school_checker),
+    current_user: User = Depends(get_current_user),
     date: str = Depends(utils.validate_date)
 ):
+    class_protect(
+        class_id=class_id,
+        permitted_roles=["teacher", "admin"],
+        current_user=current_user,
+        db=db,
+    )
     return LessonInstancesCRUD.get_all_lesson_instances_for_class(
         db=db,
         class_id=class_id,
@@ -67,7 +74,7 @@ def get_all_lesson_instances_by_room_id(
         date=date
     )
 
-@router.get("/teachers/{teacher_id}", response_model=List[lesson_instance.LessonInstanceOut], dependencies=[Depends(admin_only)])
+@router.get("/teachers/{teacher_id}", response_model=List[lesson_instance.LessonInstanceOut])
 def get_all_lesson_instances_by_teacher_id(
     school_id: int,
     teacher_id: int,

@@ -29,6 +29,7 @@ router.include_router(lesson_instances.router)
 def get_school(
     school_id: int,
     db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker),
 ):
     return SchoolsCRUD.get_school_by_id(db=db, school_id=school_id)
 

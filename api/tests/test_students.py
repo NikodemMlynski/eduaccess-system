@@ -83,8 +83,8 @@ def test_get_students_empty_list(authorized_admin_client, session):
 
 
 def test_get_students_without_admin_token(client, session, school_admin_factory):
-    school, _, _ = school_admin_factory() 
-    school_id = school.id 
+    school, _, _ = school_admin_factory()
+    school_id = school.id
 
     res = client.get(f"/school/{school_id}/students")
 
@@ -203,7 +203,7 @@ def test_get_single_student(authorized_admin_client, session, user_factory):
 
 def test_get_not_existing_student(authorized_admin_client, session, school_admin_factory):
     school, client = authorized_admin_client
-    school_id = school.id 
+    school_id = school.id
 
     res = client.get(f"/school/{school_id}/students/1")
 
@@ -307,7 +307,7 @@ def test_delete_student_without_admin_token(client, session, school_admin_factor
 
 def test_assign_student_to_class(authorized_admin_client, user_factory, classes_factory):
     school, client = authorized_admin_client
-    school_id = school.id 
+    school_id = school.id
 
     student = user_factory(role="student", school_id=school_id)
     class_= classes_factory(school_id=school_id, class_name="4D")
@@ -362,3 +362,67 @@ def test_assign_student_to_class_as_regular_user(user_factory, classes_factory, 
     res = client.put(f"/school/{school_id}/students/{other_student.id}/classes/{class_.id}")
 
     assert res.status_code == 403
+
+def test_get_student_by_id_as_admin(authorized_admin_client, user_factory):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    student = user_factory(role="student", school_id=school_id)
+
+    res = client.get(f"/school/{school_id}/students/user_id/{student.user_id}")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id"] == student.id
+
+
+def test_get_student_by_id_as_teacher(authorized_teacher_client, user_factory):
+    teacher, client = authorized_teacher_client
+    school_id = teacher.user.school_id
+
+    student = user_factory(role="student", school_id=school_id)
+
+    res = client.get(f"/school/{school_id}/students/user_id/{student.user_id}")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id"] == student.id
+
+
+def test_get_student_by_id_as_current_user(authorized_student_client):
+    student, client = authorized_student_client
+    school_id = student.user.school_id
+    user_id = student.user_id
+
+    res = client.get(f"/school/{school_id}/students/user_id/{user_id}")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id"] == student.id
+
+
+def test_get_student_by_id_not_permitted(authorized_student_client, user_factory):
+    student, client = authorized_student_client
+    school_id = student.user.school_id
+
+    other_student = user_factory(role="student", school_id=school_id)
+
+    res = client.get(f"/school/{school_id}/students/user_id/{other_student.user_id}")
+    assert res.status_code == 403
+    assert res.json()["detail"] == "You are not permitted to access fate for another user"
+
+
+def test_get_student_by_id_not_found(authorized_admin_client):
+    school, client = authorized_admin_client
+    school_id = school.id
+
+    res = client.get(f"/school/{school_id}/students/user_id/999999")
+    assert res.status_code == 404
+    assert res.json()["detail"] == "Student not found"
+
+
+def test_get_student_by_id_unauthorized(client, user_factory, school_admin_factory):
+    school, _, _ = school_admin_factory()
+    school_id = school.id
+
+    student = user_factory(role="student", school_id=school_id)
+
+    res = client.get(f"/school/{school_id}/students/user_id/{student.user_id}")
+    assert res.status_code == 401
