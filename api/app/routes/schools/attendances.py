@@ -15,7 +15,7 @@ router = APIRouter(
     tags=["attendances"],
 )
 
-@router.get("/class/{class_id}/day/{day}", response_model=List[attendance.AttendanceOut])
+@router.get("/class/{class_id}/day/{day}", response_model=List[attendance.IAttendanceRaw])
 def get_class_attendance_by_day(
     school_id: int,
     class_id: int,
