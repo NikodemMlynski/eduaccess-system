@@ -33,6 +33,19 @@ def get_students(
         limit=limit,
     )
 
+@router.get("/class_id/{class_id}", response_model=List[student.StudentOut], dependencies=[Depends(admin_only)])
+def get_all_students_for_class(
+        school_id: int,
+        class_id: int,
+        db: Session = Depends(get_db),
+        school_checker: User = Depends(school_checker)
+):
+    return StudentCRUD.get_all_students_for_class(
+        db=db,
+        school_id=school_id,
+        class_id=class_id,
+    )
+
 @router.get("/{id}", response_model=student.StudentOut, dependencies=[Depends(admin_only)])
 def get_student(school_id: int, id: int, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
     return StudentCRUD.get_student(

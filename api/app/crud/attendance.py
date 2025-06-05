@@ -136,8 +136,8 @@ class AttendancesCRUD:
             .filter(
                 and_(
                     LessonInstance.class_id == class_id,
-                    Attendance.created_at >= start,
-                    Attendance.created_at <= end
+                    LessonInstance.start_time >= start,
+                    LessonInstance.start_time <= end
                 )
             )
             .all()
@@ -161,8 +161,8 @@ class AttendancesCRUD:
             .filter(
                 and_(
                 Attendance.student_id == student_id,
-                Attendance.created_at >= start,
-                Attendance.created_at <= end
+                    LessonInstance.start_time >= start,
+                    LessonInstance.start_time <= end
                 )
             )
             .all()

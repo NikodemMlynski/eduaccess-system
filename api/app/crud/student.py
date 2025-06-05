@@ -126,3 +126,15 @@ class StudentCRUD:
         db.commit()
         db.refresh(student)
         return student
+
+    @staticmethod
+    def get_all_students_for_class(db: Session, school_id: int, class_id: int):
+        students = db.query(Student).filter(
+            and_(
+                Student.school_id == school_id,
+                Student.class_id == class_id
+            )
+        ).all()
+
+        return students
+
