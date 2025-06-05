@@ -221,7 +221,7 @@ export function SchedulesPage() {
                         date={lessonInstancesSearchValues.class_date}
                         setDate={(date) => handleLessonInstanceSearchValuesChange("class_date", date)}
                     />
-                    <LessonInstanceSelect
+                    <LessonInsanceSelect
                         isLoading={isClassesLoading}
                         isError={isClassesError}
                         errorMessage={"Błąd pobierania nauczycieli"}
