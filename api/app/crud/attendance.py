@@ -171,21 +171,23 @@ class AttendancesCRUD:
 
     @staticmethod
     def get_student_attendance_stats_by_subject(
-        db: Session,
-        student_id: int,
-        date_from: datetime.date,
-        date_to: datetime.date
-    ) -> list:
-        present_case = case(
-            (Attendance.status == "present", 1),  # WHEN
-            else_=0  # ELSE
-        )
+            db: Session,
+            student_id: int,
+            date_from: datetime.date,
+            date_to: datetime.date
+    ) -> list[dict]:
+        # CASE-y liczące poszczególne statusy
+        present_case = case((Attendance.status == "present", 1), else_=0)
+        late_case = case((Attendance.status == "late", 1), else_=0)
+        absent_case = case((Attendance.status == "absent", 1), else_=0)
 
         results = (
             db.query(
                 LessonInstance.subject.label("subject"),
                 func.count(Attendance.id).label("total"),
                 func.sum(present_case).label("present_count"),
+                func.sum(late_case).label("late_count"),
+                func.sum(absent_case).label("absent_count"),
             )
             .join(LessonInstance, Attendance.lesson_id == LessonInstance.id)
             .filter(
@@ -201,8 +203,10 @@ class AttendancesCRUD:
             {
                 "subject": r.subject,
                 "present_percent": round(r.present_count / r.total * 100, 2) if r.total else 0.0,
-                "present_count": r.present_count,
-                "total": r.total,
+                "present_count": int(r.present_count),
+                "late_count": int(r.late_count),
+                "absent_count": int(r.absent_count),
+                "total": int(r.total),
             }
             for r in results
         ]

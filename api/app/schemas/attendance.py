@@ -31,4 +31,6 @@ class StudentAttendanceStatsOut(BaseModel):
     subject: str
     present_percent: float
     present_count: int
+    absent_count: int
+    late_count: int
     total: int
