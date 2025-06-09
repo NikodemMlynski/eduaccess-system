@@ -52,6 +52,7 @@ const AttendancesTable: FC<Props> = ({
       };
     });
   });
+  console.log(lessonTable);
 
   return (
     <div className="overflow-x-auto">
@@ -92,10 +93,11 @@ const AttendancesTable: FC<Props> = ({
                 const att = cell?.attendance;
                 return (
                  <AttendanceItem
+                     key={`${student.id}-${lessonColumn[studentIndex].lesson_id}`}
                      lessonIndex={lessonIndex}
                      att={att}
-                     lessonColumn={lessonColumn}
-                     studentIndex={studentIndex}
+                     lessonId={lessonColumn[studentIndex].lesson_id}
+                     studentId={lessonColumn[studentIndex].student_id}
                      />
                 );
               })}

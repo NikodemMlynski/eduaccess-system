@@ -1,15 +1,15 @@
 import {Check, Clock, Plus, SquarePen, X} from "lucide-react";
 import {IAttendanceIn, IAttendanceRaw, IAttendanceStatus} from "@/types/Attendance.ts";
 import {TableCell} from "@/components/ui/table.tsx";
-import {IAttandanceCell} from "@/components/features/Attendances/AttendancesClassTable.tsx";
 import {useCreateAttendances, useUpdateAttendance} from "@/hooks/attendances.ts";
 import {useAuth} from "@/context/AuthProvider.tsx";
-import {Dialog, DialogContent, DialogTrigger} from "@/components/ui/dialog.tsx";
+import {Dialog, DialogContent, DialogTitle, DialogTrigger} from "@/components/ui/dialog.tsx";
 import {useState} from "react";
 import {Button} from "@/components/ui/button.tsx";
 import {toast} from "react-toastify";
+import AttendanceModal from "@/components/features/Attendances/AttendanceModal.tsx";
 
-const attendanceStatusDictionary = {
+export const attendanceStatusDictionary = {
   "absent": (
       <div className="text-red-600">
         <X className="mx-auto h-6 w-6" />
@@ -30,17 +30,17 @@ const attendanceStatusDictionary = {
 interface IAttendanceItemProps {
   lessonIndex: number;
   att: IAttendanceRaw | null;
-  lessonColumn: IAttandanceCell[];
-  studentIndex: number;
+  lessonId: number;
+  studentId: number;
 }
 
 
 
 const AttendanceItem = ({
-    lessonColumn,
+    lessonId,
     lessonIndex,
     att,
-    studentIndex
+    studentId
 }: IAttendanceItemProps) => {
     const {user, token} = useAuth();
     const {
@@ -66,6 +66,7 @@ const AttendanceItem = ({
     };
 
     const handleClick = (type: "update" | "create", lessonId?: number, studentId?: number) => {
+        console.log(`lessonId: ${lessonId}, studentId: ${studentId} attId: ${att?.id}`);
         if (!selectedStatus || !lessonId || !studentId) return;
         const data: IAttendanceIn = {
             lesson_id: lessonId,
@@ -84,11 +85,9 @@ const AttendanceItem = ({
         createAttendanceMutation(data, {
             onSuccess: () => {
                 toast.success("Attendance added successfully.");
-                setOpen(false)
             },
             onError: () => {
                 toast.error("Attendance added failed");
-                setOpen(false)
             }
         })
     }
@@ -97,18 +96,19 @@ const AttendanceItem = ({
         updateAttendanceMutation(data, {
             onSuccess: () => {
                 toast.success("Attendance updated successfully.");
-                setOpen(false)
             },
             onError: () => {
                 toast.error("Attendance update failed");
-                setOpen(false)
             }
         })
     }
 
     return (
     <TableCell key={lessonIndex} className="text-center border relative">
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(state) => {
+  setOpen(state);
+  if (!state) setSelectedStatus(null); // ← reset stanu przy zamknięciu
+}}>
             <DialogTrigger asChild>
             <div className="flex items-center justify-center py-1">
                 {att ? (
@@ -122,40 +122,25 @@ const AttendanceItem = ({
                         onClick={() => setOpen(true)}
                         className="cursor-pointer">Add button</Plus>
                 )}
+                <div className="flex flex-col">
+                    <span className="text-sm">{lessonId}</span>
+                    <span className="text-sm">{studentId}</span>
+                    <span className="text-sm">{att?.id}</span>
+                </div>
+
+
 
             </div>
             </DialogTrigger>
 
-        <DialogContent className="w-[250px] h-[150px] p-4 py-10 flex flex-col gap-1">
-          <div className="flex justify-around mb-4">
-            <Button
-              variant={selectedStatus === "present" ? "default" : "outline"}
-              className="px-2"
-              onClick={() => handleStatusClick("present")}
-            >
-              <Check className="text-green-600" />
-            </Button>
-            <Button
-              variant={selectedStatus === "late" ? "default" : "outline"}
-              className="px-2"
-              onClick={() => handleStatusClick("late")}
-            >
-              <Clock className="text-yellow-600" />
-            </Button>
-            <Button
-              variant={selectedStatus === "absent" ? "default" : "outline"}
-              className="px-2"
-              onClick={() => handleStatusClick("absent")}
-            >
-              <X className="text-red-600" />
-            </Button>
-          </div>
-
-          <Button onClick={() =>
-              handleClick(att ? "update" : "create", lessonColumn[studentIndex].lesson_id, lessonColumn[studentIndex].student_id)} className="w-full cursor-pointer">
-            Ustaw
-          </Button>
-        </DialogContent>
+        <AttendanceModal
+                selectedStatus={selectedStatus}
+                handleStatusClick={setSelectedStatus}
+                att={att}
+                handleClick={handleClick}
+                lesson_id={lessonId}
+                student_id={studentId}
+                />
         </Dialog>
 
     </TableCell>
