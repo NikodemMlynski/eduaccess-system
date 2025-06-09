@@ -25,3 +25,14 @@ export interface IAttendanceIn {
     status: IAttendanceStatus;
     manual_adjustment: boolean;
 }
+
+export type IAttendanceStats = IAttendanceStatsItem[];
+
+export interface IAttendanceStatsItem {
+    subject: string;
+    present_percent: number;
+    present_count: number;
+    total: number;
+    absent_count: number;
+    late_count: number;
+}

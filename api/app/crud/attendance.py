@@ -177,7 +177,7 @@ class AttendancesCRUD:
             date_to: datetime.date
     ) -> list[dict]:
         # CASE-y liczące poszczególne statusy
-        present_case = case((Attendance.status == "present", 1), else_=0)
+        present_case = case((Attendance.status == "present" or Attendance.status == "late", 1), else_=0)
         late_case = case((Attendance.status == "late", 1), else_=0)
         absent_case = case((Attendance.status == "absent", 1), else_=0)
 
@@ -198,12 +198,11 @@ class AttendancesCRUD:
             .group_by(LessonInstance.subject)
             .all()
         )
-
         return [
             {
                 "subject": r.subject,
-                "present_percent": round(r.present_count / r.total * 100, 2) if r.total else 0.0,
-                "present_count": int(r.present_count),
+                "present_percent": round((int(r.total) - int(r.absent_count)) / r.total * 100, 2) if r.total else 0.0,
+                "present_count": (int(r.total) - int(r.absent_count)),
                 "late_count": int(r.late_count),
                 "absent_count": int(r.absent_count),
                 "total": int(r.total),

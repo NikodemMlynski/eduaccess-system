@@ -7,12 +7,14 @@ import {useState} from "react";
 import {Card, CardContent, CardHeader} from "@/components/ui/card.tsx";
 import LessonInstanceSelect from "@/components/features/Schedules/selecters/LessonInstanceSelect.tsx";
 import {SelectItem} from "@/components/ui/select.tsx";
+import LessonTemplateSelect from "@/components/features/Schedules/selecters/LessonTemplateSelect.tsx";
 
 interface IAttendancesSearchValues {
     class_id: number | null;
     student_id: number | null;
     student_date: Date | null;
     class_date: Date | null;
+    stats_student_id: number | null;
 }
 
 export default function AttendancesPage() {
@@ -23,6 +25,7 @@ export default function AttendancesPage() {
         student_id: null,
         student_date: null,
         class_date: null,
+        stats_student_id: null,
     });
     const {
         data: classes,
@@ -57,6 +60,12 @@ export default function AttendancesPage() {
             if (id === null) return
             const formated = `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, "0")}-${`${date.getDate()}`.padStart(2, "0")}`
             navigate(`${type}/${id}/dateStr/${formated}`);
+        }
+    }
+
+    const handleAttendancesStatsButtonClick = () => {
+        if(attendancesSearchValues.stats_student_id) {
+            navigate(`stats/${attendancesSearchValues.stats_student_id}`);
         }
     }
     return (
@@ -107,6 +116,25 @@ export default function AttendancesPage() {
                         label={"Dla ucznia"}
                         date={attendancesSearchValues.student_date}
                         setDate={(date) => handleAttendancesSearchValuesChange("student_date", date)}
+                    />
+                    <LessonTemplateSelect
+                        isLoading={isStudentLoading}
+                        isError={isStudentError}
+                        errorMessage={"Failed to load students"}
+                        content={
+                        <>
+                        {
+                            students && students.users.map((student) => (
+                                <SelectItem key={`${student.id}`} value={`${student.id}`}>{student.user.first_name} {student.user.last_name}</SelectItem>
+                            ))
+                        }
+                        </>
+                        }
+                        onValueChange={(value) => {
+                            handleAttendancesSearchValuesChange("stats_student_id", +value)
+                        }}
+                        onButtonClick={handleAttendancesStatsButtonClick}
+                        label={"Statystyki ucznia"}
                     />
                 </CardContent>
             </Card>

@@ -122,14 +122,6 @@ const AttendanceItem = ({
                         onClick={() => setOpen(true)}
                         className="cursor-pointer">Add button</Plus>
                 )}
-                <div className="flex flex-col">
-                    <span className="text-sm">{lessonId}</span>
-                    <span className="text-sm">{studentId}</span>
-                    <span className="text-sm">{att?.id}</span>
-                </div>
-
-
-
             </div>
             </DialogTrigger>
 
