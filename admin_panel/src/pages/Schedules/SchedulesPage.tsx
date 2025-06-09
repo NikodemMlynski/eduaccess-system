@@ -90,14 +90,14 @@ export function SchedulesPage() {
     }
 
     const [weeksAhead, setWeeksAhead] = useState<number>(0);
-    const generateLessonInstancesFromTemplatesMutation = useGenerateLessonInstancesFromTemplates(
+    const {mutate: generateLessonMutate, isPending} = useGenerateLessonInstancesFromTemplates(
         `school/${user?.school_id}/lesson_instances`,
         weeksAhead,
         token || "",
 
     )
     const generatorClick = () => {
-        generateLessonInstancesFromTemplatesMutation.mutate({}, {
+        generateLessonMutate({}, {
             onSuccess: () => {
                 toast.success("Successfully generated lesson instances")
             },
@@ -120,7 +120,7 @@ export function SchedulesPage() {
                             <Input className="w-[150px]" value={weeksAhead} onChange={(e) => setWeeksAhead(+e.target.value)} type="number" placeholder="Ile tygodni" />
                             Tygodni w przód
                         </Label>
-                       <Button className="cursor-pointer" onClick={generatorClick}>Generuj</Button>
+                       <Button className="cursor-pointer" onClick={generatorClick} disabled={isPending}>{isPending ? "Pending..." : "generate"}</Button>
                     </div>
 
                 </CardContent>
@@ -221,7 +221,7 @@ export function SchedulesPage() {
                         date={lessonInstancesSearchValues.class_date}
                         setDate={(date) => handleLessonInstanceSearchValuesChange("class_date", date)}
                     />
-                    <LessonInsanceSelect
+                    <LessonInstanceSelect
                         isLoading={isClassesLoading}
                         isError={isClassesError}
                         errorMessage={"Błąd pobierania nauczycieli"}

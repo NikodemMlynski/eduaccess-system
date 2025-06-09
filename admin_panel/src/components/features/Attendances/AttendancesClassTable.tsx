@@ -1,4 +1,3 @@
-import {Check, X, Clock, Plus, SquarePen} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -11,25 +10,7 @@ import { IAttendanceRaw } from "@/types/Attendance.ts";
 import { FC, useMemo } from "react";
 import { IStudent } from "@/types/Student.ts";
 import { ILessonInstance } from "@/types/schedule.ts";
-import {Button} from "@/components/ui/button.tsx";
-
-const attendanceStatusDictionary = {
-  "absent": (
-      <div className="text-red-600">
-        <X className="mx-auto h-6 w-6" />
-      </div>
-),
-  "present": (
-      <div className="text-green-600">
-        <Check className="mx-auto h-6 w-6" />
-      </div>
-  ),
-  "delayed": (
-      <div className="text-yellow-600">
-        <Clock className="mx-auto h-6 w-6" />
-      </div>
-  )
-}
+import AttendanceItem from "@/components/features/Attendances/AttendanceItem.tsx";
 
 interface Props {
   students: IStudent[];
@@ -37,7 +18,7 @@ interface Props {
   attendances: IAttendanceRaw[];
 }
 
-interface IAttandanceCell {
+export interface IAttandanceCell {
   student_id: number;
   lesson_id: number;
   attendance: IAttendanceRaw | null;
@@ -72,21 +53,9 @@ const AttendancesTable: FC<Props> = ({
     });
   });
 
-  const handleAddClick = (lessonId?: number, studentId?: number) => {
-    console.log(lessonId);
-    console.log(studentId);
-    alert("Tutaj trzeba zrobić dodawanie frekwencji")
-  }
-
-   const handleEditClick = (attendanceId?: number) => {
-    console.log(attendanceId);
-    alert("Tutaj trzeba zrobić dodawanie frekwencji")
-  }
-
-
   return (
     <div className="overflow-x-auto">
-      <Table>
+      <Table className="mt-4">
         <TableHeader>
           <TableRow>
             <TableHead>Uczeń</TableHead>
@@ -121,21 +90,13 @@ const AttendancesTable: FC<Props> = ({
               {lessonTable.map((lessonColumn, lessonIndex) => {
                 const cell = lessonColumn[studentIndex]; // ← dostęp do danych danego ucznia w danej lekcji
                 const att = cell?.attendance;
-
                 return (
-                  <TableCell key={lessonIndex} className="text-center border relative">
-                    <div className="flex items-center justify-center py-1">
-                    {att ? (
-                      <>
-                        {attendanceStatusDictionary[att.status]}
-                        <SquarePen onClick={() => handleEditClick(att.id)} className="absolute top-3 right-2 cursor-pointer"/>
-                      </>
-                    ) : (
-                      <Plus onClick={() => handleAddClick(lessonColumn[studentIndex].lesson_id, lessonColumn[studentIndex].student_id)} className="cursor-pointer">Add button</Plus>
-                    )}
-
-                    </div>
-                  </TableCell>
+                 <AttendanceItem
+                     lessonIndex={lessonIndex}
+                     att={att}
+                     lessonColumn={lessonColumn}
+                     studentIndex={studentIndex}
+                     />
                 );
               })}
             </TableRow>
@@ -147,3 +108,4 @@ const AttendancesTable: FC<Props> = ({
 };
 
 export default AttendancesTable;
+

@@ -1,13 +1,13 @@
 import {IStudent} from "@/types/Student.ts";
 import {ILessonInstance} from "@/types/schedule.ts";
 
-type attendanceStatus = "present" | "absent" | "delayed"
+export type IAttendanceStatus = "present" | "late" | "absent";
 
 export interface IAttendance {
     id: number;
     student: IStudent;
     lesson: ILessonInstance;
-    status: attendanceStatus;
+    status: IAttendanceStatus;
     manual_adjustment: boolean;
     created_at: Date;
 }
@@ -15,7 +15,13 @@ export interface IAttendanceRaw {
     id: number;
     student_id: number;
     lesson_id: number;
-    status: attendanceStatus;
+    status: IAttendanceStatus;
     manual_adjustment: boolean;
     created_at: Date;
+}
+export interface IAttendanceIn {
+    student_id: number;
+    lesson_id: number;
+    status: IAttendanceStatus;
+    manual_adjustment: boolean;
 }

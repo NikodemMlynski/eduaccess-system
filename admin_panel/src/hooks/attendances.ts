@@ -1,6 +1,7 @@
-import {useQuery} from "@tanstack/react-query";
-import {fetcher} from "@/hooks/utils/fetcher.ts";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {deleteFetcher, fetcher, postFethcer, updateFetcher} from "@/hooks/utils/fetcher.ts";
 import {API_URL} from "@/config/constants.ts";
+import {IAttendanceIn} from "@/types/Attendance.ts";
 
 export function useAttendances<T>(
     endpoint: string,
@@ -13,5 +14,30 @@ export function useAttendances<T>(
     return useQuery<T[]>({
         queryKey: ["attendances", type, token, id, dateStr],
         queryFn: () => fetcher<T[]>(url, token)
+    })
+}
+
+export function useCreateAttendances(
+    endpoint: string,
+    token?: string,
+) {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: IAttendanceIn) =>
+            postFethcer(`${API_URL}${endpoint}/`, data, token),
+        onSuccess: () => queryClient.invalidateQueries(["attendances"])
+    })
+}
+
+export function useUpdateAttendance(
+    endpoint: string,
+    token?: string,
+    id?: number
+) {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: IAttendanceIn) =>
+            updateFetcher(`${API_URL}${endpoint}/${id}`, data, token),
+        onSuccess: () => queryClient.invalidateQueries(["attendances", id])
     })
 }
