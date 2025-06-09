@@ -5,7 +5,7 @@ import {IAttendanceIn} from "@/types/Attendance.ts";
 
 export function useAttendances<T>(
     endpoint: string,
-    type: "students" | "classes",
+    type: "student" | "classes",
     token?: string,
     id?: number,
     dateStr?: string,

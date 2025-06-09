@@ -84,7 +84,7 @@ export function SchedulesPage() {
 
     const handleLessonButtonClick = (type: "classes" | "rooms" | "teachers", id: number | null, date: Date | null) => {
         if (date) {
-            const formated = `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, "0")}-${`${date.getDate() + 1}`.padStart(2, "0")}`
+            const formated = `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, "0")}-${`${date.getDate()}`.padStart(2, "0")}`
             navigate(`${type}/${id}/dateStr/${formated}`);
         }
     }

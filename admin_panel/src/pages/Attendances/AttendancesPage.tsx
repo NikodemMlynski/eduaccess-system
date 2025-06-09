@@ -55,7 +55,7 @@ export default function AttendancesPage() {
         console.log(date);
         if (date) {
             if (id === null) return
-            const formated = `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, "0")}-${`${date.getDate() + 1}`.padStart(2, "0")}`
+            const formated = `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, "0")}-${`${date.getDate()}`.padStart(2, "0")}`
             navigate(`${type}/${id}/dateStr/${formated}`);
         }
     }
