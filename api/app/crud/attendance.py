@@ -98,21 +98,21 @@ class AttendancesCRUD:
     @staticmethod
     def update_attendance(
             db: Session,
-            id: int,
+            attendance_id: int,
             attendance_data: attendance.AttendanceIn,
     ):
         AttendancesCRUD.check_if_conflict(
             db=db,
             attendance_data=attendance_data,
-            id=id
+            id=attendance_id
         )
         attendance = db.query(Attendance).filter(
-            Attendance.lesson_id == attendance_data.lesson_id,
+            Attendance.id == attendance_id,
         ).first()
         if not attendance:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Attendance with id: {id} not found"
+                detail=f"Attendance with id: {attendance_id} not found"
             )
 
         attendance.status = attendance_data.status

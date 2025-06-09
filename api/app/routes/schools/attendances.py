@@ -86,15 +86,16 @@ def delete_attendance(
         id=id,
     )
 
-@router.put("/{id}", response_model=attendance.AttendanceOut, dependencies=[Depends(admin_only)])
+@router.put("/{attendance_id}", response_model=attendance.AttendanceOut, dependencies=[Depends(admin_only)])
 def update_attendance(
         school_id: int,
+        attendance_id: int,
         attendance_data: attendance.AttendanceIn,
         db: Session = Depends(get_db),
         school_checker: User = Depends(school_checker),
 ):
     return AttendancesCRUD.update_attendance(
         db=db,
-        id=id,
+        attendance_id=attendance_id,
         attendance_data=attendance_data,
     )
