@@ -50,6 +50,21 @@ class LessonInstancesCRUD:
                 detail=f"Class: {lesson_instance.class_.class_name} have {lesson_instance.subject} at {lesson_instance.start_time}-{lesson_instance.end_time} with {lesson_instance.teacher.user.first_name} {lesson_instance.teacher.user.last_name} on {lesson_instance.room.room_name}"
             )
     @staticmethod
+    def get_lesson_instance_by_id(
+            db: Session,
+            lesson_id: int
+    ):
+        lesson_instance = db.query(LessonInstance).filter(
+            LessonInstance.id == lesson_id
+        ).first()
+        if not lesson_instance:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Lesson instance not found"
+            )
+        return lesson_instance
+
+    @staticmethod
     def create_lesson_instance(
             db: Session,
             lesson_instance_data: lesson_instance.LessonInstanceIn

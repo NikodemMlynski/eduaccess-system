@@ -5,6 +5,10 @@ import Profile from "@/components/Profile"
 const Index = () => {
     const {user, logout, token } = useAuth();
     const {data: school, isLoading, isError, error} = useSchool(`school`, user?.school_id, token || "");
+    // const {data: teacher, isLoading: teacherIsLoading,
+    //     isError: teacherIsError, error: teacherError
+    // } = useTeacher(`school/${user?.school_id}/teachers`, user?.id, token || "");
+
     if (isLoading) return <Text>Loading...</Text>;
     if (isError) return <Text>Error: {error.message}</Text>;
 

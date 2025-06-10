@@ -17,6 +17,18 @@ class LessonInstanceOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+class LessonInstanceCompactOut(BaseModel):
+    id: int
+    template_id: Optional[int]
+    class_id: int
+    room_id: int
+    teacher_id: int
+    subject: str
+    start_time: datetime
+    end_time: datetime
+    created_at: datetime
+    updated_at: datetime
+
 class LessonInstanceIn(BaseModel):
     template_id: Optional[int]
     class_id: int

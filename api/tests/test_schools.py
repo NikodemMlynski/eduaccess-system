@@ -104,8 +104,10 @@ def test_invalid_super_admin_code_action(client):
 # TESTY POBIERANIA WSZYSTKICH ADMINÓW: GET /admins/
 # ------------------------------
 
-def test_get_school_by_id_unauthorized(client):
-    res = client.get(f"/school/1")
+def test_get_school_by_id_unauthorized(client, school_admin_factory):
+    school, _, _ = school_admin_factory()
+    school_id = school.id
+    res = client.get(f"/school/{school_id}")
     assert res.status_code in (401, 403)
 
 def test_get_school_by_id_admin_does_not_belong_to(authorized_admin_client):

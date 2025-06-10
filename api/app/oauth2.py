@@ -10,7 +10,12 @@ from sqlalchemy.orm import Session
 from app.schemas.auth import TokenData 
 from app.models import User 
 from app.database import get_db 
-from app.config import settings 
+from app.config import settings
+
+from app.crud.student import StudentCRUD
+
+from app.crud.lesson_instance import LessonInstancesCRUD
+from app.crud.teacher import TeachersCRUD
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -55,3 +60,26 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 def school_checker( school_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if current_user.school_id != school_id:
             raise HTTPException(status_code=403, detail="You are not permitted to access data for a different school")
+
+def protect(user_id: int, permitted_roles: [str], current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not(current_user.id == user_id or current_user.role in permitted_roles):
+        raise HTTPException(status_code=403, detail="You are not permitted to access fate for another user")
+
+def class_protect(class_id: int, permitted_roles: [str], current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if (current_user.role in permitted_roles):
+        return
+    print(current_user.__dict__)
+    student = StudentCRUD.get_student_by_user_id(db=db, user_id=current_user.id, school_id=current_user.school_id)
+    if (not student or student.class_id != class_id):
+        raise HTTPException(status_code=403, detail="You are not permitted to access data for a different class")
+
+def attendances_protect(lesson_instance_id: int, permitted_roles: [str], current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if (current_user.role in permitted_roles):
+        return
+    if (current_user.role == "student"):
+        raise HTTPException(status_code=403, detail="You are not permitted to managa attendances as a student")
+    lesson_instance = LessonInstancesCRUD.get_lesson_instance_by_id(db=db, lesson_id=lesson_instance_id)
+    teacher = TeachersCRUD.get_teacher_by_user_id(db=db, user_id=current_user.id, school_id=current_user.school_id)
+
+    if (not teacher or teacher.id != lesson_instance.teacher_id):
+        raise HTTPException(status_code=403, detail="You are not permitted to manage attendances for lesson that you are not teaching")

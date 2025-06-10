@@ -84,20 +84,20 @@ export function SchedulesPage() {
 
     const handleLessonButtonClick = (type: "classes" | "rooms" | "teachers", id: number | null, date: Date | null) => {
         if (date) {
-            const formated = `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, "0")}-${`${date.getDate() + 1}`.padStart(2, "0")}`
+            const formated = `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, "0")}-${`${date.getDate()}`.padStart(2, "0")}`
             navigate(`${type}/${id}/dateStr/${formated}`);
         }
     }
 
     const [weeksAhead, setWeeksAhead] = useState<number>(0);
-    const generateLessonInstancesFromTemplatesMutation = useGenerateLessonInstancesFromTemplates(
+    const {mutate: generateLessonMutate, isPending} = useGenerateLessonInstancesFromTemplates(
         `school/${user?.school_id}/lesson_instances`,
         weeksAhead,
         token || "",
 
     )
     const generatorClick = () => {
-        generateLessonInstancesFromTemplatesMutation.mutate({}, {
+        generateLessonMutate({}, {
             onSuccess: () => {
                 toast.success("Successfully generated lesson instances")
             },
@@ -120,7 +120,7 @@ export function SchedulesPage() {
                             <Input className="w-[150px]" value={weeksAhead} onChange={(e) => setWeeksAhead(+e.target.value)} type="number" placeholder="Ile tygodni" />
                             Tygodni w przód
                         </Label>
-                       <Button className="cursor-pointer" onClick={generatorClick}>Generuj</Button>
+                       <Button className="cursor-pointer" onClick={generatorClick} disabled={isPending}>{isPending ? "Pending..." : "generate"}</Button>
                     </div>
 
                 </CardContent>

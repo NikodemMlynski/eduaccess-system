@@ -1,4 +1,6 @@
-from fastapi import APIRouter 
+from fastapi import APIRouter
+
+from .schools import attendances
 from .schools import students
 from .schools import admins
 from .schools import teachers
@@ -24,11 +26,13 @@ router.include_router(class_.router)
 router.include_router(rooms.router)
 router.include_router(lesson_templates.router)
 router.include_router(lesson_instances.router)
+router.include_router(attendances.router)
 
 @router.get("/", response_model=SchoolOut)
 def get_school(
     school_id: int,
     db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker),
 ):
     return SchoolsCRUD.get_school_by_id(db=db, school_id=school_id)
 

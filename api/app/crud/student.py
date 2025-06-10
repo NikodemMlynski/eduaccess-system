@@ -36,6 +36,20 @@ class StudentCRUD:
             user_id=student_id,
             school_id=school_id
         )
+
+    @staticmethod
+    def get_student_by_user_id(db: Session, user_id: int, school_id: int):
+        student = db.query(Student).filter(
+            and_(
+                Student.user_id == user_id,
+                Student.school_id == school_id
+            )
+        ).first()
+
+        if not student:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
+
+        return student
     
     @staticmethod 
     def get_all_students(db: Session, school_id: int, query: Optional[str] = None, page: int = 1, limit: int = 10):
@@ -126,3 +140,15 @@ class StudentCRUD:
         db.commit()
         db.refresh(student)
         return student
+
+    @staticmethod
+    def get_all_students_for_class(db: Session, school_id: int, class_id: int):
+        students = db.query(Student).filter(
+            and_(
+                Student.school_id == school_id,
+                Student.class_id == class_id
+            )
+        ).all()
+
+        return students
+

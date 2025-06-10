@@ -44,6 +44,7 @@ const LessonInstanceClassPage = () => {
             </LessonInstanceFormModal>
             <div className="flex flex-col w-[400px]">
                 <LessonInstanceDatePicker
+                    link={"schedules"}
                     dateStr={dateStr}
                     type={"classes"}
                     id={Number(classId)} />
