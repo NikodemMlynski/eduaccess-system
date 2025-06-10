@@ -3,7 +3,7 @@ from app.database import get_db
 import calendar
 from ...crud.attendance import AttendancesCRUD
 from ...schemas import attendance
-from ...role_checker import admin_only
+from ...role_checker import admin_only, teacher_admin
 from app.models import User
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -15,7 +15,7 @@ router = APIRouter(
     tags=["attendances"],
 )
 
-@router.get("/classes/{class_id}/day/{day}", response_model=List[attendance.IAttendanceRaw])
+@router.get("/classes/{class_id}/day/{day}", response_model=List[attendance.IAttendanceRaw], dependencies=[Depends(teacher_admin)] )
 def get_class_attendance_by_day(
     school_id: int,
     class_id: int,
