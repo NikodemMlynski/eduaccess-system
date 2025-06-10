@@ -5,7 +5,7 @@ from typing import List
 from ...schemas import student, user, utils
 from sqlalchemy.orm import Session 
 from app.role_checker import admin_only
-from ...oauth2 import school_checker, get_current_user
+from ...oauth2 import school_checker, get_current_user, protect
 from ...models import User
 from typing import Optional
 from fastapi import Query
@@ -54,6 +54,20 @@ def get_student(school_id: int, id: int, db: Session = Depends(get_db), school_c
         student_id=id,
     )
 
+@router.get("/user_id/{id}", response_model=student.StudentOutWithClass)
+def get_student_by_user_id(
+        school_id: int,
+        id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+        school_checker: User = Depends(school_checker)
+):
+    protect(user_id=id, permitted_roles=["admin", "teacher"], current_user=current_user, db=db)
+    return StudentCRUD.get_student_by_user_id(
+        db=db,
+        school_id=school_id,
+        user_id=id,
+    )
 @router.delete("/{id}", dependencies=[Depends(admin_only)])
 def delete_student(school_id: int, id: int, db: Session = Depends(get_db), school_checker: User = Depends(school_checker)):
     return StudentCRUD.delete_student(

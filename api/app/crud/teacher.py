@@ -8,6 +8,7 @@ from .base_user_crud import BaseUserCRUD
 from fastapi import HTTPException, status
 from typing import Optional
 from .user import UsersCRUD
+from sqlalchemy import and_
 
 class TeachersCRUD:
     @staticmethod
@@ -32,6 +33,20 @@ class TeachersCRUD:
             user_id=teacher_id,
             school_id=school_id
             )
+
+    @staticmethod
+    def get_teacher_by_user_id(db: Session, user_id: int, school_id: int):
+        teacher = db.query(Teacher).filter(
+            and_(
+                Teacher.user_id == user_id,
+                User.school_id == school_id
+            )
+        ).first()
+
+        if not teacher:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Teacher not found")
+
+        return teacher
     
     @staticmethod
     def get_all_teachers(db: Session, school_id: int, query: Optional[str] = None, page: int = 1, limit: int = 10):
