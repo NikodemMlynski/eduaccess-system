@@ -7,7 +7,7 @@ from ...role_checker import admin_only
 from app.models import User
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from ...oauth2 import school_checker, get_current_user
+from ...oauth2 import school_checker, get_current_user, attendances_protect
 from datetime import date
 
 router = APIRouter(
@@ -62,15 +62,23 @@ def get_student_attendance_stats_by_subject(
             date_from=date_from,
             date_to=date_to,
         )
-@router.post("/", response_model=attendance.AttendanceOut, dependencies=[Depends(admin_only)])
+@router.post("/", response_model=attendance.AttendanceOut)
 def create_attendance(
         school_id: int,
         attendance_data: attendance.AttendanceIn,
         db: Session = Depends(get_db),
         school_checker: User = Depends(school_checker),
+        current_user: User = Depends(get_current_user)
 ):
-    # lesson_id
-    #
+    # lesson_id: 288
+    # w@sienko.com
+    # student_id: 13
+    attendances_protect(
+        current_user=current_user,
+        permitted_roles=["admin"],
+        lesson_instance_id=attendance_data.lesson_id,
+        db=db
+    )
     return AttendancesCRUD.create_attendance(
         db=db,
         attendance_data=attendance_data,
@@ -88,14 +96,21 @@ def delete_attendance(
         id=id,
     )
 
-@router.put("/{attendance_id}", response_model=attendance.AttendanceOut, dependencies=[Depends(admin_only)])
+@router.put("/{attendance_id}", response_model=attendance.AttendanceOut)
 def update_attendance(
         school_id: int,
         attendance_id: int,
         attendance_data: attendance.AttendanceIn,
         db: Session = Depends(get_db),
         school_checker: User = Depends(school_checker),
+        current_user: User = Depends(get_current_user)
 ):
+    attendances_protect(
+        current_user=current_user,
+        permitted_roles=["admin"],
+        lesson_instance_id=attendance_data.lesson_id,
+        db=db
+    )
     return AttendancesCRUD.update_attendance(
         db=db,
         attendance_id=attendance_id,
