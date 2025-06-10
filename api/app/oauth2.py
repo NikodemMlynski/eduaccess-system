@@ -76,6 +76,8 @@ def class_protect(class_id: int, permitted_roles: [str], current_user: User = De
 def attendances_protect(lesson_instance_id: int, permitted_roles: [str], current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if (current_user.role in permitted_roles):
         return
+    if (current_user.role == "student"):
+        raise HTTPException(status_code=403, detail="You are not permitted to managa attendances as a student")
     lesson_instance = LessonInstancesCRUD.get_lesson_instance_by_id(db=db, lesson_id=lesson_instance_id)
     teacher = TeachersCRUD.get_teacher_by_user_id(db=db, user_id=current_user.id, school_id=current_user.school_id)
 

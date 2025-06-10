@@ -7,15 +7,15 @@ from sqlalchemy.orm import Session
 def attendance_factory(session: Session):
     def create_attendance(
         lesson_id: int,
-            student_id: int,
-            status: str,
-            manual_adjustment: bool
+        student_id: int,
+        status: str,
+        manual_adjustment: bool
     ):
         attendance = Attendance(
-            lesson_id=0,
-            student_id=0,
-            status=0,
-            manual_adjustment=0,
+            lesson_id=lesson_id,
+            student_id=student_id,
+            status=status,
+            manual_adjustment=manual_adjustment,
         )
         session.add(attendance)
         session.commit()
