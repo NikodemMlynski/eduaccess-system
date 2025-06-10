@@ -69,6 +69,8 @@ def create_attendance(
         db: Session = Depends(get_db),
         school_checker: User = Depends(school_checker),
 ):
+    # lesson_id
+    #
     return AttendancesCRUD.create_attendance(
         db=db,
         attendance_data=attendance_data,

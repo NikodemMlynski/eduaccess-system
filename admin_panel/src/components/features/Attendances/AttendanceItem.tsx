@@ -85,9 +85,11 @@ const AttendanceItem = ({
         createAttendanceMutation(data, {
             onSuccess: () => {
                 toast.success("Attendance added successfully.");
+                setOpen(false)
             },
             onError: () => {
                 toast.error("Attendance added failed");
+                setOpen(false)
             }
         })
     }
@@ -96,9 +98,11 @@ const AttendanceItem = ({
         updateAttendanceMutation(data, {
             onSuccess: () => {
                 toast.success("Attendance updated successfully.");
+                setOpen(false)
             },
             onError: () => {
                 toast.error("Attendance update failed");
+                setOpen(false)
             }
         })
     }
