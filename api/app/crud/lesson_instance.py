@@ -258,3 +258,25 @@ class LessonInstancesCRUD:
             )
         return lesson_instances
 
+    @staticmethod
+    def get_current_lesson_instance_for_class(
+            db: Session,
+            class_id: int,
+            current_time: datetime
+    ):
+        lesson_instance = db.query(LessonInstance).filter(
+            and_(
+                LessonInstance.class_id == class_id,
+                LessonInstance.start_time <= current_time,
+                LessonInstance.end_time >= current_time,
+            )
+        ).first()
+
+        if not lesson_instance:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Currently there is no lesson for class: {class_id}"
+            )
+
+        return lesson_instance
+

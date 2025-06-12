@@ -114,3 +114,16 @@ def update_lesson_instance(
         lesson_instance_update_data=lesson_instance_data
     )
 
+@router.post("/classes/{class_id}/current", response_model=lesson_instance.LessonInstanceOut)
+def get_current_lesson_instance_for_class(
+        school_id: int,
+        class_id: int,
+        current_time_obj: lesson_instance.CurrentTimeIn,
+        db: Session = Depends(get_db),
+        school_checker: User = Depends(school_checker)
+):
+    return LessonInstancesCRUD.get_current_lesson_instance_for_class(
+        db=db,
+        class_id=class_id,
+        current_time=current_time_obj.current_time
+    )
