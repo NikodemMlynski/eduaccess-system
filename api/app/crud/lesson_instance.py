@@ -259,24 +259,32 @@ class LessonInstancesCRUD:
         return lesson_instances
 
     @staticmethod
-    def get_current_lesson_instance_for_class(
+    def get_current_lesson_instance_for_class_or_teacher(
             db: Session,
-            class_id: int,
-            current_time: datetime
+            current_time: datetime,
+            class_id: Optional[int] = None,
+            teacher_id: Optional[int] = None,
     ):
-        lesson_instance = db.query(LessonInstance).filter(
-            and_(
-                LessonInstance.class_id == class_id,
-                LessonInstance.start_time <= current_time,
-                LessonInstance.end_time >= current_time,
-            )
-        ).first()
+        filters = [
+            LessonInstance.start_time <= current_time,
+            LessonInstance.end_time >= current_time,
+        ]
 
-        if not lesson_instance:
+        if class_id is not None:
+            filters.append(LessonInstance.class_id == class_id)
+        elif teacher_id is not None:
+            filters.append(LessonInstance.teacher_id == teacher_id)
+        else:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Currently there is no lesson for class: {class_id}"
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Either class_id or teacher_id must be provided"
             )
 
-        return lesson_instance
+        lesson_instance = db.query(LessonInstance).filter(and_(*filters)).first()
 
+        # if not lesson_instance:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_404_NOT_FOUND,
+        #         detail=f"Currently there is no lesson for given {'class' if class_id else 'teacher'}"
+        #     )
+        return lesson_instance
