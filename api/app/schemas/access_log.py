@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from datetime import datetime
-
-from api.app.schemas.room import RoomOut
-from api.app.schemas.user import UserOut
+from typing import Optional
+from .room import RoomOut
+from .user import UserOut
 
 
 class AccessLogOutRaw(BaseModel):
@@ -10,8 +10,9 @@ class AccessLogOutRaw(BaseModel):
     user_id: int
     room_id: int
     access_start_time: datetime
-    access_end_time: datetime
+    access_end_time: Optional[datetime]
     reason: str
+    access_status: str
     created_at: datetime
 
 class AccessLogOut(BaseModel):
@@ -19,8 +20,9 @@ class AccessLogOut(BaseModel):
     user: UserOut
     room: RoomOut
     access_start_time: datetime
-    access_end_time: datetime
+    access_end_time: Optional[datetime]
     reason: str
+    access_status: str
     created_at: datetime
 
 class AccessLogIn(BaseModel):

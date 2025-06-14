@@ -4,12 +4,14 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, case, func
 from typing import Optional
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 from app.crud.lesson_instance import LessonInstancesCRUD
 from app.crud.student import StudentCRUD
 
-from api.app.models import AccessLog
+from app.models import AccessLog
+
+from app.crud.teacher import TeachersCRUD
 
 
 class AccessLogsCRUD:
@@ -19,33 +21,60 @@ class AccessLogsCRUD:
         school_id: int,
         access_log_data: access_log.AccessLogIn
     ):
-        is_student_permitted = AccessLogsCRUD.check_if_student_have_lesson_in_room(
+        existing_access_log = AccessLogsCRUD.check_if_unclosed_access_log_exists(
             db=db,
-            school_id=school_id,
-            user_id=access_log_data.user_id,
             room_id=access_log_data.room_id,
-            access_time=access_log_data.access_time,
+            user_id=access_log_data.user_id,
         )
-        if is_student_permitted:
-            db_access_log = AccessLog(
-                user_id=access_log_data.user_id,
-                room_id=access_log_data.room_id,
-                access_start_time=access_log_data.access_time,
-                reason="Student currently have lesson in this room.",
-                access_status="granted"
+        if existing_access_log:
+            access_log_to_update = AccessLog(
+                id=existing_access_log.id,
+                user_id=existing_access_log.user_id,
+                room_id=existing_access_log.room_id,
+                access_start_time=existing_access_log.access_start_time,
+                access_end_time=access_log_data.access_time,
+                access_status=existing_access_log.access_status,
+                reason=existing_access_log.reason,
+                created_at=existing_access_log.created_at,
             )
+            updated_access_log =  AccessLogsCRUD.update_access_log(
+                db=db,
+                access_log_id=existing_access_log.id,
+                access_log_data=access_log_to_update
+            )
+            # websocket wysyłający do rasbperry pi request o otwarciu drzwi
+            return updated_access_log
         else:
-            db_access_log = AccessLog(
+            is_student_permitted = AccessLogsCRUD.check_if_student_have_lesson_in_room(
+                db=db,
+                school_id=school_id,
                 user_id=access_log_data.user_id,
                 room_id=access_log_data.room_id,
-                access_start_time=access_log_data.access_time,
-                reason="Student currently do not have lesson in this room.",
-                access_status="denied"
+                access_time=access_log_data.access_time,
             )
-        db.add(db_access_log)
-        db.commit()
-        db.refresh(db_access_log)
-        return db_access_log
+            if is_student_permitted:
+                db_access_log = AccessLog(
+                    user_id=access_log_data.user_id,
+                    room_id=access_log_data.room_id,
+                    access_start_time=access_log_data.access_time,
+                    reason="Student currently have lesson in this room.",
+                    access_status="granted"
+                )
+                # stworzyc funkcje która porówna LessonInstance.start_time i access_time i wstawi na tej bazie obecność / spóźnienie
+                # websocket wysyłający do rasbperry pi request o otwarciu drzwi
+            else:
+                db_access_log = AccessLog(
+                    user_id=access_log_data.user_id,
+                    room_id=access_log_data.room_id,
+                    access_start_time=access_log_data.access_time,
+                    reason="Student currently do not have lesson in this room.",
+                    access_status="denied"
+                )
+                # websocket wysyłający do nauczyciela powiadomienie o próbie wejścia do sali odrzuconej przez system
+            db.add(db_access_log)
+            db.commit()
+            db.refresh(db_access_log)
+            return db_access_log
 
     @staticmethod
     def update_access_log(
@@ -80,7 +109,15 @@ class AccessLogsCRUD:
             user_id: int,
             room_id: int,
     ):
-        pass
+        existing_access_log = db.query(AccessLog).filter(
+            and_(
+                AccessLog.user_id == user_id,
+                AccessLog.room_id == room_id,
+                AccessLog.access_end_time.is_(None),
+                AccessLog.access_status == "granted"
+            )
+        ).first()
+        return existing_access_log
 
     @staticmethod
     def check_if_student_have_lesson_in_room(
@@ -101,16 +138,79 @@ class AccessLogsCRUD:
                 detail=f'Student {user_id} not found.',
             )
 
-        lesson_instance = LessonInstancesCRUD.get_current_lesson_instance_for_class(
+        lesson_instance = LessonInstancesCRUD.get_current_lesson_instance_for_class_or_teacher(
             db=db,
             class_id=student.class_id,
             current_time=access_time,
         )
 
         if not lesson_instance:
+            return False
+
+        return lesson_instance.room_id == room_id
+
+    @staticmethod
+    def get_all_denied_access_logs_for_lesson_instance(
+            db: Session,
+            school_id: int,
+            user_id: int,
+            current_time: datetime
+    ):
+        lesson_instance = AccessLogsCRUD.check_if_teacher_have_lesson_in_room(
+            db=db,
+            school_id=school_id,
+            user_id=user_id,
+            current_time=current_time,
+        )
+        if not lesson_instance:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f'Lesson instance for class {student.class_id} not found.',
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f'Teacher {user_id} do not have lesson in this room.',
             )
 
-        return lesson_instance.room_id != room_id
+        ten_minutes_ago = current_time - timedelta(minutes=10)
+
+        denied_access_logs = db.query(AccessLog).filter(
+            and_(
+                AccessLog.room_id == lesson_instance.room_id,
+                AccessLog.access_start_time >= ten_minutes_ago,
+                AccessLog.access_start_time <= current_time,
+                AccessLog.access_status == "denied"
+            )
+        ).all()
+
+        return denied_access_logs
+
+    @staticmethod
+    def check_if_teacher_have_lesson_in_room(
+        db: Session,
+        school_id: int,
+        user_id: int,
+        current_time: datetime
+    ):
+        teacher = TeachersCRUD.get_teacher_by_user_id(
+            db=db,
+            school_id=school_id,
+            user_id=user_id,
+        )
+        if not teacher:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'Teacher {user_id} not found.',
+            )
+
+        lesson_instance = LessonInstancesCRUD.get_current_lesson_instance_for_class_or_teacher(
+            db=db,
+            current_time=current_time,
+            teacher_id=teacher.id,
+        )
+        if not lesson_instance:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'Lesson instance for teacher {teacher.id} not found.',
+            )
+
+        if lesson_instance.room_id == lesson_instance.room_id:
+            return lesson_instance
+        return None
+

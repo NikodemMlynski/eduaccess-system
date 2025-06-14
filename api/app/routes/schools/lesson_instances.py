@@ -122,7 +122,7 @@ def get_current_lesson_instance_for_class(
         db: Session = Depends(get_db),
         school_checker: User = Depends(school_checker)
 ):
-    return LessonInstancesCRUD.get_current_lesson_instance_for_class(
+    return LessonInstancesCRUD.get_current_lesson_instance_for_class_or_teacher(
         db=db,
         class_id=class_id,
         current_time=current_time_obj.current_time
