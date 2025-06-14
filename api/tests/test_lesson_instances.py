@@ -293,7 +293,7 @@ def test_get_all_lesson_instances_for_class_unauthorized(client, school_admin_fa
     klass = classes_factory(school_id=school_id, class_name="4D")
 
     res = client.get(f"/school/{school_id}/lesson_instances/classes/{klass.id}/?date_str=2025-05-10")
-    assert res.status_code == 403
+    assert res.status_code == 401
 
 def test_update_lesson_instance_invalid_data(
         authorized_admin_client,
@@ -557,3 +557,131 @@ def test_generate_lessons_from_template_unauthorized(client, school_admin_factor
 
     res = client.post(f"/school/{school_id}/lesson_instances/generate/weeks_ahead/0")
     assert res.status_code == 403
+
+
+def test_get_current_lesson_instance_for_class_success(
+    authorized_admin_client,
+    session,
+    lesson_template_factory,
+    room_factory,
+    user_factory,
+    classes_factory,
+    lesson_instance_factory
+):
+    school, client = authorized_admin_client
+    school_id = school.id
+    room = room_factory(school_id=school_id)
+    teacher = user_factory(school_id=school_id, role='teacher')
+    klass = classes_factory(school_id=school_id, class_name="4A")
+
+    template = lesson_template_factory(
+        school_id=school_id,
+        room_id=room.id,
+        teacher_id=teacher.id,
+        class_id=klass.id,
+        start_time="08:00",
+        end_time="08:45",
+        weekday=0
+    )
+
+    now = datetime(year=2025, month=6, day=16, hour=8, minute=15)
+    start_time = now - timedelta(minutes=15)
+    end_time = now + timedelta(minutes=15)
+
+    lesson_instance = lesson_instance_factory(
+        template_id=template.id,
+        class_id=klass.id,
+        room_id=room.id,
+        teacher_id=teacher.id,
+        subject="math",
+        start_time=start_time,
+        end_time=end_time
+    )
+
+    payload = {"current_time": now.isoformat()}
+    res = client.post(
+        f"/school/{school_id}/lesson_instances/classes/{klass.id}/current",
+        json=payload
+    )
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id"] == lesson_instance.id
+    assert data["subject"] == "math"
+    assert data["class_"]["id"] == klass.id
+
+
+def test_get_current_lesson_instance_for_class_not_found(
+    authorized_admin_client,
+    session,
+    classes_factory
+):
+    school, client = authorized_admin_client
+    school_id = school.id
+    klass = classes_factory(school_id=school_id, class_name="3B")
+
+    now = datetime(year=2025, month=6, day=16, hour=10, minute=0)
+
+    payload = {"current_time": now.isoformat()}
+    res = client.post(
+        f"/school/{school_id}/lesson_instances/classes/{klass.id}/current",
+        json=payload
+    )
+
+    assert res.status_code == 404
+    assert f"class: {klass.id}" in res.json()["detail"]
+
+
+def test_get_current_lesson_instance_for_class_edge_times(
+    authorized_admin_client,
+    session,
+    lesson_template_factory,
+    room_factory,
+    user_factory,
+    classes_factory,
+    lesson_instance_factory
+):
+    school, client = authorized_admin_client
+    school_id = school.id
+    room = room_factory(school_id=school_id)
+    teacher = user_factory(school_id=school_id, role='teacher')
+    klass = classes_factory(school_id=school_id, class_name="2C")
+
+    template = lesson_template_factory(
+        school_id=school_id,
+        room_id=room.id,
+        teacher_id=teacher.id,
+        class_id=klass.id,
+        start_time="09:00",
+        end_time="09:45",
+        weekday=0
+    )
+
+    start_time = datetime(year=2025, month=6, day=16, hour=9, minute=0)
+    end_time = datetime(year=2025, month=6, day=16, hour=9, minute=45)
+
+    lesson_instance = lesson_instance_factory(
+        template_id=template.id,
+        class_id=klass.id,
+        room_id=room.id,
+        teacher_id=teacher.id,
+        subject="physics",
+        start_time=start_time,
+        end_time=end_time
+    )
+
+    # Test o czasie start_time
+    res_start = client.post(
+        f"/school/{school_id}/lesson_instances/classes/{klass.id}/current",
+        json={"current_time": start_time.isoformat()}
+    )
+    assert res_start.status_code == 200
+    assert res_start.json()["id"] == lesson_instance.id
+
+    # Test o czasie end_time
+    res_end = client.post(
+        f"/school/{school_id}/lesson_instances/classes/{klass.id}/current",
+        json={"current_time": end_time.isoformat()}
+    )
+    assert res_end.status_code == 200
+    assert res_end.json()["id"] == lesson_instance.id

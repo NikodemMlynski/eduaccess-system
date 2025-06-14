@@ -8,6 +8,7 @@ from .schools import class_
 from .schools import rooms
 from .schools import lesson_templates
 from .schools import lesson_instances
+from .schools import access_logs
 from ..crud.school import SchoolsCRUD
 from ..schemas.super_admin import SchoolOut
 from ..role_checker import admin_only
@@ -27,6 +28,7 @@ router.include_router(rooms.router)
 router.include_router(lesson_templates.router)
 router.include_router(lesson_instances.router)
 router.include_router(attendances.router)
+router.include_router(access_logs.router)
 
 @router.get("/", response_model=SchoolOut)
 def get_school(

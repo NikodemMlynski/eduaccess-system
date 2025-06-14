@@ -23,4 +23,4 @@ class StudentOutWithClass(BaseModel):
     school_id: int
     id: int
     user: UserOut
-    class_: ClassOut
+    class_: Optional[ClassOut]

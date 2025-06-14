@@ -1,4 +1,4 @@
-from pydantic import BaseModel 
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import List
 
@@ -13,6 +13,8 @@ class RoomOut(BaseModel):
     created_at: datetime
     updated_at: datetime 
     school_id: int
+
+    model_config = ConfigDict(from_attributes=True)
 
 class PaginatedRooms(BaseModel):
     total_count: int 
