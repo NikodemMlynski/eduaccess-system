@@ -3,11 +3,11 @@ from app.database import get_db
 import calendar
 from ...crud.access_logs import AccessLogsCRUD
 from ...schemas import access_log
-from ...role_checker import admin_only, teacher_admin, student_only
+from ...role_checker import admin_only, teacher_admin, student_admin
 from app.models import User
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from ...oauth2 import school_checker, get_current_user, attendances_protect
+from ...oauth2 import school_checker, get_current_user, attendances_protect, protect
 from datetime import date, datetime
 
 
@@ -16,13 +16,16 @@ router = APIRouter(
     tags=["access-logs"]
 )
 #
-@router.post("/request", response_model = access_log.AccessLogOut, dependencies=[Depends(student_only)])
+@router.post("/request", response_model = access_log.AccessLogOut, dependencies=[Depends(student_admin)])
 def request_access_log_student(
     school_id: int,
     access_log_data: access_log.AccessLogIn,
     db: Session = Depends(get_db),
     school_checker: User = Depends(school_checker),
+    current_user: User = Depends(get_current_user),
+
 ):
+    protect(user_id=access_log_data.user_id, permitted_roles=["admin"], current_user=current_user, db=db)
     return AccessLogsCRUD.create_access_log(
         school_id=school_id,
         access_log_data=access_log_data,
@@ -30,7 +33,7 @@ def request_access_log_student(
     )
 
 @router.get("/request/teacher_id/{user_id}/current_time/{current_time}",
-            # response_model = access_log.AccessLogOut,
+            response_model = List[access_log.AccessLogOut],
             dependencies=[Depends(teacher_admin)])
 def get_all_denied_access_logs_for_teacher_actual_lesson(
     school_id: int,

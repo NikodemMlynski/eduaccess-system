@@ -214,3 +214,22 @@ class AccessLogsCRUD:
             return lesson_instance
         return None
 
+    @staticmethod
+    def approve_door_request(
+            db: Session,
+            access_log_id: int
+    ):
+        access_log = db.query(AccessLog).filter(
+            AccessLog.id == access_log_id,
+        )
+
+        if not access_log:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'Access log {access_log_id} not found.',
+            )
+        access_log.access_status = "granted"
+        db.commit()
+        db.refresh(access_log)
+        return access_log
+
