@@ -26,6 +26,9 @@ import LessonInstanceRoomPage from "@/pages/Schedules/LessonInstanceRoomPage.tsx
 import AttendancesClassPage from "@/pages/Attendances/AttendancesClassPage.tsx";
 import AttendancesStudentPage from "@/pages/Attendances/AttenedancesStudentPage.tsx";
 import AttendanceStatsPage from "@/pages/Attendances/AttendanceStatsPage.tsx";
+import AccessLogLayout from "@/layouts/AccessLogLayout.tsx";
+import AccessLogsRequestsPage from "@/pages/AccesLogs/AccessLogRequestsPage.tsx";
+import AccessLogsApprovalsPage from "@/pages/AccesLogs/AccessLogApprovalsPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -56,7 +59,21 @@ const router = createBrowserRouter(
             },
             {
               path: 'access-logs',
-              element: <AccessLogsPage/>
+              element: <AccessLogLayout/>,
+              children: [
+                {
+                  path: 'list',
+                  element: <AccessLogsPage/>,
+                },
+                {
+                  path: 'requests',
+                  element: <AccessLogsRequestsPage/>
+                },
+                {
+                  path: 'approvals',
+                  element: <AccessLogsApprovalsPage/>,
+                }
+              ]
             },
             {
               path: 'attendances',
