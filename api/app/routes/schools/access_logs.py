@@ -65,5 +65,17 @@ def handle_access_log_approval(
         access_log_id=log_id,
         approval_data=approval_data,
         db=db,
+        user=current_user,
     )
 
+@router.post("/open_close_door", response_model = access_log.AccessLogOut, dependencies=[Depends(teacher_admin)])
+def handle_open_close_door(
+        school_id: int,
+        access_log_data: access_log.AccessLogIn,
+        db: Session = Depends(get_db),
+        school_checker: User = Depends(school_checker),
+):
+    return AccessLogsCRUD.open_close_door(
+        access_log_data=access_log_data,
+        db=db
+    )

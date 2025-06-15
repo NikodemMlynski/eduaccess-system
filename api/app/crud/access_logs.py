@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, case, func
 from typing import Optional
 from datetime import datetime, time, timedelta
-
+from app.models import User
 from app.crud.lesson_instance import LessonInstancesCRUD
 from app.crud.student import StudentCRUD
 
@@ -221,23 +221,12 @@ class AccessLogsCRUD:
             db: Session,
             approval_data: access_log.AccessLogApproval,
             access_log_id: int,
+            user: User
     ):
         if approval_data.status not in ("granted", "denied"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f'Invalid approval status: {approval_data.status}',
-            )
-
-        teacher_have_lesson = AccessLogsCRUD.check_if_teacher_have_lesson_in_room(
-            db=db,
-            school_id=school_id,
-            current_time=approval_data.current_time,
-            user_id=approval_data.user_id,
-        )
-        if not teacher_have_lesson:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f'Teacher currently do not have lesson in this room.',
             )
 
         ten_minutes_ago = approval_data.current_time - timedelta(minutes=10)
@@ -256,12 +245,64 @@ class AccessLogsCRUD:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f'Access log {access_log_id} is outdated',
             )
-
+        if user.role == "teacher":
+            teacher_have_lesson = AccessLogsCRUD.check_if_teacher_have_lesson_in_room(
+                db=db,
+                school_id=school_id,
+                current_time=approval_data.current_time,
+                user_id=approval_data.user_id,
+            )
+            if not teacher_have_lesson:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f'Teacher currently do not have lesson in this room.',
+                )
         if access_log.access_status == "granted":
             return access_log
 
         access_log.access_status = approval_data.status
         db.commit()
         db.refresh(access_log)
+        # jeżeli status jest granted to wyślij do aplikacji mobilnej websocketem informacje o potwierdzeniu door requestu
+        # wyślij do raspberru pi że ma otworzyć drzwi
         return access_log
+
+    @staticmethod
+    def open_close_door(
+            db: Session,
+            access_log_data: access_log.AccessLogIn,
+    ):
+        existing_access_log = AccessLogsCRUD.check_if_unclosed_access_log_exists(
+            db=db,
+            room_id=access_log_data.room_id,
+            user_id=access_log_data.user_id,
+        )
+        if existing_access_log:
+            access_log_to_update = AccessLog(
+                id=existing_access_log.id,
+                user_id=existing_access_log.user_id,
+                room_id=existing_access_log.room_id,
+                access_start_time=existing_access_log.access_start_time,
+                access_end_time=access_log_data.access_time,
+                access_status=existing_access_log.access_status,
+                reason=existing_access_log.reason,
+                created_at=existing_access_log.created_at,
+            )
+            return AccessLogsCRUD.update_access_log(
+                db=db,
+                access_log_id=access_log_to_update.id,
+                access_log_data=access_log_to_update,
+            )
+        else:
+            new_access_log = AccessLog(
+                user_id=access_log_data.user_id,
+                room_id=access_log_data.room_id,
+                access_start_time=access_log_data.access_time,
+                access_status="granted",
+                reason="Teacher and admin can access any room.", #  In the future teacher will have field containing rooms they can enter
+            )
+            db.add(new_access_log)
+            db.commit()
+            db.refresh(new_access_log)
+            return new_access_log
 
