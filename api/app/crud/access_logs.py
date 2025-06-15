@@ -14,6 +14,7 @@ from app.models import AccessLog
 from app.crud.teacher import TeachersCRUD
 
 
+
 class AccessLogsCRUD:
     @staticmethod
     def create_access_log(
@@ -216,19 +217,50 @@ class AccessLogsCRUD:
 
     @staticmethod
     def approve_door_request(
+            school_id: int,
             db: Session,
-            access_log_id: int
+            approval_data: access_log.AccessLogApproval,
+            access_log_id: int,
     ):
+        if approval_data.status not in ("granted", "denied"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Invalid approval status: {approval_data.status}',
+            )
+
+        teacher_have_lesson = AccessLogsCRUD.check_if_teacher_have_lesson_in_room(
+            db=db,
+            school_id=school_id,
+            current_time=approval_data.current_time,
+            user_id=approval_data.user_id,
+        )
+        if not teacher_have_lesson:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f'Teacher currently do not have lesson in this room.',
+            )
+
+        ten_minutes_ago = approval_data.current_time - timedelta(minutes=10)
         access_log = db.query(AccessLog).filter(
             AccessLog.id == access_log_id,
-        )
+        ).first()
 
         if not access_log:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f'Access log {access_log_id} not found.',
+                detail=f'Access log {access_log_id} not found. Or is outdated',
             )
-        access_log.access_status = "granted"
+
+        if not(access_log.access_start_time <= approval_data.current_time and access_log.access_start_time >= ten_minutes_ago):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Access log {access_log_id} is outdated',
+            )
+
+        if access_log.access_status == "granted":
+            return access_log
+
+        access_log.access_status = approval_data.status
         db.commit()
         db.refresh(access_log)
         return access_log

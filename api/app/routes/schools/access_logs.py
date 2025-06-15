@@ -49,3 +49,21 @@ def get_all_denied_access_logs_for_teacher_actual_lesson(
         user_id=user_id,
         current_time=current_time,
     )
+
+@router.put("/handle_approval/{log_id}", response_model = access_log.AccessLogOut, dependencies=[Depends(teacher_admin)])
+def handle_access_log_approval(
+    school_id: int,
+    log_id: int,
+    approval_data: access_log.AccessLogApproval,
+    db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker),
+    current_user: User = Depends(get_current_user),
+):
+    protect(user_id=approval_data.user_id, permitted_roles=["admin"], current_user=current_user, db=db)
+    return AccessLogsCRUD.approve_door_request(
+        school_id=school_id,
+        access_log_id=log_id,
+        approval_data=approval_data,
+        db=db,
+    )
+

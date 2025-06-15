@@ -30,6 +30,11 @@ class AccessLogIn(BaseModel):
     room_id: int
     access_time: datetime
 
+class AccessLogApproval(BaseModel):
+    status: str
+    user_id: int
+    current_time: datetime
+
     # 1. sprawdzić czy nie istnieje access log bez access_end_time
     # dla user_id, room_id, access_time
 
