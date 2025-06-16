@@ -80,7 +80,7 @@ def handle_open_close_door(
         db=db
     )
 
-@router.get("/", dependencies=[Depends(admin_only)])
+@router.get("/", response_model=access_log.PaginatedAccessLogs ,dependencies=[Depends(admin_only)])
 def get_all_access_logs(
     school_id: int,
     db: Session = Depends(get_db),
@@ -91,12 +91,18 @@ def get_all_access_logs(
     page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(10, ge=1, description="Result limit per page"),
 ):
+    if start_date and end_date:
+        start_date = datetime.strptime(start_date, "%Y-%m-%d")
+        end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    else:
+        start_date = None
+        end_date = None
     return AccessLogsCRUD.get_all_access_logs(
         db=db,
         school_id=school_id,
         room_id=room_id,
-        start_date=datetime.strptime(start_date, "%Y-%m-%d"),
-        end_date=datetime.strptime(end_date, "%Y-%m-%d"),
+        start_date=start_date,
+        end_date=end_date,
         page=page,
         limit=limit,
     )
