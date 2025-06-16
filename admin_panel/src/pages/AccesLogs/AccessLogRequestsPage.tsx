@@ -17,6 +17,7 @@ import {toast} from "react-toastify";
 import {Loader2} from "lucide-react";
 import AccessLogsListItem from "@/components/features/AccessLogs/AccessLogsListItem.tsx";
 import {IAccessLog} from "@/types/AccessLog.ts";
+import {UserRequestApprovalListener} from "@/websockets/UserRequestApprovalListener.tsx";
 
 interface IRequestData {
     userId: number | null;
@@ -73,6 +74,7 @@ export default function AccessLogsRequestsPage(){
     }
     return (
         <div>
+            <UserRequestApprovalListener userId={requestData.userId}/>
         <Card className="w-full max-w-md shadow-md rounded-lg mx-auto my-10 flex flex-col">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold text-center">

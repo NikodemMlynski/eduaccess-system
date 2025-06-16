@@ -11,7 +11,7 @@ from typing import List, Optional
 from ...oauth2 import school_checker, get_current_user, attendances_protect, protect
 from datetime import date, datetime
 from app.websockets import teacher_ws
-
+from app.websockets import user_ws
 from ...schemas.access_log import AccessLogIn
 
 router = APIRouter(
@@ -40,8 +40,6 @@ async def request_access_log_student(
         access_log_data=access_log_data,
         db=db,
     )
-    print("teacher_id: ", teacher_id)
-    print("connected:")
     print(teacher_ws.connected_teachers)
     if teacher_id in teacher_ws.connected_teachers:
         websocket = teacher_ws.connected_teachers[teacher_id]
@@ -73,7 +71,7 @@ def get_all_denied_access_logs_for_teacher_actual_lesson(
     )
 
 @router.put("/handle_approval/{log_id}", response_model = access_log.AccessLogOut, dependencies=[Depends(teacher_admin)])
-def handle_access_log_approval(
+async def handle_access_log_approval(
     school_id: int,
     log_id: int,
     approval_data: access_log.AccessLogApproval,
@@ -82,13 +80,24 @@ def handle_access_log_approval(
     current_user: User = Depends(get_current_user),
 ):
     protect(user_id=approval_data.user_id, permitted_roles=["admin"], current_user=current_user, db=db)
-    return AccessLogsCRUD.approve_door_request(
+    reviewed_access_log =  AccessLogsCRUD.approve_door_request(
         school_id=school_id,
         access_log_id=log_id,
         approval_data=approval_data,
         db=db,
         user=current_user,
     )
+    reviewed_user_id = reviewed_access_log.user_id
+    if reviewed_user_id in user_ws.connected_users:
+        websocket = user_ws.connected_users[reviewed_user_id]
+        message = {"event": "access_log_reviewed", "room_id": reviewed_access_log.room_id}
+        import json
+        try:
+            import asyncio
+            asyncio.create_task(websocket.send_text(json.dumps(message)))
+        except Exception as e:
+            print(f"WebSocket send failed {e}")
+    return reviewed_access_log
 
 @router.post("/open_close_door", response_model = access_log.AccessLogOut, dependencies=[Depends(teacher_admin)])
 def handle_open_close_door(
