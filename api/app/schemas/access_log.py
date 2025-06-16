@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from .room import RoomOut
 from .user import UserOut
 
@@ -34,6 +34,11 @@ class AccessLogApproval(BaseModel):
     status: str
     user_id: int
     current_time: datetime
+
+class PaginatedAccessLogs(BaseModel):
+    total_count: int
+    has_next_page: bool
+    access_logs: List[AccessLogOut]
 
     # 1. sprawdzić czy nie istnieje access log bez access_end_time
     # dla user_id, room_id, access_time

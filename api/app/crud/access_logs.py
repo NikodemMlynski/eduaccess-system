@@ -1,11 +1,10 @@
 from app.schemas import attendance, access_log
-from app.models import Attendance, Student, LessonInstance
+from app.models import Attendance, Student, LessonInstance, User, Room
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, case, func
 from typing import Optional
 from datetime import datetime, time, timedelta
-from app.models import User
 from app.crud.lesson_instance import LessonInstancesCRUD
 from app.crud.student import StudentCRUD
 
@@ -306,3 +305,40 @@ class AccessLogsCRUD:
             db.refresh(new_access_log)
             return new_access_log
 
+    @staticmethod
+    def get_all_access_logs(
+            db: Session,
+            school_id: int,
+            room_id: Optional[str] = None,
+            page: int = 1,
+            limit: int = 15,
+            start_date: Optional[datetime] = None,
+            end_date: Optional[datetime] = None,
+    ):
+        base_query = db.query(AccessLog).join(Room).filter(Room.school_id == school_id)
+        if room_id:
+            base_query = base_query.filter(
+                AccessLog.room_id == room_id
+            )
+        print(start_date)
+        print(end_date)
+        if start_date and end_date:
+            base_query = base_query.filter(
+                and_(
+                    AccessLog.access_start_time >= start_date,
+                    AccessLog.access_start_time <= end_date
+                )
+            )
+
+        access_logs = base_query.offset((page - 1) * limit).limit(limit).all()
+
+        has_next = base_query.offset(page * limit).limit(1).all()
+        has_next_page = len(has_next) > 0
+
+        total_count = base_query.count()
+
+        return {
+            "has_next_page": has_next_page,
+            "total_count": total_count,
+            "access_logs": access_logs,
+        }
