@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from app.database import get_db
 import calendar
 from ...crud.access_logs import AccessLogsCRUD
+from ...crud.lesson_instance import LessonInstancesCRUD
 from ...schemas import access_log
 from ...role_checker import admin_only, teacher_admin, student_admin
 from app.models import User
@@ -9,7 +10,9 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from ...oauth2 import school_checker, get_current_user, attendances_protect, protect
 from datetime import date, datetime
+from app.websockets import teacher_ws
 
+from ...schemas.access_log import AccessLogIn
 
 router = APIRouter(
     prefix="/access-logs",
@@ -17,7 +20,7 @@ router = APIRouter(
 )
 #
 @router.post("/request", response_model = access_log.AccessLogOut, dependencies=[Depends(student_admin)])
-def request_access_log_student(
+async def request_access_log_student(
     school_id: int,
     access_log_data: access_log.AccessLogIn,
     db: Session = Depends(get_db),
@@ -26,11 +29,31 @@ def request_access_log_student(
 
 ):
     protect(user_id=access_log_data.user_id, permitted_roles=["admin"], current_user=current_user, db=db)
-    return AccessLogsCRUD.create_access_log(
+    teacher_id = AccessLogsCRUD.get_teacher_for_current_lesson_instance(
+        db=db,
+        school_id=school_id,
+        room_id=access_log_data.room_id,
+        access_time=access_log_data.access_time,
+    )
+    new_log = AccessLogsCRUD.create_access_log(
         school_id=school_id,
         access_log_data=access_log_data,
         db=db,
     )
+    print("teacher_id: ", teacher_id)
+    print("connected:")
+    print(teacher_ws.connected_teachers)
+    if teacher_id in teacher_ws.connected_teachers:
+        websocket = teacher_ws.connected_teachers[teacher_id]
+        message = {"event": "access_log_update", "student_id": access_log_data.user_id}
+        import json
+        try:
+            import asyncio
+            asyncio.create_task(websocket.send_text(json.dumps(message)))
+        except Exception as e:
+            print(f"WebSocket send failed {e}")
+
+    return new_log
 
 @router.get("/request/teacher_id/{user_id}/current_time/{current_time}",
             response_model = List[access_log.AccessLogOut],
@@ -42,7 +65,6 @@ def get_all_denied_access_logs_for_teacher_actual_lesson(
     db: Session = Depends(get_db),
     school_checker: User = Depends(school_checker),
 ):
-    print(current_time)
     return AccessLogsCRUD.get_all_denied_access_logs_for_lesson_instance(
         db=db,
         school_id=school_id,

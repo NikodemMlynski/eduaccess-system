@@ -7,6 +7,7 @@ import LessonTemplateSelect from "@/components/features/Schedules/selecters/Less
 import {useState} from "react";
 import AccessLogsApproval from "@/components/features/AccessLogs/AccessLogsApproval.tsx";
 import {Loader2} from "lucide-react";
+import {TeacherAccessLogListener} from "@/websockets/TeacherAccessLogListener.tsx";
 
 export default function AccessLogsApprovalsPage() {
     const {user, token} = useAuth();
@@ -24,7 +25,7 @@ export default function AccessLogsApprovalsPage() {
             limit: 100
         }
     )
-    const [selectedTeacherId, setSelectedTeacher] = useState<number | null>(null);
+    const [selectedTeacherId, setSelectedTeacher] = useState<string | null>(null);
 
     const {
         data: deniedAccessLogs,
@@ -33,16 +34,20 @@ export default function AccessLogsApprovalsPage() {
         error: deniedAccessLogsError,
     } = useDeniedAccessLogsForLesson(
         `school/${user?.school_id}/access-logs`,
-        selectedTeacherId, // selected teacher userId
+        selectedTeacherId ? +selectedTeacherId.split(" ")[0] : null,
+        selectedTeacherId ? +selectedTeacherId.split(" ")[1] : null,// selected teacher userId
         token || ""
     )
+
     let content = <></>
     if (isDeniedAccessLogsLoading) content = <Loader2 className="animate-spin w-10 h-10" />;
     if (isDeniedAccessLogsError) content = <p>{deniedAccessLogsError.message}</p>
-    if (deniedAccessLogs && deniedAccessLogs.length > 0) content = <AccessLogsApproval deniedAccessLogs={deniedAccessLogs || []} userId={selectedTeacherId}/>;
+    if (deniedAccessLogs && deniedAccessLogs.length > 0) content = <AccessLogsApproval deniedAccessLogs={deniedAccessLogs || []} userId={selectedTeacherId ? +selectedTeacherId.split(" ")[0] : null}/>;
     if (selectedTeacherId && deniedAccessLogs && deniedAccessLogs.length == 0) content = <h3>Currently there is no access logs for this teacher.</h3>
+
     return (
         <div>
+            <TeacherAccessLogListener teacherId={selectedTeacherId ? +selectedTeacherId.split(" ")[1] : null}/>
             <LessonTemplateSelect
                 isLoading={isTeachersLoading}
                 isError={isTeachersError}
@@ -51,13 +56,13 @@ export default function AccessLogsApprovalsPage() {
                     <>
                         {teachers && teachers.users.map((teacher) => (
                                 <SelectItem key={`${teacher.id}`}
-                                            value={`${teacher.user.id}`}>{teacher.user.first_name} {teacher.user.last_name}</SelectItem>
+                                            value={`${teacher.user.id} ${teacher.id}`}>{teacher.user.first_name} {teacher.user.last_name}</SelectItem>
                             )
                         )}
                     </>
                 }
                 onValueChange={(value) => {
-                    setSelectedTeacher(+value)
+                    setSelectedTeacher(value)
                 }}
                 onButtonClick={() => {}}
                 label={"Wybierz nauczyciela"}

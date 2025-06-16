@@ -21,12 +21,14 @@ export interface PaginatedAccessLogsResonse<T> {
 export function useDeniedAccessLogsForLesson(
     endpoint: string,
     userId: number | null,
+    teacherId: number | null,
     token?: string,
 ) {
+    console.log(userId);
     const currentTime = "2025-06-16T08:43:52.681559";
     const url = `${API_URL}${endpoint}/request/teacher_id/${userId}/current_time/${currentTime}`;
     return useQuery<IAccessLog[]>({
-        queryKey: ["access_logs", currentTime, userId],
+        queryKey: ["access_logs", teacherId],
         queryFn: async () => fetcher<IAccessLog[]>(
             url, token
         ),

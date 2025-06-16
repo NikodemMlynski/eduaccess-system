@@ -264,6 +264,7 @@ class LessonInstancesCRUD:
             current_time: datetime,
             class_id: Optional[int] = None,
             teacher_id: Optional[int] = None,
+            room_id: Optional[int] = None,
     ):
         filters = [
             LessonInstance.start_time <= current_time,
@@ -274,6 +275,8 @@ class LessonInstancesCRUD:
             filters.append(LessonInstance.class_id == class_id)
         elif teacher_id is not None:
             filters.append(LessonInstance.teacher_id == teacher_id)
+        elif room_id is not None:
+            filters.append(LessonInstance.room_id == room_id)
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

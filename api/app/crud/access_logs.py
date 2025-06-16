@@ -120,6 +120,60 @@ class AccessLogsCRUD:
         return existing_access_log
 
     @staticmethod
+    def get_current_lesson_instance_for_user(
+            db: Session,
+            school_id: int,
+            access_time: datetime,
+            user_id: Optional[int] = None,
+            room_id: Optional[int] = None,
+    ):
+        if user_id:
+            student = StudentCRUD.get_student_by_user_id(
+                db=db,
+                school_id=school_id,
+                user_id=user_id,
+            )
+            if not student:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f'Student {user_id} not found.',
+                )
+
+            lesson_instance = LessonInstancesCRUD.get_current_lesson_instance_for_class_or_teacher(
+                db=db,
+                class_id=student.class_id,
+                current_time=access_time,
+            )
+            return lesson_instance
+        if room_id:
+            lesson_instance = LessonInstancesCRUD.get_current_lesson_instance_for_class_or_teacher(
+                db=db,
+                room_id=room_id,
+                current_time=access_time,
+            )
+            return lesson_instance
+        return None
+
+    @staticmethod
+    def get_teacher_for_current_lesson_instance(
+            db: Session,
+            school_id: int,
+            room_id: int,
+            access_time: datetime
+    ):
+        lesson_instance = AccessLogsCRUD.get_current_lesson_instance_for_user(
+            db=db,
+            school_id=school_id,
+            room_id=room_id,
+            access_time=access_time,
+        )
+        print("lesson_instance:")
+        print(lesson_instance)
+        if not lesson_instance:
+            return None
+        return lesson_instance.teacher_id
+
+    @staticmethod
     def check_if_student_have_lesson_in_room(
             db: Session,
             school_id: int,
@@ -127,21 +181,11 @@ class AccessLogsCRUD:
             room_id: int,
             access_time: datetime,
     ):
-        student = StudentCRUD.get_student_by_user_id(
+        lesson_instance = AccessLogsCRUD.get_current_lesson_instance_for_user(
             db=db,
             school_id=school_id,
             user_id=user_id,
-        )
-        if not student:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f'Student {user_id} not found.',
-            )
-
-        lesson_instance = LessonInstancesCRUD.get_current_lesson_instance_for_class_or_teacher(
-            db=db,
-            class_id=student.class_id,
-            current_time=access_time,
+            access_time=access_time,
         )
 
         if not lesson_instance:
