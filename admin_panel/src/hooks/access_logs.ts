@@ -1,6 +1,6 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {IAccessLog, IAccessLogApproval} from "@/types/AccessLog.ts";
-import {fetcher, updateFetcher} from "@/hooks/utils/fetcher.ts";
+import {IAccessLog, IAccessLogApproval, IAccessLogIn} from "@/types/AccessLog.ts";
+import {fetcher, postFethcer, updateFetcher} from "@/hooks/utils/fetcher.ts";
 import {API_URL} from "@/config/constants.ts";
 
 export interface PaginatedAccessLogsParams {
@@ -74,5 +74,18 @@ export function useAccessLogs<T>(
                 return res as PaginatedAccessLogsResonse<T>;
             }),
         enabled: !!token && !!endpoint && dateEnabler,
+    })
+}
+
+export function useSendAccessLogRequest(
+    endpoint: string,
+    token?: string,
+) {
+    const url = `${API_URL}${endpoint}/request`;
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: IAccessLogIn) =>
+            postFethcer<IAccessLog>(url, data, token),
+        onSuccess: () => queryClient.invalidateQueries(["access-logs"])
     })
 }
