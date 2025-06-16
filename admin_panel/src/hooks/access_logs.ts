@@ -4,11 +4,11 @@ import {fetcher, updateFetcher} from "@/hooks/utils/fetcher.ts";
 import {API_URL} from "@/config/constants.ts";
 
 export interface PaginatedAccessLogsParams {
-    room_id?: string;
+    room_id: string | null;
     page?: number;
     limit?: number;
-    start_date?: string;
-    end_date?: string;
+    start_date: string | null;
+    end_date: string | null;
     paginated?: boolean;
 }
 
@@ -63,6 +63,7 @@ export function useAccessLogs<T>(
         if (limit) params.append("limit", String(limit));
         if (page) params.append("page", String(page));
     }
+    const dateEnabler = !start_date && !end_date || !!start_date && !!end_date;
 
     const url = `${API_URL}${endpoint}${paginated ? `?${params.toString()}` : ""}`;
 
@@ -72,6 +73,6 @@ export function useAccessLogs<T>(
             fetcher<PaginatedAccessLogsResonse<T>  | T[]>(url, token).then((res) => {
                 return res as PaginatedAccessLogsResonse<T>;
             }),
-        enabled: !!token && !!endpoint,
+        enabled: !!token && !!endpoint && dateEnabler,
     })
 }

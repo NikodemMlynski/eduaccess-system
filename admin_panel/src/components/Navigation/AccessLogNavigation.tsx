@@ -8,7 +8,7 @@ const navigationItems = [
 
 export default function AccessLogNavigation() {
   return (
-    <nav className="w-full flex justify-center h-[120px] items-center">
+    <nav className="w-full flex justify-center h-[80px] items-center">
         <div className="flex gap-5">
           {navigationItems.map((item) => (
             <NavLink

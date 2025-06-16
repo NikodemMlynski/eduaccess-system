@@ -3,7 +3,7 @@ import AccessLogNavigation from "@/components/Navigation/AccessLogNavigation.tsx
 
 export default function AccessLogLayout() {
   return (
-    <div className="flex-col h-screen m-0 p-0">
+    <div className="flex-col m-0 p-0">
       <AccessLogNavigation />
       <main className="flex-1 overflow-y-auto">
         <div className="p-4">
