@@ -7,11 +7,9 @@ from typing import Optional
 from datetime import datetime, time, timedelta
 from app.crud.lesson_instance import LessonInstancesCRUD
 from app.crud.student import StudentCRUD
-
 from app.models import AccessLog
-
 from app.crud.teacher import TeachersCRUD
-
+from app.crud.attendance import AttendancesCRUD
 
 
 class AccessLogsCRUD:
@@ -61,6 +59,12 @@ class AccessLogsCRUD:
                     access_status="granted"
                 )
                 # stworzyc funkcje która porówna LessonInstance.start_time i access_time i wstawi na tej bazie obecność / spóźnienie
+                AccessLogsCRUD.generate_attendance(
+                    db=db,
+                    school_id=school_id,
+                    access_time=access_log_data.access_time,
+                    user_id=access_log_data.user_id,
+                )
                 # websocket wysyłający do rasbperry pi request o otwarciu drzwi
             else:
                 db_access_log = AccessLog(
@@ -192,6 +196,57 @@ class AccessLogsCRUD:
             return False
 
         return lesson_instance.room_id == room_id
+
+    @staticmethod
+    def generate_attendance(
+            db: Session,
+            school_id: int,
+            access_time: datetime,
+            user_id: int,
+    ):
+        student = StudentCRUD.get_student_by_user_id(
+            db=db,
+            school_id=school_id,
+            user_id=user_id,
+        )
+        current_lesson_instance = AccessLogsCRUD.get_current_lesson_instance_for_user(
+            db=db,
+            school_id=school_id,
+            access_time=access_time,
+            user_id=user_id,
+        )
+        if not current_lesson_instance:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'Failed to generate attendance. Lesson instance not found',
+            )
+        minutes_late = (access_time - current_lesson_instance.start_time).total_seconds() / 60
+        existing_attendance = AttendancesCRUD.get_attendance_by_lesson_id(
+            db=db,
+            lesson_id=current_lesson_instance.id,
+            access_time=access_time,
+            student_id=student.id,
+        )
+        attendance_data = attendance.AttendanceIn(
+            student_id=student.id,
+            lesson_id=current_lesson_instance.id,
+            status=AttendancesCRUD.get_status_base_on_access_time(minutes_late),
+            manual_adjustment=False
+        )
+        if not existing_attendance:
+            print("dodanie")
+            AttendancesCRUD.create_attendance(
+                db=db,
+                attendance_data=attendance_data
+            )
+        else:
+            print("update")
+            if existing_attendance.status == "absent":
+                AttendancesCRUD.update_attendance(
+                    db=db,
+                    attendance_id=existing_attendance.id,
+                    attendance_data=attendance_data
+                )
 
     @staticmethod
     def get_all_denied_access_logs_for_lesson_instance(

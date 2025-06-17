@@ -100,6 +100,7 @@ class AttendancesCRUD:
             db: Session,
             attendance_id: int,
             attendance_data: attendance.AttendanceIn,
+            manual_adjustment: Optional[bool] = True
     ):
         AttendancesCRUD.check_if_conflict(
             db=db,
@@ -116,11 +117,38 @@ class AttendancesCRUD:
             )
 
         attendance.status = attendance_data.status
-        attendance.manual_adjustment = True
+        attendance.manual_adjustment = manual_adjustment
         db.commit()
         db.refresh(attendance)
         return attendance
+    @staticmethod
+    def get_attendance_by_lesson_id(
+            db: Session,
+            lesson_id: int,
+            access_time: datetime,
+            student_id: int,
+    ):
+        attendance = db.query(Attendance).join(LessonInstance).filter(
+            and_(
+                LessonInstance.start_time <= access_time,
+                LessonInstance.end_time >= access_time,
+                Attendance.lesson_id == lesson_id,
+                Attendance.student_id == student_id,
+            )
+        ).first()
 
+        return attendance
+
+    @staticmethod
+    def get_status_base_on_access_time(
+            minutes_late: int
+    ):
+        if minutes_late <= 7:
+            return "present"
+        elif minutes_late <= 18:
+            return "late"
+        else:
+            return "absent"
     @staticmethod
     def get_class_attendance_by_day(
         db: Session,
