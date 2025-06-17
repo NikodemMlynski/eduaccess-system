@@ -25,20 +25,21 @@ export function useDeniedAccessLogsForLesson(
     token?: string,
 ) {
     console.log(userId);
-    const currentTime = "2025-06-16T08:43:52.681559";
+    const currentTime = "2025-06-16T09:20:52.681559";
     const url = `${API_URL}${endpoint}/request/teacher_id/${userId}/current_time/${currentTime}`;
     return useQuery<IAccessLog[]>({
         queryKey: ["access_logs", teacherId],
         queryFn: async () => fetcher<IAccessLog[]>(
             url, token
         ),
-        enabled: !!userId
+        enabled: !!userId,
     })
 }
 
 export function useAccessLogApproval(
     endpoint: string,
     accessLogId: number,
+    teacherId: number | null,
     token?: string,
 ) {
     const url = `${API_URL}${endpoint}/handle_approval/${accessLogId}`;
@@ -46,7 +47,7 @@ export function useAccessLogApproval(
     return useMutation({
         mutationFn: (data: IAccessLogApproval) =>
             updateFetcher(url, data, token),
-        onSuccess: () => queryClient.invalidateQueries(["access-logs", accessLogId])
+        onSuccess: () => queryClient.invalidateQueries(["access-logs", teacherId])
     })
 }
 

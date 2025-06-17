@@ -8,21 +8,24 @@ import {toast} from "react-toastify";
 interface AccessLogsApprovalItemProps {
     accessLog: IAccessLog;
     userId: number | null;
+    teacherId: number | null;
 }
 
 const AccessLogsApprovalItem = ({
     accessLog,
     userId,
+    teacherId,
 }: AccessLogsApprovalItemProps) => {
     const {user, token} = useAuth();
     const approvaAccessLogMutation = useAccessLogApproval(
         `school/${user?.school_id}/access-logs`,
         accessLog.id,
+        teacherId,
         token || ""
     )
 
     const handleApprovalButtonClick = async (status: accessStatus) => {
-        const current_time = "2025-06-16T08:43:52.681559";
+        const current_time = "2025-06-16T09:20:52.681559";
         approvaAccessLogMutation.mutate({
             status,
             user_id: userId,

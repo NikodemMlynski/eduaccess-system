@@ -70,7 +70,7 @@ def get_all_denied_access_logs_for_teacher_actual_lesson(
         current_time=current_time,
     )
 
-@router.put("/handle_approval/{log_id}", response_model = access_log.AccessLogOut, dependencies=[Depends(teacher_admin)])
+@router.put("/handle_approval/{log_id}", dependencies=[Depends(teacher_admin)])
 async def handle_access_log_approval(
     school_id: int,
     log_id: int,
@@ -87,16 +87,23 @@ async def handle_access_log_approval(
         db=db,
         user=current_user,
     )
+    status = reviewed_access_log.access_status
     reviewed_user_id = reviewed_access_log.user_id
+    if status == "denied":
+        AccessLogsCRUD.delete_access_log(
+            db=db,
+            access_log_id=log_id,
+        )
     if reviewed_user_id in user_ws.connected_users:
         websocket = user_ws.connected_users[reviewed_user_id]
-        message = {"event": "access_log_reviewed", "room_id": reviewed_access_log.room_id}
+        message = {"event": "access_log_reviewed", "status": status}
         import json
         try:
             import asyncio
             asyncio.create_task(websocket.send_text(json.dumps(message)))
         except Exception as e:
             print(f"WebSocket send failed {e}")
+
     return reviewed_access_log
 
 @router.post("/open_close_door", response_model = access_log.AccessLogOut, dependencies=[Depends(teacher_admin)])

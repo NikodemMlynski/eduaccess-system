@@ -405,6 +405,22 @@ class AccessLogsCRUD:
             return new_access_log
 
     @staticmethod
+    def delete_access_log(
+            db: Session,
+            access_log_id: int
+    ):
+        access_log = db.query(AccessLog).filter(
+            AccessLog.id == access_log_id,
+        )
+        if not access_log:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'Access log {access_log_id} not found.',
+            )
+        access_log.delete()
+        db.commit()
+        return None
+    @staticmethod
     def get_all_access_logs(
             db: Session,
             school_id: int,

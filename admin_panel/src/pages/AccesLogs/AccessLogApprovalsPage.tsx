@@ -42,7 +42,11 @@ export default function AccessLogsApprovalsPage() {
     let content = <></>
     if (isDeniedAccessLogsLoading) content = <Loader2 className="animate-spin w-10 h-10" />;
     if (isDeniedAccessLogsError) content = <p>{deniedAccessLogsError.message}</p>
-    if (deniedAccessLogs && deniedAccessLogs.length > 0) content = <AccessLogsApproval deniedAccessLogs={deniedAccessLogs || []} userId={selectedTeacherId ? +selectedTeacherId.split(" ")[0] : null}/>;
+    if (deniedAccessLogs && deniedAccessLogs.length > 0) content = <AccessLogsApproval
+        deniedAccessLogs={deniedAccessLogs || []}
+        userId={selectedTeacherId ? +selectedTeacherId.split(" ")[0] : null}
+        teacherId={selectedTeacherId ? +selectedTeacherId.split(" ")[1] : null}
+    />;
     if (selectedTeacherId && deniedAccessLogs && deniedAccessLogs.length == 0) content = <h3>Currently there is no access logs for this teacher.</h3>
 
     return (
