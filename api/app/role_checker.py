@@ -20,4 +20,6 @@ class RoleChecker:
         
 admin_only = RoleChecker(["admin"])
 teacher_admin = RoleChecker(["admin", "teacher"])
+student_only = RoleChecker(["student"])
+student_admin = RoleChecker(["student", "admin"])
 

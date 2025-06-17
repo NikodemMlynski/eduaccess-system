@@ -37,3 +37,6 @@ class LessonInstanceIn(BaseModel):
     subject: str
     start_time: datetime
     end_time: datetime
+
+class CurrentTimeIn(BaseModel):
+    current_time: datetime

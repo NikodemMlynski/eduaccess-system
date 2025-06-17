@@ -14,6 +14,7 @@ interface LessonTemplateSelectProps {
   label: string;
   isSearch?: boolean;
   defaultValue?: number | null;
+  isLabelHidden?: boolean;
 }
 
 const LessonTemplateSelect = ({
@@ -26,10 +27,11 @@ const LessonTemplateSelect = ({
     label,
     isSearch = true,
     defaultValue,
+    isLabelHidden,
 }: LessonTemplateSelectProps) => {
   return (
-      <div className="flex justify-between w-[400px] px-5 py-2 items-center">
-          <Label>{label}</Label>
+      <div className={`flex justify-between ${isLabelHidden ? "" : "w-[400px]"} px-5 py-2 items-center`}>
+          {!isLabelHidden && (<Label>{label}</Label>)}
           <Select
               onValueChange={onValueChange}
               {...(defaultValue !== undefined ? { defaultValue: `${defaultValue}` } : {})}
