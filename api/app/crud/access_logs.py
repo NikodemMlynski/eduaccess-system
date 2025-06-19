@@ -143,6 +143,12 @@ class AccessLogsCRUD:
                     detail=f'Student {user_id} not found.',
                 )
 
+            if not student.class_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f'Student {user_id} is not assigned to any class.',
+                )
+
             lesson_instance = LessonInstancesCRUD.get_current_lesson_instance_for_class_or_teacher(
                 db=db,
                 class_id=student.class_id,
@@ -335,7 +341,7 @@ class AccessLogsCRUD:
         if not access_log:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f'Access log {access_log_id} not found. Or is outdated',
+                detail=f'Access log {access_log_id} not found',
             )
 
         if not(access_log.access_start_time <= approval_data.current_time and access_log.access_start_time >= ten_minutes_ago):
