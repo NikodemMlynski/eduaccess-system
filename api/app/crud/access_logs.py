@@ -261,7 +261,7 @@ class AccessLogsCRUD:
             user_id: int,
             current_time: datetime
     ):
-        lesson_instance = AccessLogsCRUD.check_if_teacher_have_lesson_in_room(
+        lesson_instance = AccessLogsCRUD.get_current_lesson_instance_for_teacher(
             db=db,
             school_id=school_id,
             user_id=user_id,
@@ -270,7 +270,7 @@ class AccessLogsCRUD:
         if not lesson_instance:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f'Teacher {user_id} do not have lesson in this room.',
+                detail=f'Teacher {user_id} currently do not have any lesson',
             )
 
         ten_minutes_ago = current_time - timedelta(minutes=10)
@@ -288,6 +288,23 @@ class AccessLogsCRUD:
 
     @staticmethod
     def check_if_teacher_have_lesson_in_room(
+            db: Session,
+            school_id: int,
+            user_id: int,
+            current_time: datetime,
+            room_id: int,
+    ):
+        lesson_instance = AccessLogsCRUD.get_current_lesson_instance_for_teacher(
+            db=db,
+            school_id=school_id,
+            user_id=user_id,
+            current_time=current_time,
+        )
+        if room_id == lesson_instance.room_id:
+            return lesson_instance
+        return None
+    @staticmethod
+    def get_current_lesson_instance_for_teacher(
         db: Session,
         school_id: int,
         user_id: int,
@@ -315,9 +332,7 @@ class AccessLogsCRUD:
                 detail=f'Lesson instance for teacher {teacher.id} not found.',
             )
 
-        if lesson_instance.room_id == lesson_instance.room_id:
-            return lesson_instance
-        return None
+        return lesson_instance
 
     @staticmethod
     def approve_door_request(
@@ -355,6 +370,7 @@ class AccessLogsCRUD:
                 school_id=school_id,
                 current_time=approval_data.current_time,
                 user_id=approval_data.user_id,
+                room_id=access_log.room_id,
             )
             if not teacher_have_lesson:
                 raise HTTPException(
