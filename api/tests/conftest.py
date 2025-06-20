@@ -9,6 +9,7 @@ from app.oauth2 import create_access_token
 from app import models 
 from .fixtures.users import user_factory
 from .fixtures.school import school_admin_factory
+from .fixtures.classes import classes_factory
 
 SQLALCHEMY_DATABASE_URL = settings.test_database_url
 
@@ -77,7 +78,30 @@ def authorized_student_client(client, student_token):
     client.headers.update({
         "Authorization": f"Bearer {token}"
     })
-    return student, client 
+    return student, client
+
+@pytest.fixture
+def test_student_class4D(client, school_admin_factory, user_factory, classes_factory):
+    school, _, _ = school_admin_factory()
+    school_id = school.id
+    klass = classes_factory(school_id=school_id, class_name="4D")
+    student = user_factory(role="student", school_id=school_id, email="student4d@example.com", class_id=klass.id)
+    return student, klass
+
+@pytest.fixture
+def student_class_4D_token(test_student_class4D):
+    student, klass = test_student_class4D
+    return student, klass, create_access_token({"user_id": student.user.id, "role": student.user.role})
+
+@pytest.fixture
+def authorized_student_class4D_client(client, student_class_4D_token):
+    student, klass, token = student_class_4D_token
+    client.headers.clear()
+    client.headers.update({
+        "Authorization": f"Bearer {token}"
+    })
+    return student, klass, client
+
 
 @pytest.fixture 
 def test_teacher(client, school_admin_factory, user_factory):
