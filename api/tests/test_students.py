@@ -406,7 +406,7 @@ def test_get_student_by_id_not_permitted(authorized_student_client, user_factory
 
     res = client.get(f"/school/{school_id}/students/user_id/{other_student.user_id}")
     assert res.status_code == 403
-    assert res.json()["detail"] == "You are not permitted to access fate for another user"
+    assert res.json()["detail"] == "You are not permitted to access data for another user"
 
 
 def test_get_student_by_id_not_found(authorized_admin_client):

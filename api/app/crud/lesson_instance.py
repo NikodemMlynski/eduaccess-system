@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from .classes import ClassesCRUD
+from .teacher import TeachersCRUD
 from .lesson_template import LessonTemplatesCRUD
 from typing import Optional
 from datetime import datetime, timedelta
@@ -262,18 +263,32 @@ class LessonInstancesCRUD:
     def get_current_lesson_instance_for_class_or_teacher(
             db: Session,
             current_time: datetime,
+            school_id: int,
             class_id: Optional[int] = None,
             teacher_id: Optional[int] = None,
             room_id: Optional[int] = None,
     ):
+
         filters = [
             LessonInstance.start_time <= current_time,
             LessonInstance.end_time >= current_time,
         ]
 
         if class_id is not None:
+            class_ = ClassesCRUD.get_class_by_id(db=db, id=class_id, school_id=school_id)
+            if not class_:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Provided class does not exist"
+                )
             filters.append(LessonInstance.class_id == class_id)
         elif teacher_id is not None:
+            teacher = TeachersCRUD.get_teacher(db=db, school_id=school_id, teacher_id=teacher_id)
+            if not teacher:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Provided class does not exist"
+                )
             filters.append(LessonInstance.teacher_id == teacher_id)
         elif room_id is not None:
             filters.append(LessonInstance.room_id == room_id)

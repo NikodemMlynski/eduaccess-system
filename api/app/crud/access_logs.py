@@ -153,6 +153,7 @@ class AccessLogsCRUD:
                 db=db,
                 class_id=student.class_id,
                 current_time=access_time,
+                school_id=school_id,
             )
             return lesson_instance
         if room_id:
@@ -160,6 +161,7 @@ class AccessLogsCRUD:
                 db=db,
                 room_id=room_id,
                 current_time=access_time,
+                school_id=school_id,
             )
             return lesson_instance
         return None
@@ -325,6 +327,7 @@ class AccessLogsCRUD:
             db=db,
             current_time=current_time,
             teacher_id=teacher.id,
+            school_id=school_id
         )
         if not lesson_instance:
             raise HTTPException(

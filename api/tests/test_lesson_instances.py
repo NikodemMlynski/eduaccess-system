@@ -618,18 +618,17 @@ def test_get_current_lesson_instance_for_class_not_found(
 ):
     school, client = authorized_admin_client
     school_id = school.id
-    klass = classes_factory(school_id=school_id, class_name="3B")
 
     now = datetime(year=2025, month=6, day=16, hour=10, minute=0)
 
     payload = {"current_time": now.isoformat()}
     res = client.post(
-        f"/school/{school_id}/lesson_instances/classes/{klass.id}/current",
+        f"/school/{school_id}/lesson_instances/classes/99/current",
         json=payload
     )
 
     assert res.status_code == 404
-    assert f"class: {klass.id}" in res.json()["detail"]
+    assert res.json()["detail"] == "This class does not exist in this school"
 
 
 def test_get_current_lesson_instance_for_class_edge_times(
