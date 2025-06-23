@@ -143,10 +143,17 @@ class AccessLogsCRUD:
                     detail=f'Student {user_id} not found.',
                 )
 
+            if not student.class_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f'Student {user_id} is not assigned to any class.',
+                )
+
             lesson_instance = LessonInstancesCRUD.get_current_lesson_instance_for_class_or_teacher(
                 db=db,
                 class_id=student.class_id,
                 current_time=access_time,
+                school_id=school_id,
             )
             return lesson_instance
         if room_id:
@@ -154,6 +161,7 @@ class AccessLogsCRUD:
                 db=db,
                 room_id=room_id,
                 current_time=access_time,
+                school_id=school_id,
             )
             return lesson_instance
         return None
@@ -255,7 +263,7 @@ class AccessLogsCRUD:
             user_id: int,
             current_time: datetime
     ):
-        lesson_instance = AccessLogsCRUD.check_if_teacher_have_lesson_in_room(
+        lesson_instance = AccessLogsCRUD.get_current_lesson_instance_for_teacher(
             db=db,
             school_id=school_id,
             user_id=user_id,
@@ -264,7 +272,7 @@ class AccessLogsCRUD:
         if not lesson_instance:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f'Teacher {user_id} do not have lesson in this room.',
+                detail=f'Teacher {user_id} currently do not have any lesson',
             )
 
         ten_minutes_ago = current_time - timedelta(minutes=10)
@@ -282,6 +290,23 @@ class AccessLogsCRUD:
 
     @staticmethod
     def check_if_teacher_have_lesson_in_room(
+            db: Session,
+            school_id: int,
+            user_id: int,
+            current_time: datetime,
+            room_id: int,
+    ):
+        lesson_instance = AccessLogsCRUD.get_current_lesson_instance_for_teacher(
+            db=db,
+            school_id=school_id,
+            user_id=user_id,
+            current_time=current_time,
+        )
+        if room_id == lesson_instance.room_id:
+            return lesson_instance
+        return None
+    @staticmethod
+    def get_current_lesson_instance_for_teacher(
         db: Session,
         school_id: int,
         user_id: int,
@@ -302,6 +327,7 @@ class AccessLogsCRUD:
             db=db,
             current_time=current_time,
             teacher_id=teacher.id,
+            school_id=school_id
         )
         if not lesson_instance:
             raise HTTPException(
@@ -309,9 +335,7 @@ class AccessLogsCRUD:
                 detail=f'Lesson instance for teacher {teacher.id} not found.',
             )
 
-        if lesson_instance.room_id == lesson_instance.room_id:
-            return lesson_instance
-        return None
+        return lesson_instance
 
     @staticmethod
     def approve_door_request(
@@ -335,7 +359,7 @@ class AccessLogsCRUD:
         if not access_log:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f'Access log {access_log_id} not found. Or is outdated',
+                detail=f'Access log {access_log_id} not found',
             )
 
         if not(access_log.access_start_time <= approval_data.current_time and access_log.access_start_time >= ten_minutes_ago):
@@ -349,6 +373,7 @@ class AccessLogsCRUD:
                 school_id=school_id,
                 current_time=approval_data.current_time,
                 user_id=approval_data.user_id,
+                room_id=access_log.room_id,
             )
             if not teacher_have_lesson:
                 raise HTTPException(

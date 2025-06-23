@@ -63,7 +63,7 @@ def school_checker( school_id: int, current_user: User = Depends(get_current_use
 
 def protect(user_id: int, permitted_roles: [str], current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not(current_user.id == user_id or current_user.role in permitted_roles):
-        raise HTTPException(status_code=403, detail="You are not permitted to access fate for another user")
+        raise HTTPException(status_code=403, detail="You are not permitted to access data for another user")
 
 def class_protect(class_id: int, permitted_roles: [str], current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if (current_user.role in permitted_roles):
