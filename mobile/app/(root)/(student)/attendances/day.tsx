@@ -63,9 +63,7 @@ const StudentAttendanceByDay = () => {
             onRetry={() => attendancesRefetch()}
             />
     )
-    console.log("attendances:")
-    console.log(attendances);
-    if(!studentIsLoading && !attendancesIsError && !attendancesIsError && !studentIsError) content = (
+    if(!studentIsLoading && !attendancesIsLoading && !attendancesIsError && !studentIsError) content = (
         <AttendancesList attendances={attendances || []}/>
     )
       if (attendances?.length == 0) content = <View className="h-[70%] w-full flex items-center justify-center"><Text className="text-red-200 text-2xl font-light">Brak frekwencji</Text></View>

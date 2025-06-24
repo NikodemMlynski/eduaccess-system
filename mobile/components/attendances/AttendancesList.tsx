@@ -11,7 +11,7 @@ interface AttendancesListProps {
 
 const AttendancesList = ({ attendances }: AttendancesListProps) => {
   return (
-    <ScrollView className="mb-[180px] p-4">
+    <ScrollView className="mb-[200px] p-4">
       {attendances?.map((attendance) => {
         const { id, lesson, status } = attendance;
         const subject = lesson.subject;
