@@ -27,6 +27,14 @@ class IAttendanceRaw(BaseModel):
     manual_adjustment: bool
     created_at: datetime
 
+class AttendanceCompact(BaseModel):
+    id: int
+    student: StudentOut
+    lesson_id: int
+    status: str
+    manual_adjustment: bool
+    created_at: datetime
+
 class StudentAttendanceStatsOut(BaseModel):
     subject: str
     present_percent: float

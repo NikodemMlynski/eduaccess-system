@@ -29,7 +29,7 @@ const AttendanceStats = ({ attendancesStats }: AttendanceStatsProps) => {
   return (
   <View>
       <Text className="text-text text-center py-2 pb-4 text-xl">Całkowita frekwencja: <Text className="font-bold">{generalPresentPercentage}%</Text></Text>
-    <ScrollView className="px-4 py-3 mb-[120px]">
+    <ScrollView className="px-4 py-3 mb-[140px]">
       {attendancesStats.map((item) => {
         const percent = Math.min(item.present_percent, 100);
         const strokeDashoffset =

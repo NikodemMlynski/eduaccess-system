@@ -15,7 +15,21 @@ export function useAttendances<T>(
     console.log(url);
     return useQuery<T[]>({
         queryKey: ["attendances", type, token, id, dateStr],
-        queryFn: () => fetcher<T[]>(url, token)
+        queryFn: () => fetcher<T[]>(url, token),
+    })
+}
+
+export function useTeacherAttendances<T>(
+    endpoint: string,
+    token?: string,
+    teacher_id?: number,
+    dateStr?: string,
+) {
+    const url = `${apiUrl}${endpoint}/teacher/${teacher_id}?date_str=${dateStr}`;
+    console.log(url);
+    return useQuery<T[]>({
+        queryKey: ["attendances", teacher_id, dateStr],
+        queryFn: () => fetcher<T[]>(url, token),
     })
 }
 

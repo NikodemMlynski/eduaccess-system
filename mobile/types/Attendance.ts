@@ -19,6 +19,18 @@ export interface IAttendanceRaw {
     manual_adjustment: boolean;
     created_at: Date;
 }
+export interface TeacherAttendanceItem {
+    lesson: ILessonInstance;
+    attendances: IAttendanceCompact[];
+}
+export interface IAttendanceCompact {
+    id: number;
+    student: IStudent;
+    lesson_id: number;
+    status: IAttendanceStatus;
+    manual_adjustment: boolean;
+    created_at: Date;
+}
 export interface IAttendanceIn {
     student_id: number;
     lesson_id: number;

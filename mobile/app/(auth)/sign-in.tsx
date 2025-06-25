@@ -29,12 +29,11 @@ const SignIn = () => {
             try {
                 await login(data.access_token)
             } catch (error) {
-                Toast.error(error.message || "Failed to login");
+                Toast.error("Failed to login");
             }
         },
         onError: (error) => {
-            console.log(" wywolal sie drugi");
-            Toast.error(error.message || "Failed to login");
+            Toast.error("Invalid data");
         }
     });
     };

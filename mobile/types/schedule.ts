@@ -1,3 +1,7 @@
+import {IClass} from "@/types/Class";
+import {ITeacher} from "@/types/Teacher";
+import {IRoom} from "@/types/Room";
+
 export interface ILessonInstance {
     id: number;
     template_id?: number;
