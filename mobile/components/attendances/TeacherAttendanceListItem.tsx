@@ -2,6 +2,9 @@ import {IAttendanceCompact, IAttendanceStatus} from "@/types/Attendance";
 import {Text, TouchableOpacity, View} from "react-native";
 import clsx from "clsx";
 import {X, Check, Clock} from "lucide-react-native";
+import {useUpdateAttendance} from "@/hooks/attendances";
+import {useAuth} from "@/context/AuthContext";
+import {Toast} from "toastify-react-native";
 
 const attendanceStatusIconMap = {
   absent: X,
@@ -26,18 +29,39 @@ export const getAttendanceIcon = (
 
 interface TeacherAttendanceListItemProps {
     attendance: IAttendanceCompact;
+    teacher_id: number;
+    dateStr: string;
 }
 
 const TeacherAttendanceListItem = ({
-    attendance
+    attendance,
+    teacher_id,
+    dateStr,
 }: TeacherAttendanceListItemProps) => {
-    // TODO:
-    // aktualnie w tym komponencie wyświetlane są obeczności które już istnieją
-    // wrzucić tutaj tyle obiektów ile jest uczniów w klasie
-    // dla niektórych dodać obecność jeżeli taka istnieje
-    //      - po kliknięciu funkcja update
-    // niektóre będą puste
-    //      - po kliknięciu funkcja create
+    const {user, token} = useAuth();
+    // nie trzeba pobierać wszystkich studentów ponieważ system sam z siebie wpisuje
+    // automatyczne obecności po 7 minutach od rozpoczęcia lekcji
+    const updateAttendanceMutation = useUpdateAttendance(
+        `school/${user?.school_id}/attendances`,
+        token || "",
+        attendance.id,
+        teacher_id,
+        dateStr
+    )
+    const handleUpdate = (status: IAttendanceStatus) => {
+        if (!status) return;
+        updateAttendanceMutation.mutate({
+            student_id: attendance.student.id,
+            lesson_id: attendance.lesson_id,
+            status: status,
+            manual_adjustment: true,
+        }, {
+            onError: (err) => {
+                Toast.error(err.message || "Failed to update attendance");
+            }
+        })
+    }
+
     return (
         <View
             key={attendance.id}
@@ -45,7 +69,7 @@ const TeacherAttendanceListItem = ({
           >
             <View className="flex flex-row gap-2 items-center pb-4">
 
-                <Text className="text-white font-medium">
+                <Text className="text-white font-medium w-[70%]">
                     {attendance.student.user.first_name} {attendance.student.user.last_name}
                 </Text>
                 {getAttendanceIcon(attendance.status, attendanceStatusColorMap[attendance.status])}
@@ -56,7 +80,7 @@ const TeacherAttendanceListItem = ({
               {["absent", "late", "present"].map((status) => (
                 <TouchableOpacity
                   key={status}
-                  onPress={() => console.log(status)}
+                  onPress={() => handleUpdate(status as IAttendanceStatus)}
                   className={clsx(
                     "px-3 py-1 rounded-3xl w-8 h-8 flex items-center justify-center text-text",
                     status === "present"

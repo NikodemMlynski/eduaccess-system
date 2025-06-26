@@ -1,4 +1,3 @@
-import {API_URL} from "@env";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {fetcher, postFethcer, updateFetcher} from "@/utils/fetcher";
 import {IAttendanceIn, IAttendanceStats} from "@/types/Attendance";
@@ -25,6 +24,8 @@ export function useTeacherAttendances<T>(
     teacher_id?: number,
     dateStr?: string,
 ) {
+    console.log("pobranie teacher:");
+    console.log(["attendances", teacher_id, dateStr]);
     const url = `${apiUrl}${endpoint}/teacher/${teacher_id}?date_str=${dateStr}`;
     console.log(url);
     return useQuery<T[]>({
@@ -59,27 +60,19 @@ export function useAttendanceStats(
     })
 }
 
-export function useCreateAttendances(
-    endpoint: string,
-    token?: string,
-) {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (data: IAttendanceIn) =>
-            postFethcer(`${API_URL}${endpoint}/`, data, token),
-        onSuccess: () => queryClient.invalidateQueries(["attendances"])
-    })
-}
-
 export function useUpdateAttendance(
     endpoint: string,
     token?: string,
     id?: number,
+    teacher_id?: number,
+    dateStr?: string,
 ) {
+    console.log(id);
+    console.log(["attendances", teacher_id, dateStr])
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (data: IAttendanceIn) =>
             updateFetcher(`${apiUrl}${endpoint}/${id}`, data, token),
-        onSuccess: () => queryClient.invalidateQueries(["attendances", id])
+        onSuccess: () => queryClient.invalidateQueries(["attendances", teacher_id, dateStr])
     })
 }
