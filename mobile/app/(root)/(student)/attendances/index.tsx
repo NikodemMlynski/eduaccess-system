@@ -9,10 +9,20 @@ const Index = () => {
   return (
     <SafeAreaView className="flex-1 bg-background py-0">
       <View className="flex flex-row justify-between px-5 py-3 pt-12 bg-background">
-        <Text className="text-2xl text-white font-semibold">Dashboard</Text>
+        <Text className="text-2xl text-white font-semibold">Attendances</Text>
       </View>
 
       <View className="flex flex-row justify-around bg-background  py-4">
+          <TouchableOpacity onPress={() => setActiveTab("day")}>
+          <Text
+            className={`text-lg font-semibold ${
+              activeTab === "day" ? "text-accent" : "text-subtext"
+            }`}
+          >
+            Przegląd dzienny
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity onPress={() => setActiveTab("stats")}>
           <Text
             className={`text-lg font-semibold ${
@@ -23,15 +33,7 @@ const Index = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => setActiveTab("day")}>
-          <Text
-            className={`text-lg font-semibold ${
-              activeTab === "day" ? "text-accent" : "text-subtext"
-            }`}
-          >
-            Data
-          </Text>
-        </TouchableOpacity>
+
       </View>
 
       {/* Treść */}

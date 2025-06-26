@@ -15,6 +15,6 @@ export function useLessonInstance(
     return useQuery<ILessonInstance[]>({
         queryKey: ["lessonInstances", id, dateStr],
         queryFn: () => fetcher<ILessonInstance[]>(url, token),
-
+        enabled: !!id
     })
 }

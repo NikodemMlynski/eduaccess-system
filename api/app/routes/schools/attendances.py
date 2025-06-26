@@ -2,14 +2,15 @@ from fastapi import APIRouter, Depends, Query
 from app.database import get_db
 import calendar
 from ...crud.attendance import AttendancesCRUD
+from ...crud.teacher import TeachersCRUD
 from ...schemas import attendance
 from ...role_checker import admin_only, teacher_admin
 from app.models import User
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from ...oauth2 import school_checker, get_current_user, attendances_protect
+from ...oauth2 import school_checker, get_current_user, attendances_protect, protect
 from datetime import date
-
+from app import utils
 router = APIRouter(
     prefix="/attendances",
     tags=["attendances"],
@@ -115,4 +116,23 @@ def update_attendance(
         db=db,
         attendance_id=attendance_id,
         attendance_data=attendance_data,
+    )
+
+@router.get("/teacher/{teacher_id}", response_model=List[attendance.AttendanceCompact], dependencies=[Depends(teacher_admin)])
+def get_attendances_for_day_by_teacher(
+        school_id: int,
+        teacher_id: int,
+        date: str = Depends(utils.validate_date),
+        db: Session = Depends(get_db),
+        school_checker: User = Depends(school_checker),
+        current_user: User = Depends(get_current_user)
+):
+    teacher = TeachersCRUD.get_teacher(db=db, teacher_id=teacher_id, school_id=school_id)
+
+    protect(user_id=teacher.user.id, permitted_roles=["admin"], current_user=current_user, db=db)
+
+    return AttendancesCRUD.get_attendances_for_day_by_teacher(
+        db=db,
+        teacher_id=teacher_id,
+        day=date,
     )

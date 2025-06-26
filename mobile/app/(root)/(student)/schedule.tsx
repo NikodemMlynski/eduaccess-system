@@ -56,7 +56,7 @@ const ScheduleScreen = () => {
           onRetry={() => refetchLessonInstances()}
       />
   )
- if (!studentIsError && !lessonIsLoading && !studentIsError && !lessonIsError) content = <LessonInstancesMobile lesson_instances={lessons || []} />
+ if (!studentIsLoading && !lessonIsLoading && !studentIsError && !lessonIsError) content = <LessonInstancesMobile lesson_instances={lessons || []} />
   if (lessons?.length == 0) content = <View className="h-[70%] w-full flex items-center justify-center"><Text className="text-red-200 text-2xl font-light">Brak lekcji</Text></View>
   return (
     <SafeAreaView className="flex-1 bg-black py-0">

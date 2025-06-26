@@ -237,3 +237,26 @@ class AttendancesCRUD:
             }
             for r in results
         ]
+
+    @staticmethod
+    def get_attendances_for_day_by_teacher(
+            db: Session,
+            teacher_id: int,
+            day: datetime.date,
+    ) -> list:
+        start = datetime.combine(day, time.min)
+        end = datetime.combine(day, time.max)
+        attendances = (
+            db.query(Attendance)
+            .join(Student, Attendance.student_id == Student.id)
+            .join(LessonInstance, Attendance.lesson_id == LessonInstance.id)
+            .filter(
+                and_(
+                    LessonInstance.start_time >= start,
+                    LessonInstance.start_time <= end,
+                    LessonInstance.teacher_id == teacher_id,
+                )
+            )
+            .all()
+        )
+        return attendances
