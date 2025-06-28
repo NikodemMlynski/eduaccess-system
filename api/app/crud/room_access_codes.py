@@ -88,3 +88,11 @@ class RoomAccessCodesCRUD:
             db.commit()
             db.refresh(room_access_code)
         return "successfully generated"
+
+    @staticmethod
+    def get_all_room_access_codes(
+            db: Session,
+            school_id: int
+    ):
+        room_access_codes = db.query(RoomAccessCodes).filter(school_id == school_id).all()
+        return room_access_codes

@@ -67,3 +67,14 @@ def generate_room_access_codes(
     RoomAccessCodesCRUD.generate_room_access_codes_for_all_rooms(
         db=db
     )
+
+@router.get("/", dependencies=[Depends(admin_only)], response_model=List[room_access_codes.RoomAccessCodeOut])
+def get_all_room_access_codes(
+        school_id: int,
+        db: Session = Depends(get_db),
+        school_checker: User = Depends(school_checker),
+):
+    return RoomAccessCodesCRUD.get_all_room_access_codes(
+        db=db,
+        school_id=school_id,
+    )

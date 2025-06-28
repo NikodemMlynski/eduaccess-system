@@ -1,5 +1,5 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {IAccessLog, IAccessLogApproval, IAccessLogIn} from "@/types/AccessLog.ts";
+import {IAccessLog, IAccessLogApproval, IAccessLogIn, IAccessLogRequestIn} from "@/types/AccessLog.ts";
 import {fetcher, postFethcer, updateFetcher} from "@/hooks/utils/fetcher.ts";
 import {API_URL} from "@/config/constants.ts";
 
@@ -87,7 +87,7 @@ export function useSendAccessLogRequest(
     const url = `${API_URL}${endpoint}/request`;
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data: IAccessLogIn) =>
+        mutationFn: (data: IAccessLogRequestIn) =>
             postFethcer<IAccessLog>(url, data, token),
         onSuccess: () => queryClient.invalidateQueries(["access-logs"])
     })
