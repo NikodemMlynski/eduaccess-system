@@ -62,3 +62,29 @@ class RoomAccessCodesCRUD:
         room_access_code.delete()
         db.commit()
         return None
+
+    @staticmethod
+    def check_room_access_code(
+            db: Session,
+            room_id: int,
+            provided_code: str
+    ):
+        RoomAccessCodesCRUD.check_if_room_exist(db, room_id)
+        room_access_code = RoomAccessCodesCRUD.get_room_access_code(db, room_id)
+        return room_access_code.access_code == provided_code
+
+    @staticmethod
+    def generate_room_access_codes_for_all_rooms(
+            db: Session,
+    ):
+        rooms = db.query(Room).all()
+        for room in rooms:
+            generated_code = generate_4_letter_code()
+            room_access_code = RoomAccessCodes(
+                access_code=generated_code,
+                room_id=room.id,
+            )
+            db.add(room_access_code)
+            db.commit()
+            db.refresh(room_access_code)
+        return "successfully generated"

@@ -58,3 +58,12 @@ def get_room_access_code(
         room_id=room_id,
         db=db
     )
+
+@router.post("/generate", dependencies=[Depends(admin_only)])
+def generate_room_access_codes(
+        db: Session = Depends(get_db),
+        school_checker: User = Depends(school_checker),
+):
+    RoomAccessCodesCRUD.generate_room_access_codes_for_all_rooms(
+        db=db
+    )

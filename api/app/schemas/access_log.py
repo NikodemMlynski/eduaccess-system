@@ -30,6 +30,12 @@ class AccessLogIn(BaseModel):
     room_id: int
     access_time: datetime
 
+class AccessLogRequestIn(BaseModel):
+    user_id: int
+    room_id: int
+    access_time: datetime
+    access_code: str
+
 class AccessLogApproval(BaseModel):
     status: str
     user_id: int

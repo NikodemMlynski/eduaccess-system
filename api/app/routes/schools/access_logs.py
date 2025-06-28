@@ -22,7 +22,7 @@ router = APIRouter(
 @router.post("/request", response_model = access_log.AccessLogOut, dependencies=[Depends(student_admin)])
 async def request_access_log_student(
     school_id: int,
-    access_log_data: access_log.AccessLogIn,
+    access_log_data: access_log.AccessLogRequestIn,
     db: Session = Depends(get_db),
     school_checker: User = Depends(school_checker),
     current_user: User = Depends(get_current_user),
