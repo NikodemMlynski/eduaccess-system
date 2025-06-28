@@ -6,12 +6,10 @@ import {format} from "date-fns";
 import {useLessonInstance} from "@/hooks/schedule";
 import Loader from "@/components/Loader";
 import ErrorMessage from "@/components/ErrorMessage";
-import LessonInstancesMobile from "@/components/schedule/LessonList";
 import LessonInstanceDatePickerMobile from "@/components/schedule/LessonInstanceDayPicker";
 import {useTeacherAttendances} from "@/hooks/attendances";
-import {IAttendance, IAttendanceCompact, IAttendanceRaw} from "@/types/Attendance";
-import TeachersAttendanceList, {TeacherAttendanceItem} from "@/components/attendances/TeachersAttendanceList";
-import {ILessonInstance} from "@/types/schedule";
+import { IAttendanceCompact, TeacherAttendanceItem} from "@/types/Attendance";
+import TeachersAttendanceList  from "@/components/attendances/TeachersAttendanceList";
 
 const Index = () => {
     const { user, token } = useAuth();
