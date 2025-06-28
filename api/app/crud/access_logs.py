@@ -10,15 +10,25 @@ from app.crud.student import StudentCRUD
 from app.models import AccessLog
 from app.crud.teacher import TeachersCRUD
 from app.crud.attendance import AttendancesCRUD
-
+from app.crud.room_access_codes import RoomAccessCodesCRUD
 
 class AccessLogsCRUD:
     @staticmethod
     def create_access_log(
         db: Session,
         school_id: int,
-        access_log_data: access_log.AccessLogIn
+        access_log_data: access_log.AccessLogRequestIn
     ):
+        is_access_code_valid = RoomAccessCodesCRUD.check_room_access_code(
+            db=db,
+            room_id=access_log_data.room_id,
+            provided_code=access_log_data.access_code
+        )
+        if not is_access_code_valid:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid access code",
+            )
         existing_access_log = AccessLogsCRUD.check_if_unclosed_access_log_exists(
             db=db,
             room_id=access_log_data.room_id,
@@ -43,6 +53,7 @@ class AccessLogsCRUD:
             # websocket wysyłający do rasbperry pi request o otwarciu drzwi
             return updated_access_log
         else:
+
             is_student_permitted = AccessLogsCRUD.check_if_student_have_lesson_in_room(
                 db=db,
                 school_id=school_id,
@@ -75,6 +86,10 @@ class AccessLogsCRUD:
                     access_status="denied"
                 )
                 # websocket wysyłający do nauczyciela powiadomienie o próbie wejścia do sali odrzuconej przez system
+            RoomAccessCodesCRUD.regenerate_room_access_code(
+                db=db,
+                room_id=access_log_data.room_id,
+            )
             db.add(db_access_log)
             db.commit()
             db.refresh(db_access_log)

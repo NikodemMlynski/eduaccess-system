@@ -14,6 +14,7 @@ from datetime import datetime
 from datetime import datetime, timedelta
 from .fixtures.attendances import attendance_factory
 from .fixtures.access_logs import access_logs_factory
+from .fixtures.room_access_codes import room_access_codes_factory
 
 
 def test_request_access_log_student_granted_by_schedule(
@@ -24,10 +25,12 @@ def test_request_access_log_student_granted_by_schedule(
         room_factory,
         user_factory,
         classes_factory,
+        room_access_codes_factory
 ):
     student, klass, client = authorized_student_class4D_client
     school_id = student.user.school_id
     room = room_factory(school_id=school_id)
+    room_access_code = room_access_codes_factory(room.id)
     teacher = user_factory(school_id=school_id, role='teacher', email="teacher1@example.com")
     template = lesson_template_factory(
         school_id=school_id,
@@ -55,7 +58,8 @@ def test_request_access_log_student_granted_by_schedule(
     payload = {
         "user_id": student.user.id,
         "room_id": room.id,
-        "access_time": start_time.isoformat()
+        "access_time": start_time.isoformat(),
+        "access_code": room_access_code.access_code,
     }
 
     res = client.post(f"/school/{school_id}/access-logs/request", json=payload)
@@ -63,6 +67,55 @@ def test_request_access_log_student_granted_by_schedule(
     assert res.status_code == 200
     assert data["access_status"] == "granted"
 
+def test_request_access_log_student_invalid_access_code(
+        authorized_student_class4D_client,
+        session,
+        lesson_template_factory,
+        lesson_instance_factory,
+        room_factory,
+        user_factory,
+        classes_factory,
+        room_access_codes_factory
+):
+    student, klass, client = authorized_student_class4D_client
+    school_id = student.user.school_id
+    room = room_factory(school_id=school_id)
+    room_access_code = room_access_codes_factory(room.id)
+    teacher = user_factory(school_id=school_id, role='teacher', email="teacher1@example.com")
+    template = lesson_template_factory(
+        school_id=school_id,
+        room_id=room.id,
+        teacher_id=teacher.id,
+        class_id=klass.id,
+        start_time="10:05",
+        end_time="10:50",
+        weekday=0
+    )
+
+
+    start_time = datetime(year=2025, month=5, day=15, hour=10, minute=5)
+    end_time = datetime(year=2025, month=5, day=15, hour=10, minute=50)
+
+    lesson_instance = lesson_instance_factory(
+        template_id=template.id,
+        class_id=klass.id,
+        room_id=room.id,
+        teacher_id=teacher.id,
+        subject="computer science",
+        start_time=start_time,
+        end_time=end_time,
+    )
+    payload = {
+        "user_id": student.user.id,
+        "room_id": room.id,
+        "access_time": start_time.isoformat(),
+        "access_code": "1111",
+    }
+
+    res = client.post(f"/school/{school_id}/access-logs/request", json=payload)
+    data = res.json()
+    assert res.status_code == 401
+    assert data["detail"] == "Invalid access code"
 
 def test_request_access_log_student_authorized_as_different_student_than_provided_in_request(
         authorized_student_class4D_client,
@@ -72,11 +125,13 @@ def test_request_access_log_student_authorized_as_different_student_than_provide
         room_factory,
         user_factory,
         classes_factory,
+        room_access_codes_factory
 ):
     studentC, _, client = authorized_student_class4D_client
     school_id = studentC.user.school_id
     klass = classes_factory(school_id=school_id, class_name="4E")
     room = room_factory(school_id=school_id)
+    room_access_code = room_access_codes_factory(room.id)
     student = user_factory(school_id=school_id, role='student', email="student12@example.com", class_id=klass.id)
     teacher = user_factory(school_id=school_id, role='teacher', email="teacher1@example.com")
     template = lesson_template_factory(
@@ -105,7 +160,8 @@ def test_request_access_log_student_authorized_as_different_student_than_provide
     payload = {
         "user_id": student.user.id,
         "room_id": room.id,
-        "access_time": start_time.isoformat()
+        "access_time": start_time.isoformat(),
+        "access_code": room_access_code.access_code,
     }
 
     res = client.post(f"/school/{school_id}/access-logs/request", json=payload)
@@ -123,10 +179,12 @@ def test_request_access_log_student_not_assigned_to_any_class(
         room_factory,
         user_factory,
         classes_factory,
+        room_access_codes_factory
 ):
     student, client = authorized_student_client
     school_id = student.user.school_id
     room = room_factory(school_id=school_id)
+    room_access_code = room_access_codes_factory(room.id)
     klass = classes_factory(school_id=school_id, class_name="4D")
     teacher = user_factory(school_id=school_id, role='teacher', email="teacher1@example.com")
     template = lesson_template_factory(
@@ -155,7 +213,8 @@ def test_request_access_log_student_not_assigned_to_any_class(
     payload = {
         "user_id": student.user.id,
         "room_id": room.id,
-        "access_time": start_time.isoformat()
+        "access_time": start_time.isoformat(),
+        "access_code": room_access_code.access_code,
     }
 
     res = client.post(f"/school/{school_id}/access-logs/request", json=payload)
@@ -172,17 +231,20 @@ def test_request_access_log_student_denied_by_schedule_lesson_not_existing(
         room_factory,
         user_factory,
         classes_factory,
+        room_access_codes_factory
 ):
     student, klass, client = authorized_student_class4D_client
     school_id = student.user.school_id
     room = room_factory(school_id=school_id)
+    room_access_code = room_access_codes_factory(room.id)
 
     start_time = datetime(year=2025, month=5, day=15, hour=10, minute=5)
 
     payload = {
         "user_id": student.user.id,
         "room_id": room.id,
-        "access_time": start_time.isoformat()
+        "access_time": start_time.isoformat(),
+        "access_code": room_access_code.access_code,
     }
 
     res = client.post(f"/school/{school_id}/access-logs/request", json=payload)
@@ -200,11 +262,13 @@ def test_request_access_log_student_denied_by_schedule_student_not_assigned_to_c
         room_factory,
         user_factory,
         classes_factory,
+        room_access_codes_factory
 ):
     student, _, client = authorized_student_class4D_client
     school_id = student.user.school_id
     klass = classes_factory(school_id=school_id, class_name="3C")
     room = room_factory(school_id=school_id)
+    room_access_code = room_access_codes_factory(room.id)
     teacher = user_factory(school_id=school_id, role='teacher', email="teacher1@example.com")
     template = lesson_template_factory(
         school_id=school_id,
@@ -232,7 +296,8 @@ def test_request_access_log_student_denied_by_schedule_student_not_assigned_to_c
     payload = {
         "user_id": student.user.id,
         "room_id": room.id,
-        "access_time": start_time.isoformat()
+        "access_time": start_time.isoformat(),
+        "access_code": room_access_code.access_code,
     }
 
     res = client.post(f"/school/{school_id}/access-logs/request", json=payload)
@@ -250,10 +315,12 @@ def test_request_access_log_student_access_log_already_exists(
         user_factory,
         classes_factory,
         access_logs_factory,
+        room_access_codes_factory
 ):
     student, klass, client = authorized_student_class4D_client
     school_id = student.user.school_id
     room = room_factory(school_id=school_id)
+    room_access_code = room_access_codes_factory(room.id)
     teacher = user_factory(school_id=school_id, role='teacher', email="teacher1@example.com")
     template = lesson_template_factory(
         school_id=school_id,
@@ -290,7 +357,8 @@ def test_request_access_log_student_access_log_already_exists(
     payload = {
         "user_id": student.user.id,
         "room_id": room.id,
-        "access_time": access_time.isoformat()
+        "access_time": access_time.isoformat(),
+        "access_code": room_access_code.access_code,
     }
 
     res = client.post(f"/school/{school_id}/access-logs/request", json=payload)
@@ -308,10 +376,12 @@ def test_request_access_log_student_uncomplete_data(
         room_factory,
         user_factory,
         classes_factory,
+        room_access_codes_factory
 ):
     student, klass, client = authorized_student_class4D_client
     school_id = student.user.school_id
     room = room_factory(school_id=school_id)
+    room_access_code = room_access_codes_factory(room.id)
     teacher = user_factory(school_id=school_id, role='teacher', email="teacher1@example.com")
     template = lesson_template_factory(
         school_id=school_id,
@@ -339,12 +409,13 @@ def test_request_access_log_student_uncomplete_data(
     payload = {
         "user_id": student.user.id,
         "room_id": room.id,
+        "access_time": start_time.isoformat(),
     }
 
     res = client.post(f"/school/{school_id}/access-logs/request", json=payload)
     data = res.json()
     assert res.status_code == 422
-    assert data["detail"] == [{'input': {'room_id': 1, 'user_id': 2}, 'loc': ['body', 'access_time'], 'msg': 'Field required', 'type': 'missing'}]
+    assert data["detail"][0]["loc"][1] == "access_code"
 
 
 
@@ -356,11 +427,13 @@ def test_request_access_log_provided_user_is_not_student(
         room_factory,
         user_factory,
         classes_factory,
+        room_access_codes_factory
 ):
     teacherC, client = authorized_teacher_client
     school_id = teacherC.user.school_id
     klass = classes_factory(school_id=school_id, class_name="4D")
     room = room_factory(school_id=school_id)
+    room_access_code = room_access_codes_factory(room.id)
     teacher = user_factory(school_id=school_id, role='teacher', email="teacher1@example.com")
     student = user_factory(school_id=school_id, role='student', email="student@example.com", class_id=klass.id)
     template = lesson_template_factory(
@@ -389,6 +462,7 @@ def test_request_access_log_provided_user_is_not_student(
     payload = {
         "user_id": student.user.id,
         "room_id": room.id,
+        "access_code": room_access_code.access_code,
     }
 
     res = client.post(f"/school/{school_id}/access-logs/request", json=payload)
@@ -1371,12 +1445,14 @@ def test_get_attendance_after_successful_student_request_status_present(
         user_factory,
         classes_factory,
         access_time,
-        status
+        status,
+        room_access_codes_factory
 ):
     student, klass, client = authorized_student_class4D_client
     student_id = student.id
     school_id = student.user.school_id
     room = room_factory(school_id=school_id)
+    room_access_code = room_access_codes_factory(room.id)
     teacher = user_factory(school_id=school_id, role='teacher', email="teacher1@example.com")
     template = lesson_template_factory(
         school_id=school_id,
@@ -1405,7 +1481,8 @@ def test_get_attendance_after_successful_student_request_status_present(
     payload = {
         "user_id": student.user.id,
         "room_id": room.id,
-        "access_time": access_time.isoformat()
+        "access_time": access_time.isoformat(),
+        "access_code": room_access_code.access_code,
     }
 
     res = client.post(f"/school/{school_id}/access-logs/request", json=payload)
@@ -1430,10 +1507,12 @@ def test_request_access_log_student_triggers_websocket(
         room_factory,
         user_factory,
         classes_factory,
+        room_access_codes_factory
 ):
     student, klass, client = authorized_student_class4D_client
     school_id = student.user.school_id
     room = room_factory(school_id=school_id)
+    room_access_code = room_access_codes_factory(room.id)
     teacher = user_factory(school_id=school_id, role='teacher', email="teacher1@example.com")
     user_id = student.user.id
 
@@ -1474,7 +1553,8 @@ def test_request_access_log_student_triggers_websocket(
     payload = {
         "user_id": user_id,
         "room_id": room.id,
-        "access_time": start_time.isoformat()
+        "access_time": start_time.isoformat(),
+        "access_code": room_access_code.access_code,
     }
 
     res = client.post(f"/school/{school_id}/access-logs/request", json=payload)

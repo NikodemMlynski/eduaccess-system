@@ -1,17 +1,12 @@
 from sqlalchemy.orm import Session 
 from app.models import Room 
-from app.schemas import room 
+from app.schemas import room, room_access_codes
 from fastapi import HTTPException, status 
 from sqlalchemy import and_
 from typing import Optional
-# class Room(Base):
-#     __tablename__ = "rooms"
-#     id = Column(Integer, primary_key=True, nullable=False)
-#     room_name = Column(String, nullable=False)
-#     capacity = Column(SmallInteger, nullable=False)
-#     created_at = Column(DateTime, default=func.now(), nullable=False)
-#     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
-#     school_id = Column(Integer, ForeignKey("school.id"), nullable=True)
+
+from app.crud.room_access_codes import RoomAccessCodesCRUD
+
 
 class RoomsCRUD:
     @staticmethod
@@ -38,6 +33,13 @@ class RoomsCRUD:
         db.add(db_room)
         db.commit()
         db.refresh(db_room)
+        RoomAccessCodesCRUD.create_room_access_code(
+            db=db,
+            room_access_code_in=room_access_codes.RoomAccessCodeIn(
+                room_id=db_room.id
+            )
+        )
+
         return db_room
     
     @staticmethod

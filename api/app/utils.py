@@ -1,3 +1,5 @@
+import string
+import random
 from fastapi import Query, HTTPException
 from datetime import datetime
 
@@ -16,3 +18,7 @@ def validate_date(date_str: str = Query(..., description="Date in YYYY-MM-DD for
             status_code=422,
             detail="Date must be in format YYYY-MM-DD"
         )
+
+def generate_4_letter_code():
+    letters = string.digits
+    return ''.join(random.choices(letters, k=4))

@@ -30,6 +30,12 @@ export interface IAccessLogIn {
     room_id: number;
     access_time: Date;
 }
+export interface IAccessLogRequestIn {
+    user_id: number;
+    room_id: number;
+    access_time: Date;
+    access_code: string;
+}
 
 export interface IAccessLogApproval {
     status: accessStatus;

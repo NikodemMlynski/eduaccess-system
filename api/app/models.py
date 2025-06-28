@@ -181,3 +181,11 @@ class AccessLog(Base):
     
     user = relationship("User")
     room = relationship("Room")
+
+class RoomAccessCodes(Base):
+    __tablename__ = "room_access_codes"
+    id = Column(Integer, primary_key=True, nullable=False)
+    room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False)
+    access_code = Column(String, nullable=False)
+
+    room = relationship("Room")
