@@ -86,6 +86,10 @@ class AccessLogsCRUD:
                     access_status="denied"
                 )
                 # websocket wysyłający do nauczyciela powiadomienie o próbie wejścia do sali odrzuconej przez system
+            RoomAccessCodesCRUD.regenerate_room_access_code(
+                db=db,
+                room_id=access_log_data.room_id,
+            )
             db.add(db_access_log)
             db.commit()
             db.refresh(db_access_log)
