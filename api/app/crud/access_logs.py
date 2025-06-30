@@ -497,3 +497,18 @@ class AccessLogsCRUD:
             "total_count": total_count,
             "access_logs": access_logs,
         }
+
+    @staticmethod
+    def get_access_log(
+            db: Session,
+            access_log_id: int,
+    ):
+        access_log = db.query(AccessLog).filter(
+            AccessLog.id == access_log_id,
+        ).first()
+        if not access_log:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'Access log {access_log_id} not found.',
+            )
+        return access_log

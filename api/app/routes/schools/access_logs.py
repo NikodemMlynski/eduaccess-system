@@ -144,3 +144,22 @@ def get_all_access_logs(
         page=page,
         limit=limit,
     )
+@router.delete("/{access_log_id}", dependencies=[Depends(student_admin)])
+
+def delete_access_log(
+    school_id: int,
+    access_log_id: int,
+    db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker),
+    current_user: User = Depends(get_current_user),
+):
+    access_log = AccessLogsCRUD.get_access_log(
+        db=db,
+        access_log_id=access_log_id,
+    )
+    protect(user_id=access_log.user_id, permitted_roles=["admin"], current_user=current_user, db=db)
+
+    return AccessLogsCRUD.delete_access_log(
+        db=db,
+        access_log_id=access_log_id,
+    )

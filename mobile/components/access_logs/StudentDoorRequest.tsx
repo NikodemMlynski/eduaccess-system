@@ -17,14 +17,17 @@ import {IAccessLog} from "@/types/AccessLogs";
 interface StudentDoorRequestProps {
   lesson: ILessonInstance;
   userId: number;
+  setExistingAccessLog: (data: IAccessLog | null) => void;
+  existingAccessLog: IAccessLog | null;
 }
 
 const StudentDoorRequest = ({
     lesson,
-    userId
+    userId,
+    setExistingAccessLog,
+    existingAccessLog,
 }: StudentDoorRequestProps) => {
     const {user, token} = useAuth();
-    const [existingAccessLog, setExistingAccessLog] = useState<IAccessLog | null>(null);
     const sendAccessLogMutation = useSendAccessLogRequest(
         `school/${user?.school_id}/access-logs`,
         token || ""
@@ -69,7 +72,7 @@ const StudentDoorRequest = ({
         setAccessCode("");
     };
     return (
-        <View className="p-5 w-[270px] bg-background rounded-2xl shadow-xl my-10">
+        <View className="p-5 w-[270px] bg-background rounded-2xl shadow-xl my-3 mb-8">
             <View className="flex flex-row py-1 px-3 gap-5 items-center">
                 <Text className="text-white font-semibold mb-1 text-2xl">{lesson.subject}</Text>
                 <Text className="text-subtext text-xl">{lesson.room.room_name}</Text>
