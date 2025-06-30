@@ -20,3 +20,12 @@ class PaginatedRooms(BaseModel):
     total_count: int 
     has_next_page: bool 
     rooms: List[RoomOut]
+
+class RoomRawOut(BaseModel):
+    id: int
+    room_name: str
+
+class PaginatedRoomRaw(BaseModel):
+    total_count: int
+    has_next_page: bool
+    rooms: List[RoomRawOut]

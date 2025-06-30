@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,HTTPException, status
 from app.database import get_db
 from ...crud.lesson_instance import LessonInstancesCRUD
 from typing import List
@@ -122,9 +122,15 @@ def get_current_lesson_instance_for_class(
         db: Session = Depends(get_db),
         school_checker: User = Depends(school_checker)
 ):
-    return LessonInstancesCRUD.get_current_lesson_instance_for_class_or_teacher(
+    lesson_instance =  LessonInstancesCRUD.get_current_lesson_instance_for_class_or_teacher(
         db=db,
         class_id=class_id,
         school_id=school_id,
         current_time=current_time_obj.current_time
     )
+    if not lesson_instance:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Currently there is no lesson for given {'class' if class_id else 'teacher'}"
+        )
+    return lesson_instance
