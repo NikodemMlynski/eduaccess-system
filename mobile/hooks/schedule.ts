@@ -32,7 +32,7 @@ export function useCurrentLessonInstance(
         queryKey: ["lessonInstance", classId, dateKey],
         queryFn: () => postFethcer<ILessonInstance>(url, {
             // current_time: date.toISOString(),
-            current_time: "2025-06-16T15:00:21.681559"
+            current_time: "2025-06-16T09:13:21.681559"
         }, token ),
 
     })

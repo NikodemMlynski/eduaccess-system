@@ -13,6 +13,7 @@ import {useAuth} from "@/context/AuthContext";
 import {Toast} from "toastify-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {IAccessLog} from "@/types/AccessLogs";
+import {useRoomAccessCode} from "@/hooks/rooms";
 
 interface StudentDoorRequestProps {
   lesson: ILessonInstance;
@@ -43,6 +44,15 @@ const StudentDoorRequest = ({
         getExistingAccessLog();
     }, [sendAccessLogMutation.isPending]);
 
+    const {
+        data: roomAccessCode
+    } = useRoomAccessCode(
+        `school/${user?.school_id}/room_access_codes`,
+        token || "",
+        existingAccessLog?.room.id
+    )
+    console.log("Access code:")
+    console.log(roomAccessCode)
 
     const [grantedModalVisible, setGrantedModalVisible] = useState(false);
     const [deniedModalVisible, setDeniedModalVisible] = useState(false);
@@ -50,12 +60,13 @@ const StudentDoorRequest = ({
     const [accessCode, setAccessCode] = useState("");
 
 
-    const handleEnter = () => {
+    const handleEnter = (providedAccessCode: string | null = null) => {
+        if (!providedAccessCode && !accessCode) return
         setModalVisible(false);
         sendAccessLogMutation.mutate({
             user_id: userId,
             room_id: lesson.room.id,
-            access_code: accessCode
+            access_code: providedAccessCode || accessCode,
         }, {
             onSuccess: (data) => {
                 if (data.access_status === "granted") {
@@ -84,7 +95,14 @@ const StudentDoorRequest = ({
 
           <TouchableOpacity
             className="my-2 bg-primary py-3 px-4 rounded-2xl"
-            onPress={() => setModalVisible(true)}
+            onPress={() => {
+                if (existingAccessLog && !existingAccessLog?.access_end_time)
+                {
+                   handleEnter(roomAccessCode?.access_code);
+                } else {
+                    setModalVisible(true)
+                }
+            }}
           >
             <Text className="text-white text-center font-semibold text-2xl">{
                               existingAccessLog && !existingAccessLog?.access_end_time ? (
@@ -117,7 +135,7 @@ const StudentDoorRequest = ({
                   className="bg-background text-white p-3 rounded-xl mb-4 text-center text-xl my-1"
                 />
                 <TouchableOpacity
-                  onPress={handleEnter}
+                  onPress={() => handleEnter(null)}
                   className="bg-green-500 py-3 mt-4 mb-2 rounded-xl"
                 >
                   <Text className="text-white text-xl text-center font-semibold">{

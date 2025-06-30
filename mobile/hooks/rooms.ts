@@ -1,5 +1,5 @@
 import {useQuery} from "@tanstack/react-query";
-import {IRoomRaw} from "@/types/Room";
+import {IRoomAccessCode, IRoomRaw} from "@/types/Room";
 import {fetcher} from "@/utils/fetcher";
 import {apiUrl} from "@/constants/constants";
 
@@ -19,5 +19,20 @@ export function useRooms(
             `${apiUrl}${endpoint}/raw_rooms`,
             token
         )
+    })
+}
+
+export function useRoomAccessCode(
+    endpoint: string,
+    token?: string,
+    roomId?: number
+) {
+    return useQuery<IRoomAccessCode>({
+        queryKey: ["room_access_code"],
+        queryFn: () => fetcher<IRoomAccessCode>(
+            `${apiUrl}${endpoint}/room/${roomId}`,
+            token
+        ),
+        enabled: !!roomId,
     })
 }

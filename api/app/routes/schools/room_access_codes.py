@@ -45,8 +45,7 @@ def regenerate_access_code(
 
 @router.get(
     "/room/{room_id}",
-    response_model=room_access_codes.RoomAccessCodeOut,
-    dependencies=[Depends(admin_only)]
+    response_model=room_access_codes.RoomAccessCodeOut
 )
 def get_room_access_code(
         room_id: int,

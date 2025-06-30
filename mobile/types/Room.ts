@@ -10,3 +10,9 @@ export interface IRoomRaw {
     id: number;
     room_name: string;
 }
+
+export interface IRoomAccessCode {
+    id: number;
+    room: IRoom;
+    access_code: string;
+}

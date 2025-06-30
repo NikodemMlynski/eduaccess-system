@@ -114,15 +114,16 @@ const Index = () => {
                 <Text className="text-2xl text-center py-2 text-white">Classrooms</Text>
             </View>
             {existingAccessLog && !existingAccessLog.access_end_time && <Text className="text-3xl font-normal text-subtext text-center pt-5">You are currently in class</Text>}
-            {currentLesson && <>
-            <View className="flex items-center py-6 pb-0">
-                 <Text className="text-text font-semibold text-2xl py-5">Your current lesson</Text>
-            </View>
-            {content}
-            </>
-                }
+            {currentLesson && !existingDeniedAccessLog &&  (
+                <View className="flex items-center py-6 pb-0">
+                     <Text className="text-text font-semibold text-2xl py-5">Your current lesson</Text>
+                {content}
+                </View>
+                )
+            }
             <View className="flex items-center">
-                {!(existingAccessLog && !existingAccessLog.access_end_time) && <Text className="text-text font-semibold text-2xl py-5">Enter other classrooms</Text>}
+                {
+                !(existingDeniedAccessLog && !existingDeniedAccessLog.access_end_time) &&    !(existingAccessLog && !existingAccessLog.access_end_time) && <Text className="text-text font-semibold text-2xl py-5">Enter other classrooms</Text>}
                 {roomsContent}
             </View>
         </SafeAreaView>
