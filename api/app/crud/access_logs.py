@@ -19,6 +19,7 @@ class AccessLogsCRUD:
         school_id: int,
         access_log_data: access_log.AccessLogRequestIn
     ):
+        print(access_log_data.access_code)
         is_access_code_valid = RoomAccessCodesCRUD.check_room_access_code(
             db=db,
             room_id=access_log_data.room_id,

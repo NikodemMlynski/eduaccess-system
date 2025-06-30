@@ -32,7 +32,7 @@ export interface IAccessLogIn {
 }
 export interface IAccessLogRequestIn {
     user_id: number;
-    room_id: number;
+    room_id?: number;
     access_code: string;
 }
 

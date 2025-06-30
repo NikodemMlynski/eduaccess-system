@@ -1,20 +1,17 @@
 import React, {useEffect, useState} from "react";
 import {
-  Modal,
   TextInput,
   TouchableOpacity,
   View,
   Text,
 } from "react-native";
-import { format } from "date-fns";
-import {ILessonInstance} from "@/types/schedule";
 import {useDeleteAccessLogRequest, useSendAccessLogRequest} from "@/hooks/access_logs";
 import {useAuth} from "@/context/AuthContext";
 import {Toast} from "toastify-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {IAccessLog} from "@/types/AccessLogs";
-import {useRooms} from "@/hooks/rooms";
 import {IRoomRaw} from "@/types/Room";
+import {useRoomAccessCode} from "@/hooks/rooms";
 
 interface StudentDoorRequestProps {
     userId: number;
@@ -44,15 +41,18 @@ const StudentDoorRequest = ({
         token || "",
         existingDeniedAccessLog?.id,
     )
+    const {
+        data: roomAccessCode
+    } = useRoomAccessCode(
+        `school/${user?.school_id}/room_access_codes`,
+        token || "",
+        existingApprovedAccessLog?.room.id
+    )
+    console.log("approved from othwer rooms")
+    console.log(existingApprovedAccessLog?.room.id)
+    console.log("tym samym")
+    console.log(roomAccessCode)
 
-    // zrobić useEffect który jeżeli znajdzie jakikolwiek access log
-    // o statusie denied nie pozwoli wysłać kolejnego access requestu
-    // (czyli nie wyświetli się StudenrDoorRequest w komponencie door_request)
-    // chyba że użytkownik usunie swoj request
-
-    // jeżeli access log zostanie potwierdzony przez nauczyciela
-    // zostanie usuniety denied-${room.id}
-    // i zostanie dodany approved-${room.id}
 
     const [modalVisible, setModalVisible] = useState(false);
     const [accessCode, setAccessCode] = useState("");
@@ -71,15 +71,34 @@ const StudentDoorRequest = ({
         getExistingAccessLog();
     }, [sendAccessLogMutation.isPending, deleteAccessLogMutation.isPending]);
 
+    useEffect(() => {
+        const getExistingAccessLog = async () => {
+            const existingAccessLog = await AsyncStorage.getItem(`approved`)
+            console.log("this is fetched from asyncstorage")
+            console.log(existingAccessLog)
+            if (existingAccessLog)
+                setExistingApprovedAccessLog(JSON.parse(existingAccessLog))
+            else setExistingApprovedAccessLog(null)
+        }
+        getExistingAccessLog();
+    }, [sendAccessLogMutation.isPending]);
+
     const handleEnter = () => {
-        if (!selectedRoom) return
+        console.log("WAZNE:")
+        console.log(selectedRoom)
+        console.log(existingDeniedAccessLog)
+        console.log(roomAccessCode)
+        if (!selectedRoom && !(existingApprovedAccessLog && roomAccessCode)) return
+        console.log("wowyloje sie tak czy siak")
         setModalVisible(false);
         sendAccessLogMutation.mutate({
             user_id: userId,
-            room_id: selectedRoom?.id,
-            access_code: accessCode
+            room_id: existingApprovedAccessLog?.room.id || selectedRoom?.id,
+            access_code: existingApprovedAccessLog && roomAccessCode?.access_code || accessCode
         }, {
-            onSuccess: (data) => {
+            onSuccess: async (data) => {
+                setExistingApprovedAccessLog(null)
+                await AsyncStorage.removeItem(`approved`)
                 // if (data.access_status === "granted") {
                 //     setGrantedModalVisible(true);
                 // } else {
@@ -119,6 +138,19 @@ const StudentDoorRequest = ({
             </View>
         )
     }
+    if (existingApprovedAccessLog) {
+        return (
+            <View className="py-5 px-5 w-[80%]">
+                <Text className="text-3xl font-normal text-subtext text-center pt-5">You are currently in class</Text>
+                <TouchableOpacity
+                  onPress={handleEnter}
+                  className="bg-green-500 py-3 mt-4 mb-2 rounded-xl"
+                >
+                  <Text className="text-white text-xl text-center font-semibold">Leave classroom</Text>
+                </TouchableOpacity>
+            </View>
+        )
+    }
     return (
         <View className="p-5 w-[270px] bg-surface rounded-2xl shadow-xl my-3">
           <Text className="text-white text-xl mb-4 text-center font-medium">
@@ -144,13 +176,7 @@ const StudentDoorRequest = ({
                   onPress={handleEnter}
                   className="bg-green-500 py-3 mt-4 mb-2 rounded-xl"
                 >
-                  <Text className="text-white text-xl text-center font-semibold">{
-                              existingApprovedAccessLog && !existingApprovedAccessLog?.access_end_time ? (
-                                  "Leave"
-                              ) : (
-                                  "Request for entry"
-                              )
-                          }</Text>
+                  <Text className="text-white text-xl text-center font-semibold">Request for entry</Text>
                 </TouchableOpacity>
           {/* Modal */}
 

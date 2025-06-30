@@ -7,8 +7,9 @@ import ErrorMessage from "@/components/ErrorMessage";
 import StudentDoorRequest from "@/components/access_logs/StudentDoorRequest";
 import StudentOtherRoomsRequest from "@/components/access_logs/StudentOtherRoomsRequest";
 import {useRooms} from "@/hooks/rooms";
-import {useState} from "react";
+import React, {useState} from "react";
 import {IAccessLog} from "@/types/AccessLogs";
+import {UserRequestApprovalListener} from "@/websockets/UserRequestApprovalListener";
 const Index = () => {
     const {user, token} = useAuth();
     const [existingAccessLog, setExistingAccessLog] = useState<IAccessLog | null>(null);
@@ -97,7 +98,7 @@ const Index = () => {
                 rooms={rooms.rooms}
                 existingDeniedAccessLog={existingDeniedAccessLog}
                 setExistingDeniedAccessLog={setExistingDeniedAccessLog}
-                existingApprovedAccessLog={existingDeniedAccessLog}
+                existingApprovedAccessLog={existingApprovedAccessLog}
                 setExistingApprovedAccessLog={setExistingApprovedAccessLog}
             />
     )
@@ -110,11 +111,17 @@ const Index = () => {
     if (existingAccessLog && !existingAccessLog.access_end_time) roomsContent = <></>
     return (
         <SafeAreaView className="flex-1 bg-black py-0">
+            <UserRequestApprovalListener
+                userId={user?.id || null}
+                setExistingDeniedAccessLog={setExistingDeniedAccessLog}
+                setExistingApprovedAccessLog={setExistingApprovedAccessLog}
+            />
+
             <View className="flex flex-row justify-between px-5 py-3 pt-12 bg-background">
                 <Text className="text-2xl text-center py-2 text-white">Classrooms</Text>
             </View>
             {existingAccessLog && !existingAccessLog.access_end_time && <Text className="text-3xl font-normal text-subtext text-center pt-5">You are currently in class</Text>}
-            {currentLesson && !existingDeniedAccessLog &&  (
+            {currentLesson && !existingDeniedAccessLog && !existingApprovedAccessLog &&  (
                 <View className="flex items-center py-6 pb-0">
                      <Text className="text-text font-semibold text-2xl py-5">Your current lesson</Text>
                 {content}
@@ -123,7 +130,7 @@ const Index = () => {
             }
             <View className="flex items-center">
                 {
-                !(existingDeniedAccessLog && !existingDeniedAccessLog.access_end_time) &&    !(existingAccessLog && !existingAccessLog.access_end_time) && <Text className="text-text font-semibold text-2xl py-5">Enter other classrooms</Text>}
+                !(existingDeniedAccessLog && !existingDeniedAccessLog.access_end_time) && !existingApprovedAccessLog && !(existingAccessLog && !existingAccessLog.access_end_time) && <Text className="text-text font-semibold text-2xl py-5">Enter other classrooms</Text>}
                 {roomsContent}
             </View>
         </SafeAreaView>
