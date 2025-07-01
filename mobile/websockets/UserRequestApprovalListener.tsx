@@ -47,6 +47,8 @@ export function UserRequestApprovalListener({
                 await AsyncStorage.removeItem("denied")
                 if (data.status === "denied") {
                     Toast.error("Your access log was denied")
+                    // W PRZYSZŁOŚCI DODAĆ TUTAJ POWIADOMIENIA PUSH
+                    // TAK SAMO PRZY ZATWIERDZENIU REQUESTU
                 }
 
             }

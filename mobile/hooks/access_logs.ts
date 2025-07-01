@@ -1,7 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {apiUrl} from "@/constants/constants";
-import {IAccessLog, IAccessLogRequestIn} from "@/types/AccessLogs";
-import {deleteFetcher, postFethcer} from "@/utils/fetcher";
+import {IAccessLog, IAccessLogApproval, IAccessLogRequestIn} from "@/types/AccessLogs";
+import {deleteFetcher, postFethcer, updateFetcher, fetcher} from "@/utils/fetcher";
 import {ILessonInstance} from "@/types/schedule";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -53,5 +53,34 @@ export function useDeleteAccessLogRequest(
             queryClient.invalidateQueries()
             await AsyncStorage.removeItem("denied")
         }
+    })
+}
+
+export function useDeniedAccessLogsForLesson(
+    endpoint: string,
+    userId: number | null,
+    teacherId: number | null,
+    token?: string,
+) {
+    const currentTime = "2025-06-16T09:20:52.681559";
+    const url = `${apiUrl}${endpoint}/request/teacher_id/${userId}/current_time/${currentTime}`
+    return useQuery<IAccessLog[]>({
+        queryKey: ["access_logs", teacherId],
+        queryFn: async () => fetcher<IAccessLog[]>(url, token),
+    })
+}
+
+export function useAccessLogApproval(
+    endpoint: string,
+    accessLogId: number,
+    teacherId: number | null,
+    token?: string,
+) {
+    const url = `${apiUrl}${endpoint}/handle_approval/${accessLogId}`;
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: IAccessLogApproval)=>
+            updateFetcher(url, data, token),
+        onSuccess: async () => queryClient.invalidateQueries(["access_logs", teacherId])
     })
 }

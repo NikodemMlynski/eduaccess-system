@@ -4,7 +4,7 @@ from ...crud.lesson_instance import LessonInstancesCRUD
 from typing import List
 from ...schemas import lesson_instance
 from sqlalchemy.orm import Session
-from app.role_checker import admin_only
+from app.role_checker import admin_only, teacher_admin
 from ...oauth2 import school_checker, class_protect, get_current_user
 from ...models import User
 from app import utils
@@ -131,6 +131,6 @@ def get_current_lesson_instance_for_class(
     if not lesson_instance:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Currently there is no lesson for given {'class' if class_id else 'teacher'}"
+            detail=f"Currently there is no lesson for given class"
         )
     return lesson_instance
