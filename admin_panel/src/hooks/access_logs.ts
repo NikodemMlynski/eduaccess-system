@@ -47,7 +47,7 @@ export function useAccessLogApproval(
     return useMutation({
         mutationFn: (data: IAccessLogApproval) =>
             updateFetcher(url, data, token),
-        onSuccess: () => queryClient.invalidateQueries(["access-logs", teacherId])
+        onSuccess: () => queryClient.invalidateQueries(["access_logs", teacherId])
     })
 }
 
@@ -89,6 +89,6 @@ export function useSendAccessLogRequest(
     return useMutation({
         mutationFn: (data: IAccessLogRequestIn) =>
             postFethcer<IAccessLog>(url, data, token),
-        onSuccess: () => queryClient.invalidateQueries(["access-logs"])
+        onSuccess: () => queryClient.invalidateQueries(["access_logs"])
     })
 }

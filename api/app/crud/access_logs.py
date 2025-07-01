@@ -19,6 +19,7 @@ class AccessLogsCRUD:
         school_id: int,
         access_log_data: access_log.AccessLogRequestIn
     ):
+        print(access_log_data.access_code)
         is_access_code_valid = RoomAccessCodesCRUD.check_room_access_code(
             db=db,
             room_id=access_log_data.room_id,
@@ -497,3 +498,18 @@ class AccessLogsCRUD:
             "total_count": total_count,
             "access_logs": access_logs,
         }
+
+    @staticmethod
+    def get_access_log(
+            db: Session,
+            access_log_id: int,
+    ):
+        access_log = db.query(AccessLog).filter(
+            AccessLog.id == access_log_id,
+        ).first()
+        if not access_log:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'Access log {access_log_id} not found.',
+            )
+        return access_log

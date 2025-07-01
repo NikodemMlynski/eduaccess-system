@@ -26,6 +26,19 @@ def create_room(
         room_data=room_data
     )
 
+@router.get("/raw_rooms", response_model=room.PaginatedRoomRaw)
+def get_all_rooms(
+    school_id: int,
+    db: Session = Depends(get_db),
+    school_checker: User = Depends(school_checker),
+):
+    return RoomsCRUD.get_all_rooms(
+        db=db,
+        school_id=school_id,
+        query=None,
+        page=1,
+        limit=999
+    )
 @router.get("/", response_model=room.PaginatedRooms, dependencies=[Depends(admin_only)])
 def get_all_rooms(
     school_id: int,
