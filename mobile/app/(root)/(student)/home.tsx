@@ -4,12 +4,13 @@ import { useAuth } from "@/context/AuthContext";
 import React from "react";
 import { useStudent } from "@/hooks/students";
 import { format, parseISO } from "date-fns";
-import { useAttendances } from "@/hooks/attendances";
+import {useAttendances, useAttendanceStats} from "@/hooks/attendances";
 import { IAttendance } from "@/types/Attendance";
 import Loader from "@/components/Loader";
 import ErrorMessage from "@/components/ErrorMessage";
 import { UserCheck, UserMinus, Clock } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { Svg, Circle } from "react-native-svg";
 
 const Home = () => {
   const { user, token } = useAuth();
@@ -56,6 +57,18 @@ const Home = () => {
     token || ""
   );
 
+  const {
+        data: attendanceStats,
+        isLoading: attendanceStatsIsLoading,
+        isError: attendanceStatsIsError,
+        error: attendanceStatsError,
+        refetch: refetchAttendanceStats
+    } = useAttendanceStats(
+        `school/${user?.school_id}/attendances`,
+        token || "",
+        student?.id
+    )
+    console.log(attendanceStats)
   const goToSchedule = () => router.push("/(root)/(student)/schedule");
   const goToAttendances = () => router.push("/(root)/(student)/attendances");
 
@@ -121,7 +134,7 @@ const Home = () => {
       );
 
     return (
-         <View className="p-4 ">
+         <View className="p-4 pb-1 ">
             <Text className="py-3 text-center text-white text-2xl font-semibold mb-1">Dzisiejsze obecności</Text>
       <TouchableOpacity
         className="bg-background rounded-2xl shadow-md p-4 mb-4 mx-2 flex flex-row gap-10 px-6 items-center"
@@ -139,7 +152,70 @@ const Home = () => {
     );
   };
 
-  if (studentIsLoading || attendancesIsLoading || lessonIsLoading) {
+  const renderAttendanceStatsBlock = () => {
+  if (!attendanceStats || attendanceStats.length === 0) return null;
+
+  const SIZE = 40;
+  const STROKE_WIDTH = 5;
+  const RADIUS = (SIZE - STROKE_WIDTH) / 2;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+  const generalPresentPercentage = Number(
+    (
+      attendanceStats.reduce((acc, item) => acc + item.present_percent, 0) /
+      attendanceStats.length
+    ).toFixed(2)
+  );
+
+  const strokeDashoffset =
+    CIRCUMFERENCE - (generalPresentPercentage / 100) * CIRCUMFERENCE;
+
+  return (
+    <View className="p-4 py-1">
+      <Text className="py-3 text-center text-white text-2xl font-semibold mb-1">
+        Obecność w tym roku
+      </Text>
+      <TouchableOpacity
+          className="bg-background rounded-2xl shadow-md p-4 mb-4 mx-2 flex-row items-center justify-around"
+      onPress={goToAttendances}>
+        <Svg width={SIZE} height={SIZE}>
+          <Circle
+            cx={SIZE / 2}
+            cy={SIZE / 2}
+            r={RADIUS}
+            stroke="#ef4444"
+            strokeWidth={STROKE_WIDTH}
+            fill="none"
+          />
+          <Circle
+            cx={SIZE / 2}
+            cy={SIZE / 2}
+            r={RADIUS}
+            stroke="#22c55e"
+            strokeWidth={STROKE_WIDTH}
+            strokeDasharray={`${CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            fill="none"
+            rotation={-90}
+            origin={`${SIZE / 2}, ${SIZE / 2}`}
+          />
+        </Svg>
+        <View className="ml-4">
+          <Text className="text-white text-lg font-semibold">
+            Całkowita frekwencja
+          </Text>
+          <Text className="text-subtext text-xl mt-1 font-bold">
+            {generalPresentPercentage}%
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+
+  if (studentIsLoading || attendancesIsLoading || lessonIsLoading || attendanceStatsIsLoading) {
     return <Loader />;
   }
 
@@ -168,7 +244,7 @@ const Home = () => {
         {renderLessonBlock()}
 
         {renderLatestAttendance()}
-        {/* Możesz dodać kolejny bloczek np. do profilu */}
+        {renderAttendanceStatsBlock()}
 
       </View>
     </SafeAreaView>
