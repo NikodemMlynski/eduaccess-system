@@ -240,7 +240,7 @@ const Home = () => {
         <Text className="text-3xl text-center py-4 text-white">EduAccess</Text>
       </View>
 
-      <View className="flex-1 mt-10 flex flex-col justify-around mb-[180px]">
+      <View className="flex-1 mt-6 flex flex-col justify-around mb-[180px]">
         {renderLessonBlock()}
 
         {renderLatestAttendance()}
