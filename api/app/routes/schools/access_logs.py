@@ -12,7 +12,10 @@ from ...oauth2 import school_checker, get_current_user, attendances_protect, pro
 from datetime import date, datetime
 from app.websockets import teacher_ws
 from app.websockets import user_ws
+from app.websockets import open_door
 from ...schemas.access_log import AccessLogIn
+import requests
+import asyncio
 
 router = APIRouter(
     prefix="/access-logs",
@@ -46,11 +49,11 @@ async def request_access_log_student(
         message = {"event": "access_log_update", "student_id": access_log_data.user_id}
         import json
         try:
-            import asyncio
             asyncio.create_task(websocket.send_text(json.dumps(message)))
         except Exception as e:
             print(f"WebSocket send failed {e}")
-
+    if new_log.access_status == "granted":
+        open_door.notify_rpi_open_door()
     return new_log
 
 @router.get("/request/teacher_id/{user_id}/current_time/{current_time}",
@@ -103,16 +106,19 @@ async def handle_access_log_approval(
             asyncio.create_task(websocket.send_text(json.dumps(message)))
         except Exception as e:
             print(f"WebSocket send failed {e}")
+    if status == "granted":
+        open_door.notify_rpi_open_door()
 
     return reviewed_access_log
 
 @router.post("/open_close_door", response_model = access_log.AccessLogOut, dependencies=[Depends(teacher_admin)])
-def handle_open_close_door(
+async def handle_open_close_door(
         school_id: int,
         access_log_data: access_log.AccessLogIn,
         db: Session = Depends(get_db),
         school_checker: User = Depends(school_checker),
 ):
+    open_door.notify_rpi_open_door()
     return AccessLogsCRUD.open_close_door(
         access_log_data=access_log_data,
         db=db
