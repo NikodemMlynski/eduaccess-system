@@ -189,3 +189,11 @@ class RoomAccessCodes(Base):
     access_code = Column(String, nullable=False)
 
     room = relationship("Room")
+
+class RoomEsp32Ips(Base):
+    __tablename__ = "room_esp32_ips"
+    id = Column(Integer, primary_key=True, nullable=False)
+    room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False)
+    ip_address = Column(String, nullable=False)
+
+    room = relationship("Room")

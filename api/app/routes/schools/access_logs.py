@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from app.database import get_db
 import calendar
 from ...crud.access_logs import AccessLogsCRUD
-from ...crud.lesson_instance import LessonInstancesCRUD
+
 from ...schemas import access_log
 from ...role_checker import admin_only, teacher_admin, student_admin
 from app.models import User
@@ -53,7 +53,10 @@ async def request_access_log_student(
         except Exception as e:
             print(f"WebSocket send failed {e}")
     if new_log.access_status == "granted":
-        open_door.notify_rpi_open_door()
+        open_door.notify_rpi_open_door(
+            db=db,
+            room_id=access_log_data.room_id,
+        )
     return new_log
 
 @router.get("/request/teacher_id/{user_id}/current_time/{current_time}",
