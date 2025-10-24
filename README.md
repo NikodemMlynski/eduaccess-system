@@ -1,5 +1,7 @@
 # 🏫 Inteligentny System Kontroli Dostępu dla Szkół
 
+## Read the English version: [README_EN.md](README_EN.md)
+
 ## 📋 Spis treści
 1. [Opis projektu](#opis-projektu)
 2. [Status projektu](#status-projektu)
