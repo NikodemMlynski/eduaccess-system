@@ -1,5 +1,8 @@
 # 🏫 Intelligent Access Control System for Schools
 
+🌐 Read the Polish version: [README.md](README.md)
+
+
 ## 📋 Table of Contents
 1. [Project Description](#project-description)
 2. [Project Status](#project-status)
